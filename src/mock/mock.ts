@@ -2,8 +2,9 @@ import { createServer } from 'miragejs'
 import appConfig from '@/configs/app.config'
 
 import { signInUserData } from './data/authData'
+import { productData } from './data/productData'
 
-import { authFakeApi } from './fakeApi'
+import { authFakeApi, inventoryFakeApi } from './fakeApi'
 
 const { apiPrefix } = appConfig
 
@@ -13,6 +14,7 @@ export function mockServer({ environment = 'test' }) {
         seeds(server) {
             server.db.loadData({
                 signInUserData,
+                productData,
             })
         },
         routes() {
@@ -25,6 +27,7 @@ export function mockServer({ environment = 'test' }) {
             this.passthrough()
 
             authFakeApi(this, apiPrefix)
+            inventoryFakeApi(this, apiPrefix)
         },
     })
 }

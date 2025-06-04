@@ -1,0 +1,14 @@
+{
+    "nav": {
+        "home": "Home",
+        "inventory": {
+            "title": "Inventario",
+            "products": "Productos",
+            "collapse": {
+                "collapse": "Group collapse menu",
+                "item1": "Group collapse menu item 1",
+                "item2": "Group collapse menu item 2"
+            }
+        }
+    }
+}

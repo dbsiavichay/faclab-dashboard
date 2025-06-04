@@ -1,18 +1,13 @@
+import { BiHome, BiPackage } from 'react-icons/bi'
 import {
-    HiOutlineColorSwatch,
-    HiOutlineDesktopComputer,
-    HiOutlineTemplate,
-    HiOutlineViewGridAdd,
-    HiOutlineHome,
+    HiOutlineColorSwatch
 } from 'react-icons/hi'
 
 export type NavigationIcons = Record<string, JSX.Element>
 
 const navigationIcon: NavigationIcons = {
-    home: <HiOutlineHome />,
-    singleMenu: <HiOutlineViewGridAdd />,
-    collapseMenu: <HiOutlineTemplate />,
-    groupSingleMenu: <HiOutlineDesktopComputer />,
+    home: <BiHome />,
+    inventoryProducts: <BiPackage />,
     groupCollapseMenu: <HiOutlineColorSwatch />,
 }
 

@@ -5,15 +5,17 @@ export type AppConfig = {
     tourPath: string
     locale: string
     enableMock: boolean
+    inventoryApiHost?: string
 }
 
 const appConfig: AppConfig = {
-    apiPrefix: '/api',
+    apiPrefix: '',
     authenticatedEntryPath: '/home',
     unAuthenticatedEntryPath: '/sign-in',
     tourPath: '/',
     locale: 'en',
     enableMock: true,
+    inventoryApiHost: 'http://localhost:3000',
 }
 
 export default appConfig

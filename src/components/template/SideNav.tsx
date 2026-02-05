@@ -13,7 +13,7 @@ import Logo from '@/components/template/Logo'
 import navigationConfig from '@/configs/navigation.config'
 import VerticalMenuContent from '@/components/template/VerticalMenuContent'
 import useResponsive from '@/utils/hooks/useResponsive'
-import { useAppSelector } from '@/store'
+import { useThemeStore, useAuthStore, useBaseStore } from '@/stores'
 
 const sideNavStyle = {
     width: SIDE_NAV_WIDTH,
@@ -26,20 +26,20 @@ const sideNavCollapseStyle = {
 }
 
 const SideNav = () => {
-    const themeColor = useAppSelector((state) => state.theme.themeColor)
-    const primaryColorLevel = useAppSelector(
-        (state) => state.theme.primaryColorLevel
+    const themeColor = useThemeStore((state) => state.themeColor)
+    const primaryColorLevel = useThemeStore(
+        (state) => state.primaryColorLevel
     )
-    const navMode = useAppSelector((state) => state.theme.navMode)
-    const mode = useAppSelector((state) => state.theme.mode)
-    const direction = useAppSelector((state) => state.theme.direction)
-    const currentRouteKey = useAppSelector(
-        (state) => state.base.common.currentRouteKey
+    const navMode = useThemeStore((state) => state.navMode)
+    const mode = useThemeStore((state) => state.mode)
+    const direction = useThemeStore((state) => state.direction)
+    const currentRouteKey = useBaseStore(
+        (state) => state.currentRouteKey
     )
-    const sideNavCollapse = useAppSelector(
-        (state) => state.theme.layout.sideNavCollapse
+    const sideNavCollapse = useThemeStore(
+        (state) => state.layout.sideNavCollapse
     )
-    const userAuthority = useAppSelector((state) => state.auth.user.authority)
+    const userAuthority = useAuthStore((state) => state.user?.authority)
 
     const { larger } = useResponsive()
 

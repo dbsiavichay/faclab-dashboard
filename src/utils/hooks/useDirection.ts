@@ -1,16 +1,16 @@
 import { useEffect } from 'react'
-import { setDirection, useAppDispatch, useAppSelector } from '@/store'
+import { useThemeStore } from '@/stores'
 import type { Direction } from '@/@types/theme'
 
 function useDirection(): [
     direction: Direction,
     updateDirection: (dir: Direction) => void
 ] {
-    const direction = useAppSelector((state) => state.theme.direction)
+    const direction = useThemeStore((state) => state.direction)
+    const setDirection = useThemeStore((state) => state.setDirection)
 
-    const dispatch = useAppDispatch()
     const updateDirection = (dir: Direction) => {
-        dispatch(setDirection(dir))
+        setDirection(dir)
     }
 
     useEffect(() => {

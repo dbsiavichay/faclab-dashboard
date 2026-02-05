@@ -2,10 +2,10 @@ import Notification from '@/components/ui/Notification'
 import Button from '@/components/ui/Button'
 import toast from '@/components/ui/toast'
 import { themeConfig } from '@/configs/theme.config'
-import { useAppSelector } from '@/store'
+import { useThemeStore } from '@/stores'
 
 const CopyButton = () => {
-    const theme = useAppSelector((state) => state.theme)
+    const theme = useThemeStore()
 
     const handleCopy = () => {
         const config = {

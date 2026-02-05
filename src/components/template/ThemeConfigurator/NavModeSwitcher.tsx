@@ -1,15 +1,15 @@
 import Radio from '@/components/ui/Radio'
-import { setNavMode, useAppSelector, useAppDispatch } from '@/store'
+import { useThemeStore } from '@/stores'
 import { NAV_MODE_THEMED } from '@/constants/theme.constant'
 
 type NavModeParam = 'default' | 'themed'
 
 const NavModeSwitcher = () => {
-    const navMode = useAppSelector((state) => state.theme.navMode)
-    const dispatch = useAppDispatch()
+    const navMode = useThemeStore((state) => state.navMode)
+    const setNavMode = useThemeStore((state) => state.setNavMode)
 
     const onSetNavMode = (val: NavModeParam) => {
-        dispatch(setNavMode(val))
+        setNavMode(val)
     }
 
     return (

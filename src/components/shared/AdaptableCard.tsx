@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import Card from '@/components/ui/Card'
 import { LAYOUT_TYPE_MODERN } from '@/constants/theme.constant'
-import { useAppSelector } from '@/store'
+import { useThemeStore } from '@/stores'
 import type { CardProps } from '@/components/ui/Card'
 
 interface AdaptableCardProps extends CardProps {
@@ -25,7 +25,7 @@ const AdaptableCard = (props: AdaptableCardProps) => {
         ...rest
     } = props
 
-    const type = useAppSelector((state) => state.theme.layout.type)
+    const type = useThemeStore((state) => state.layout.type)
 
     return (
         <Card

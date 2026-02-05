@@ -2,17 +2,24 @@ import ConfigProvider from '@/components/ui/ConfigProvider'
 import useDarkMode from '@/utils/hooks/useDarkmode'
 import type { CommonProps } from '@/@types/common'
 import { themeConfig } from '@/configs/theme.config'
-import { useAppSelector } from '@/store'
+import { useThemeStore, useLocaleStore } from '@/stores'
 
 const Theme = (props: CommonProps) => {
-    const theme = useAppSelector((state) => state.theme)
-    const locale = useAppSelector((state) => state.locale.currentLang)
+    const theme = useThemeStore()
+    const locale = useLocaleStore((state) => state.currentLang)
     useDarkMode()
 
     const currentTheme = {
         ...themeConfig,
-        ...theme,
-        ...{ locale },
+        themeColor: theme.themeColor,
+        direction: theme.direction,
+        mode: theme.mode,
+        primaryColorLevel: theme.primaryColorLevel,
+        panelExpand: theme.panelExpand,
+        navMode: theme.navMode,
+        cardBordered: theme.cardBordered,
+        layout: theme.layout,
+        locale,
     }
 
     return (

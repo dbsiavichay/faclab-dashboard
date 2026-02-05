@@ -1,6 +1,6 @@
 import { useMemo, lazy, Suspense } from 'react'
 import Loading from '@/components/shared/Loading'
-import { useAppSelector } from '@/store'
+import { useThemeStore } from '@/stores'
 import {
     LAYOUT_TYPE_CLASSIC,
     LAYOUT_TYPE_MODERN,
@@ -23,7 +23,7 @@ const layouts = {
 }
 
 const Layout = () => {
-    const layoutType = useAppSelector((state) => state.theme.layout.type)
+    const layoutType = useThemeStore((state) => state.layout.type)
 
     const { authenticated } = useAuth()
 

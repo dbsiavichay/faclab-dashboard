@@ -1,10 +1,10 @@
 import HorizontalMenuContent from './HorizontalMenuContent'
 import useResponsive from '@/utils/hooks/useResponsive'
-import { useAppSelector } from '@/store'
+import { useThemeStore, useAuthStore } from '@/stores'
 
 const HorizontalNav = () => {
-    const mode = useAppSelector((state) => state.theme.mode)
-    const userAuthority = useAppSelector((state) => state.auth.user.authority)
+    const mode = useThemeStore((state) => state.mode)
+    const userAuthority = useAuthStore((state) => state.user?.authority)
 
     const { larger } = useResponsive()
 

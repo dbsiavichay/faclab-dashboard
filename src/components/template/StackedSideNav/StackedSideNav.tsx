@@ -11,7 +11,7 @@ import StackedSideNavMini, { SelectedMenuItem } from './StackedSideNavMini'
 import StackedSideNavSecondary from './StackedSideNavSecondary'
 import useResponsive from '@/utils/hooks/useResponsive'
 import isEmpty from 'lodash/isEmpty'
-import { useAppSelector } from '@/store'
+import { useThemeStore, useAuthStore, useBaseStore } from '@/stores'
 import { useTranslation } from 'react-i18next'
 
 const stackedSideNavDefaultStyle = {
@@ -24,17 +24,17 @@ const StackedSideNav = () => {
     const [selectedMenu, setSelectedMenu] = useState<SelectedMenuItem>({})
     const [activeKeys, setActiveKeys] = useState<string[]>([])
 
-    const themeColor = useAppSelector((state) => state.theme.themeColor)
-    const primaryColorLevel = useAppSelector(
-        (state) => state.theme.primaryColorLevel
+    const themeColor = useThemeStore((state) => state.themeColor)
+    const primaryColorLevel = useThemeStore(
+        (state) => state.primaryColorLevel
     )
-    const navMode = useAppSelector((state) => state.theme.navMode)
-    const mode = useAppSelector((state) => state.theme.mode)
-    const direction = useAppSelector((state) => state.theme.direction)
-    const currentRouteKey = useAppSelector(
-        (state) => state.base.common.currentRouteKey
+    const navMode = useThemeStore((state) => state.navMode)
+    const mode = useThemeStore((state) => state.mode)
+    const direction = useThemeStore((state) => state.direction)
+    const currentRouteKey = useBaseStore(
+        (state) => state.currentRouteKey
     )
-    const userAuthority = useAppSelector((state) => state.auth.user.authority)
+    const userAuthority = useAuthStore((state) => state.user?.authority)
 
     const { larger } = useResponsive()
 

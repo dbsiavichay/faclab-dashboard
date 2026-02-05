@@ -4,7 +4,7 @@ import Dropdown from '@/components/ui/Dropdown'
 import Spinner from '@/components/ui/Spinner'
 import classNames from 'classnames'
 import withHeaderItem from '@/utils/hoc/withHeaderItem'
-import { setLang, useAppSelector, useAppDispatch } from '@/store'
+import { useLocaleStore } from '@/stores'
 import { dateLocales } from '@/locales'
 import dayjs from 'dayjs'
 // eslint-disable-next-line import/no-named-as-default
@@ -18,12 +18,11 @@ const languageList = [
 
 const _LanguageSelector = ({ className }: CommonProps) => {
     const [loading, setLoading] = useState(false)
-    const locale = useAppSelector((state) => state.locale.currentLang)
-    const dispatch = useAppDispatch()
+    const { currentLang, setLang } = useLocaleStore()
 
     const selectLangFlag = useMemo(() => {
-        return languageList.find((lang) => lang.value === locale)?.flag
-    }, [locale])
+        return languageList.find((lang) => lang.value === currentLang)?.flag
+    }, [currentLang])
 
     const selectedLanguage = (
         <div className={classNames(className, 'flex items-center')}>
@@ -48,7 +47,7 @@ const _LanguageSelector = ({ className }: CommonProps) => {
 
         const dispatchLang = () => {
             i18n.changeLanguage(formattedLang)
-            dispatch(setLang(lang))
+            setLang(lang)
             setLoading(false)
         }
 
@@ -79,7 +78,7 @@ const _LanguageSelector = ({ className }: CommonProps) => {
                         />
                         <span className="ltr:ml-2 rtl:mr-2">{lang.label}</span>
                     </span>
-                    {locale === lang.value && (
+                    {currentLang === lang.value && (
                         <HiCheck className="text-emerald-500 text-lg" />
                     )}
                 </Dropdown.Item>

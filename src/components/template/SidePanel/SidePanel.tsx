@@ -3,26 +3,24 @@ import Drawer from '@/components/ui/Drawer'
 import { HiOutlineCog } from 'react-icons/hi'
 import SidePanelContent, { SidePanelContentProps } from './SidePanelContent'
 import withHeaderItem from '@/utils/hoc/withHeaderItem'
-import { setPanelExpand, useAppSelector, useAppDispatch } from '@/store'
+import { useThemeStore } from '@/stores'
 import type { CommonProps } from '@/@types/common'
 
 type SidePanelProps = SidePanelContentProps & CommonProps
 
 const _SidePanel = (props: SidePanelProps) => {
-    const dispatch = useAppDispatch()
-
     const { className, ...rest } = props
 
-    const panelExpand = useAppSelector((state) => state.theme.panelExpand)
-
-    const direction = useAppSelector((state) => state.theme.direction)
+    const panelExpand = useThemeStore((state) => state.panelExpand)
+    const direction = useThemeStore((state) => state.direction)
+    const setPanelExpand = useThemeStore((state) => state.setPanelExpand)
 
     const openPanel = () => {
-        dispatch(setPanelExpand(true))
+        setPanelExpand(true)
     }
 
     const closePanel = () => {
-        dispatch(setPanelExpand(false))
+        setPanelExpand(false)
         const bodyClassList = document.body.classList
         if (bodyClassList.contains('drawer-lock-scroll')) {
             bodyClassList.remove('drawer-lock-scroll', 'drawer-open')

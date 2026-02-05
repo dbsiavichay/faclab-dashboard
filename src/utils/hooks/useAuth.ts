@@ -1,11 +1,5 @@
 import { apiSignIn, apiSignOut, apiSignUp } from '@/services/AuthService'
-import {
-    setUser,
-    signInSuccess,
-    signOutSuccess,
-    useAppSelector,
-    useAppDispatch,
-} from '@/store'
+import { useAuthStore } from '@/stores'
 import appConfig from '@/configs/app.config'
 import { REDIRECT_URL_KEY } from '@/constants/app.constant'
 import { useNavigate } from 'react-router-dom'
@@ -15,13 +9,14 @@ import type { SignInCredential, SignUpCredential } from '@/@types/auth'
 type Status = 'success' | 'failed'
 
 function useAuth() {
-    const dispatch = useAppDispatch()
-
     const navigate = useNavigate()
-
     const query = useQuery()
 
-    const { token, signedIn } = useAppSelector((state) => state.auth.session)
+    const token = useAuthStore((state) => state.token)
+    const signedIn = useAuthStore((state) => state.signedIn)
+    const signInSuccess = useAuthStore((state) => state.signInSuccess)
+    const signOutSuccess = useAuthStore((state) => state.signOutSuccess)
+    const setUser = useAuthStore((state) => state.setUser)
 
     const signIn = async (
         values: SignInCredential
@@ -36,19 +31,13 @@ function useAuth() {
             const resp = await apiSignIn(values)
             if (resp.data) {
                 const { token } = resp.data
-                dispatch(signInSuccess(token))
-                if (resp.data.user) {
-                    dispatch(
-                        setUser(
-                            resp.data.user || {
-                                avatar: '',
-                                userName: 'Anonymous',
-                                authority: ['USER'],
-                                email: '',
-                            }
-                        )
-                    )
+                const user = resp.data.user || {
+                    avatar: '',
+                    userName: 'Anonymous',
+                    authority: ['USER'],
+                    email: '',
                 }
+                signInSuccess(token, user)
                 const redirectUrl = query.get(REDIRECT_URL_KEY)
                 navigate(
                     redirectUrl ? redirectUrl : appConfig.authenticatedEntryPath
@@ -72,19 +61,13 @@ function useAuth() {
             const resp = await apiSignUp(values)
             if (resp.data) {
                 const { token } = resp.data
-                dispatch(signInSuccess(token))
-                if (resp.data.user) {
-                    dispatch(
-                        setUser(
-                            resp.data.user || {
-                                avatar: '',
-                                userName: 'Anonymous',
-                                authority: ['USER'],
-                                email: '',
-                            }
-                        )
-                    )
+                const user = resp.data.user || {
+                    avatar: '',
+                    userName: 'Anonymous',
+                    authority: ['USER'],
+                    email: '',
                 }
+                signInSuccess(token, user)
                 const redirectUrl = query.get(REDIRECT_URL_KEY)
                 navigate(
                     redirectUrl ? redirectUrl : appConfig.authenticatedEntryPath
@@ -104,15 +87,7 @@ function useAuth() {
     }
 
     const handleSignOut = () => {
-        dispatch(signOutSuccess())
-        dispatch(
-            setUser({
-                avatar: '',
-                userName: '',
-                email: '',
-                authority: [],
-            })
-        )
+        signOutSuccess()
         navigate(appConfig.unAuthenticatedEntryPath)
     }
 

@@ -1,4 +1,4 @@
-import { useAppSelector } from '@/store'
+import { useThemeStore } from '@/stores'
 import { THEME_ENUM } from '@/constants/theme.constant'
 import type { DetailedHTMLProps, ImgHTMLAttributes } from 'react'
 
@@ -18,7 +18,7 @@ const DoubleSidedImage = ({
     alt = '',
     ...rest
 }: DoubleSidedImageProps) => {
-    const mode = useAppSelector((state) => state.theme.mode)
+    const mode = useThemeStore((state) => state.mode)
 
     return (
         <img src={mode === MODE_DARK ? darkModeSrc : src} alt={alt} {...rest} />

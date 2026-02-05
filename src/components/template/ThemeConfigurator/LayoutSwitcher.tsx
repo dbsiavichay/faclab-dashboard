@@ -4,7 +4,7 @@ import SegmentItemOption from '@/components/shared/SegmentItemOption'
 import DoubleSidedImage from '@/components/shared/DoubleSidedImage'
 import { HiCheckCircle } from 'react-icons/hi'
 import useThemeClass from '@/utils/hooks/useThemeClass'
-import { setLayout, useAppSelector, useAppDispatch } from '@/store'
+import { useThemeStore } from '@/stores'
 import {
     LAYOUT_TYPE_CLASSIC,
     LAYOUT_TYPE_MODERN,
@@ -55,11 +55,11 @@ const layouts = [
 ]
 
 const LayoutSwitcher = () => {
-    const type = useAppSelector((state) => state.theme.layout.type)
-    const dispatch = useAppDispatch()
+    const type = useThemeStore((state) => state.layout.type)
+    const setLayout = useThemeStore((state) => state.setLayout)
 
     const onLayoutSelect = (val: LayoutType) => {
-        dispatch(setLayout(val))
+        setLayout(val)
     }
 
     const { textTheme } = useThemeClass()

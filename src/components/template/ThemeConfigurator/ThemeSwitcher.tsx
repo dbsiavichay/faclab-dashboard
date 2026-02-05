@@ -1,12 +1,7 @@
 import classNames from 'classnames'
 import Select from '@/components/ui/Select'
 import Badge from '@/components/ui/Badge'
-import {
-    setThemeColor,
-    setThemeColorLevel,
-    useAppSelector,
-    useAppDispatch,
-} from '@/store'
+import { useThemeStore } from '@/stores'
 import { HiCheck } from 'react-icons/hi'
 import { components } from 'react-select'
 import type { ColorLevel } from '@/@types/theme'
@@ -60,8 +55,8 @@ const ColorBadge = ({
     className?: string
     themeColor: string
 }) => {
-    const primaryColorLevel = useAppSelector(
-        (state) => state.theme.primaryColorLevel
+    const primaryColorLevel = useThemeStore(
+        (state) => state.primaryColorLevel
     )
 
     return (
@@ -99,7 +94,7 @@ const CustomSelectOption = ({
 const CustomControl = ({ children, ...props }: ControlProps<ColorList>) => {
     const selected = props.getValue()[0]
 
-    const themeColor = useAppSelector((state) => state.theme.themeColor)
+    const themeColor = useThemeStore((state) => state.themeColor)
 
     return (
         <Control {...props}>
@@ -115,19 +110,19 @@ const CustomControl = ({ children, ...props }: ControlProps<ColorList>) => {
 }
 
 const ThemeSwitcher = () => {
-    const dispatch = useAppDispatch()
-
-    const themeColor = useAppSelector((state) => state.theme.themeColor)
-    const primaryColorLevel = useAppSelector(
-        (state) => state.theme.primaryColorLevel
+    const themeColor = useThemeStore((state) => state.themeColor)
+    const primaryColorLevel = useThemeStore(
+        (state) => state.primaryColorLevel
     )
+    const setThemeColor = useThemeStore((state) => state.setThemeColor)
+    const setThemeColorLevel = useThemeStore((state) => state.setThemeColorLevel)
 
     const onThemeColorChange = ({ value }: ColorList) => {
-        dispatch(setThemeColor(value))
+        setThemeColor(value)
     }
 
     const onThemeColorLevelChange = ({ value }: ColorLevelList) => {
-        dispatch(setThemeColorLevel(value))
+        setThemeColorLevel(value)
     }
 
     return (

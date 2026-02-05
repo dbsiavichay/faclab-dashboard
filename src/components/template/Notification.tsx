@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom'
 import isLastChild from '@/utils/isLastChild'
 import useTwColorByName from '@/utils/hooks/useTwColorByName'
 import useThemeClass from '@/utils/hooks/useThemeClass'
-import { useAppSelector } from '@/store'
+import { useThemeStore } from '@/stores'
 import useResponsive from '@/utils/hooks/useResponsive'
 import acronym from '@/utils/acronym'
 
@@ -125,7 +125,7 @@ const _Notification = ({ className }: { className?: string }) => {
 
     const { larger } = useResponsive()
 
-    const direction = useAppSelector((state) => state.theme.direction)
+    const direction = useThemeStore((state) => state.direction)
 
     const getNotificationCount = async () => {
         // Fetch Notification count

@@ -3,10 +3,10 @@ import { useEffect } from 'react'
 import i18n from 'i18next'
 import dayjs from 'dayjs'
 import { dateLocales } from '@/locales'
-import { useAppSelector } from '@/store'
+import { useLocaleStore } from '@/stores'
 
 function useLocale() {
-    const locale = useAppSelector((state) => state.locale.currentLang)
+    const locale = useLocaleStore((state) => state.currentLang)
 
     useEffect(() => {
         const formattedLang = locale.replace(/-([a-z])/g, function (g) {

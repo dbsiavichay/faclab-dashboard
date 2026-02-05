@@ -1,15 +1,15 @@
 import View from '@/views'
 import SidePanel from '@/components/template/SidePanel'
-import { setPanelExpand, useAppSelector, useAppDispatch } from '@/store'
+import { useThemeStore } from '@/stores'
 import { HiOutlineCog } from 'react-icons/hi'
 import classNames from 'classnames'
 
 const ConfiguratorToggle = () => {
-    const dispatch = useAppDispatch()
-    const themeColor = useAppSelector((state) => state.theme.themeColor)
-    const primaryColorLevel = useAppSelector(
-        (state) => state.theme.primaryColorLevel
+    const themeColor = useThemeStore((state) => state.themeColor)
+    const primaryColorLevel = useThemeStore(
+        (state) => state.primaryColorLevel
     )
+    const setPanelExpand = useThemeStore((state) => state.setPanelExpand)
 
     return (
         <div
@@ -18,7 +18,7 @@ const ConfiguratorToggle = () => {
                 `bg-${themeColor}-${primaryColorLevel}`
             )}
             onClick={() => {
-                dispatch(setPanelExpand(true))
+                setPanelExpand(true)
             }}
         >
             <HiOutlineCog />

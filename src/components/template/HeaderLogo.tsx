@@ -1,8 +1,8 @@
 import Logo from '@/components/template/Logo'
-import { useAppSelector } from '@/store'
+import { useThemeStore } from '@/stores'
 
 const HeaderLogo = () => {
-    const mode = useAppSelector((state) => state.theme.mode)
+    const mode = useThemeStore((state) => state.mode)
 
     return <Logo mode={mode} className="hidden md:block" />
 }

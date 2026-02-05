@@ -1,11 +1,5 @@
 import { useEffect, useCallback } from 'react'
-import {
-    setLayout,
-    setPreviousLayout,
-    setCurrentRouteKey,
-    useAppSelector,
-    useAppDispatch,
-} from '@/store'
+import { useThemeStore, useBaseStore } from '@/stores'
 import { useLocation } from 'react-router-dom'
 import type { LayoutType } from '@/@types/theme'
 import type { ComponentType } from 'react'
@@ -23,26 +17,27 @@ const AppRoute = <T extends Record<string, unknown>>({
 }: AppRouteProps<T>) => {
     const location = useLocation()
 
-    const dispatch = useAppDispatch()
-
-    const layoutType = useAppSelector((state) => state.theme.layout.type)
-    const previousLayout = useAppSelector(
-        (state) => state.theme.layout.previousType
+    const layoutType = useThemeStore((state) => state.layout.type)
+    const previousLayout = useThemeStore(
+        (state) => state.layout.previousType
     )
+    const setLayout = useThemeStore((state) => state.setLayout)
+    const setPreviousLayout = useThemeStore((state) => state.setPreviousLayout)
+    const setCurrentRouteKey = useBaseStore((state) => state.setCurrentRouteKey)
 
     const handleLayoutChange = useCallback(() => {
-        dispatch(setCurrentRouteKey(routeKey))
+        setCurrentRouteKey(routeKey)
 
         if (props.layout && props.layout !== layoutType) {
-            dispatch(setPreviousLayout(layoutType))
-            dispatch(setLayout(props.layout))
+            setPreviousLayout(layoutType)
+            setLayout(props.layout)
         }
 
         if (!props.layout && previousLayout && layoutType !== previousLayout) {
-            dispatch(setLayout(previousLayout))
-            dispatch(setPreviousLayout(''))
+            setLayout(previousLayout)
+            setPreviousLayout('')
         }
-    }, [dispatch, layoutType, previousLayout, props.layout, routeKey])
+    }, [layoutType, previousLayout, props.layout, routeKey, setCurrentRouteKey, setLayout, setPreviousLayout])
 
     useEffect(() => {
         handleLayoutChange()

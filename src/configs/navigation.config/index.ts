@@ -98,6 +98,27 @@ const navigationConfig: NavigationTree[] = [
             },
         ],
     },
+    {
+        key: 'sales',
+        path: '',
+        title: 'Sales',
+        translateKey: 'nav.sales.title',
+        icon: '',
+        type: NAV_ITEM_TYPE_TITLE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'sales.customers',
+                path: '/customers',
+                title: 'Customers',
+                translateKey: 'nav.sales.customers',
+                icon: 'salesCustomers',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
 ]
 
 export default navigationConfig

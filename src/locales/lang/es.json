@@ -6,6 +6,7 @@
             "products": "Productos",
             "categories": "Categorías",
             "stock": "Stock",
+            "movements": "Movimientos",
             "collapse": {
                 "collapse": "Group collapse menu",
                 "item1": "Group collapse menu item 1",

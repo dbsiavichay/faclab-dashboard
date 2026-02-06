@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import Notification from '@/components/ui/Notification'
+import toast from '@/components/ui/toast'
 import { useCreateProduct, useUpdateProduct } from '@/hooks/useProducts'
 import type { Product, ProductInput } from '@/services/InventoryService'
 
@@ -54,8 +56,37 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
             } else {
                 await createProduct.mutateAsync(formData)
             }
+
+            toast.push(
+                <Notification
+                    title={isEdit ? 'Producto actualizado' : 'Producto creado'}
+                    type="success"
+                >
+                    {isEdit
+                        ? 'El producto se actualizó correctamente'
+                        : 'El producto se creó correctamente'
+                    }
+                </Notification>,
+                {
+                    placement: 'top-center',
+                }
+            )
+
             onClose()
-        } catch (error) {
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.detail
+                || error.message
+                || 'Error al guardar el producto'
+
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {errorMessage}
+                </Notification>,
+                {
+                    placement: 'top-center',
+                }
+            )
+
             console.error('Error saving product:', error)
         }
     }

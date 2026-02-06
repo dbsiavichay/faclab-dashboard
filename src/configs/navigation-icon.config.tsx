@@ -2,7 +2,8 @@ import { BiHome, BiPackage } from 'react-icons/bi'
 import {
     HiOutlineColorSwatch,
     HiOutlineFolder,
-    HiOutlineCube
+    HiOutlineCube,
+    HiOutlineSwitchHorizontal
 } from 'react-icons/hi'
 
 export type NavigationIcons = Record<string, JSX.Element>
@@ -12,6 +13,7 @@ const navigationIcon: NavigationIcons = {
     inventoryProducts: <BiPackage />,
     inventoryCategories: <HiOutlineFolder />,
     inventoryStock: <HiOutlineCube />,
+    inventoryMovements: <HiOutlineSwitchHorizontal />,
     groupCollapseMenu: <HiOutlineColorSwatch />,
 }
 

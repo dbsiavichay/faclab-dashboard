@@ -28,6 +28,14 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'inventory.stock',
+        path: '/stock',
+        component: lazy(() =>
+            import('@/views/inventory/StockView')
+        ),
+        authority: [],
+    },
+    {
         key: 'groupMenu.collapse.item1',
         path: '/group-collapse-menu-item-view-1',
         component: lazy(() =>

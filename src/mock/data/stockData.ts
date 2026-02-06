@@ -1,0 +1,92 @@
+export const stockData = [
+    {
+        id: 1,
+        productId: 12,
+        quantity: 150,
+        location: 'Almacén A - Estante 1',
+    },
+    {
+        id: 2,
+        productId: 12,
+        quantity: 75,
+        location: 'Almacén B - Estante 3',
+    },
+    {
+        id: 3,
+        productId: 13,
+        quantity: 200,
+        location: 'Almacén A - Estante 2',
+    },
+    {
+        id: 4,
+        productId: 14,
+        quantity: 89,
+        location: 'Almacén C - Estante 1',
+    },
+    {
+        id: 5,
+        productId: 15,
+        quantity: 120,
+        location: 'Almacén A - Estante 4',
+    },
+    {
+        id: 6,
+        productId: 16,
+        quantity: 45,
+        location: 'Almacén B - Estante 2',
+    },
+    {
+        id: 7,
+        productId: 17,
+        quantity: 300,
+        location: null,
+    },
+    {
+        id: 8,
+        productId: 18,
+        quantity: 67,
+        location: 'Almacén C - Estante 5',
+    },
+    {
+        id: 9,
+        productId: 19,
+        quantity: 180,
+        location: 'Almacén A - Estante 3',
+    },
+    {
+        id: 10,
+        productId: 20,
+        quantity: 95,
+        location: 'Almacén B - Estante 1',
+    },
+    {
+        id: 11,
+        productId: 21,
+        quantity: 55,
+        location: null,
+    },
+    {
+        id: 12,
+        productId: 22,
+        quantity: 210,
+        location: 'Almacén A - Estante 5',
+    },
+    {
+        id: 13,
+        productId: 23,
+        quantity: 140,
+        location: 'Almacén C - Estante 2',
+    },
+    {
+        id: 14,
+        productId: 13,
+        quantity: 88,
+        location: 'Almacén C - Estante 3',
+    },
+    {
+        id: 15,
+        productId: 14,
+        quantity: 160,
+        location: 'Almacén B - Estante 4',
+    },
+]

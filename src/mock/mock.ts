@@ -7,11 +7,13 @@ import { categoryData } from './data/categoryData'
 import { stockData } from './data/stockData'
 import { movementData } from './data/movementData'
 import { customerData } from './data/customerData'
+import { customerContactData } from './data/customerContactData'
 
 import { authFakeApi, inventoryFakeApi, categoryFakeApi } from './fakeApi'
 import stockFakeApi from './fakeApi/stockFakeApi'
 import movementFakeApi from './fakeApi/movementFakeApi'
 import customerFakeApi from './fakeApi/customerFakeApi'
+import customerContactFakeApi from './fakeApi/customerContactFakeApi'
 
 const { apiPrefix } = appConfig
 
@@ -26,6 +28,7 @@ export function mockServer({ environment = 'test' }) {
                 stockData,
                 movementData,
                 customerData,
+                customerContactData,
             })
         },
         routes() {
@@ -43,6 +46,7 @@ export function mockServer({ environment = 'test' }) {
             stockFakeApi(this)
             movementFakeApi(this)
             customerFakeApi(this)
+            customerContactFakeApi(this)
         },
     })
 }

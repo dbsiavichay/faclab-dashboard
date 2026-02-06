@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
     useCustomers,
     useDeleteCustomer,
@@ -22,11 +23,13 @@ import {
     HiOutlineTrash,
     HiOutlineCheckCircle,
     HiOutlineXCircle,
+    HiOutlineEye,
 } from 'react-icons/hi'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
 const CustomersView = () => {
+    const navigate = useNavigate()
     const { data: customers = [], isLoading } = useCustomers()
     const deleteCustomer = useDeleteCustomer()
     const activateCustomer = useActivateCustomer()
@@ -170,6 +173,14 @@ const CustomersView = () => {
             cell: ({ row }) => {
                 return (
                     <div className="flex gap-2">
+                        <Button
+                            size="sm"
+                            variant="plain"
+                            icon={<HiOutlineEye />}
+                            onClick={() =>
+                                navigate(`/customers/${row.original.id}`)
+                            }
+                        />
                         <Button
                             size="sm"
                             variant="plain"

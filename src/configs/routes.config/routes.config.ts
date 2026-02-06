@@ -20,6 +20,14 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'inventory.category',
+        path: '/categories',
+        component: lazy(() =>
+            import('@/views/inventory/CategoriesView')
+        ),
+        authority: [],
+    },
+    {
         key: 'groupMenu.collapse.item1',
         path: '/group-collapse-menu-item-view-1',
         component: lazy(() =>

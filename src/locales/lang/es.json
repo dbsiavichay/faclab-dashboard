@@ -5,6 +5,7 @@
             "title": "Inventario",
             "products": "Productos",
             "categories": "Categorías",
+            "stock": "Stock",
             "collapse": {
                 "collapse": "Group collapse menu",
                 "item1": "Group collapse menu item 1",

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts'
+import { useCategories } from '@/hooks/useCategories'
 import type { Product } from '@/services/InventoryService'
 import ProductForm from './ProductForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
@@ -17,7 +18,15 @@ const ProductsView = () => {
     }>({ open: false, product: null })
 
     const { data: products = [], isLoading } = useProducts()
+    const { data: categories = [] } = useCategories()
     const deleteProduct = useDeleteProduct()
+
+    // Create a lookup map for category ID to name
+    const categoryMap = useMemo(() => {
+        const map = new Map<number, string>()
+        categories.forEach((cat) => map.set(cat.id, cat.name))
+        return map
+    }, [categories])
 
     const handleCreate = () => {
         setSelectedProduct(null)
@@ -91,12 +100,15 @@ const ProductsView = () => {
             accessorKey: 'categoryId',
             cell: (props) => {
                 const { row } = props
-                return row.original.categoryId ? (
-                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs">
-                        Cat #{row.original.categoryId}
+                const categoryName = row.original.categoryId
+                    ? categoryMap.get(row.original.categoryId)
+                    : null
+                return categoryName ? (
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
+                        {categoryName}
                     </span>
                 ) : (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-gray-400">Sin categoría</span>
                 )
             },
         },

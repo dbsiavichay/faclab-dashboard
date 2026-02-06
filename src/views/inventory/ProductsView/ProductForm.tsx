@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import Select from '@/components/ui/Select'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateProduct, useUpdateProduct } from '@/hooks/useProducts'
+import { useCategories } from '@/hooks/useCategories'
 import type { Product, ProductInput } from '@/services/InventoryService'
 
 interface ProductFormProps {
@@ -23,8 +25,18 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
 
     const createProduct = useCreateProduct()
     const updateProduct = useUpdateProduct()
+    const { data: categories = [] } = useCategories()
 
     const isEdit = !!product
+
+    // Create options for category select
+    const categoryOptions = [
+        { value: 0, label: 'Sin categoría' },
+        ...categories.map((cat) => ({
+            value: cat.id,
+            label: cat.name,
+        })),
+    ]
 
     useEffect(() => {
         if (product) {
@@ -161,26 +173,26 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                             />
                         </div>
 
-                        {/* Category ID */}
+                        {/* Category */}
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                ID de Categoría
+                                Categoría
                             </label>
-                            <Input
-                                type="number"
-                                placeholder="ID de categoría (opcional)"
-                                value={formData.categoryId || ''}
-                                onChange={(e) =>
+                            <Select
+                                placeholder="Seleccione una categoría"
+                                value={categoryOptions.find(
+                                    (opt) => opt.value === (formData.categoryId || 0)
+                                )}
+                                options={categoryOptions}
+                                onChange={(option) =>
                                     setFormData({
                                         ...formData,
-                                        categoryId: e.target.value
-                                            ? parseInt(e.target.value)
-                                            : undefined,
+                                        categoryId: option?.value === 0 ? undefined : option?.value,
                                     })
                                 }
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                Opcional: Ingrese el ID de la categoría
+                                Opcional: Seleccione la categoría del producto
                             </p>
                         </div>
                     </div>

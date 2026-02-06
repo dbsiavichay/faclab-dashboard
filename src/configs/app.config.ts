@@ -14,7 +14,7 @@ const appConfig: AppConfig = {
     unAuthenticatedEntryPath: '/sign-in',
     tourPath: '/',
     locale: 'en',
-    enableMock: true,
+    enableMock: false,
     inventoryApiHost: 'http://localhost:3000',
 }
 

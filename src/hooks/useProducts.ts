@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import InventoryService, { Product } from '@/services/InventoryService'
+import InventoryService, { ProductInput } from '@/services/InventoryService'
 
 // GET /products - Obtener todos los productos
 export function useProducts() {
@@ -7,7 +7,7 @@ export function useProducts() {
         queryKey: ['products'],
         queryFn: async () => {
             const response = await InventoryService.getProducts()
-            return response.data
+            return response.data.data // API retorna { data: Product[] }
         },
     })
 }
@@ -29,7 +29,7 @@ export function useCreateProduct() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (product: Omit<Product, 'id'>) =>
+        mutationFn: (product: ProductInput) =>
             InventoryService.createProduct(product),
 
         onSuccess: () => {
@@ -44,7 +44,7 @@ export function useUpdateProduct() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Partial<Omit<Product, 'id'>> }) =>
+        mutationFn: ({ id, data }: { id: number; data: Partial<ProductInput> }) =>
             InventoryService.updateProduct(id, data),
 
         onSuccess: (_, variables) => {

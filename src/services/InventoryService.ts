@@ -6,7 +6,16 @@ export interface Product {
     id: number
     name: string
     sku: string
-    description: string
+    description?: string | null
+    categoryId?: number | null
+}
+
+export interface ProductInput {
+    name: string
+    sku: string
+    description?: string
+    categoryId?: number
+    [key: string]: unknown
 }
 
 export interface ProductResponse {
@@ -61,7 +70,7 @@ class InventoryService {
      * Crea un nuevo producto
      * @param product Datos del producto
      */
-    async createProduct(product: Omit<Product, 'id'>) {
+    async createProduct(product: ProductInput) {
         return ApiService.fetchData<Product>({
             url: `${this.config.host}/products`,
             method: 'post',
@@ -74,7 +83,7 @@ class InventoryService {
      * @param id ID del producto
      * @param product Datos del producto
      */
-    async updateProduct(id: number, product: Partial<Omit<Product, 'id'>>) {
+    async updateProduct(id: number, product: Partial<ProductInput>) {
         return ApiService.fetchData<Product>({
             url: `${this.config.host}/products/${id}`,
             method: 'put',

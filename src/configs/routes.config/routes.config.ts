@@ -44,6 +44,14 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'inventory.unitsOfMeasure',
+        path: '/units-of-measure',
+        component: lazy(() =>
+            import('@/views/inventory/UnitsOfMeasureView')
+        ),
+        authority: [],
+    },
+    {
         key: 'sales.customers',
         path: '/customers',
         component: lazy(() =>

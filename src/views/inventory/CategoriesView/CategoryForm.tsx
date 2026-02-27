@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
+import Notification from '@/components/ui/Notification'
+import toast from '@/components/ui/toast'
 import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories'
 import type { Category } from '@/services/CategoryService'
 
@@ -48,9 +50,33 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
             } else {
                 await createCategory.mutateAsync(formData)
             }
+
+            toast.push(
+                <Notification
+                    title={isEditMode ? 'Categoría actualizada' : 'Categoría creada'}
+                    type="success"
+                >
+                    {isEditMode
+                        ? 'La categoría se actualizó correctamente'
+                        : 'La categoría se creó correctamente'
+                    }
+                </Notification>,
+                { placement: 'top-center' }
+            )
+
             onClose()
-        } catch (error) {
-            console.error('Error saving category:', error)
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.detail
+                || error.response?.data?.message
+                || error.message
+                || 'Error al guardar la categoría'
+
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {errorMessage}
+                </Notification>,
+                { placement: 'top-center' }
+            )
         }
     }
 

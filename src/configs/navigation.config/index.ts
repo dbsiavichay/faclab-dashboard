@@ -66,6 +66,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'inventory.unitsOfMeasure',
+                path: '/units-of-measure',
+                title: 'Units of Measure',
+                translateKey: 'nav.inventory.unitsOfMeasure',
+                icon: 'inventoryUnitsOfMeasure',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
                 key: 'groupMenu.collapse',
                 path: '',
                 title: 'Group collapse menu',

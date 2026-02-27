@@ -3,53 +3,54 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
+import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useCategories, useDeleteCategory } from '@/hooks/useCategories'
-import type { Category } from '@/services/CategoryService'
-import CategoryForm from './CategoryForm'
+import { useUnitsOfMeasure, useDeleteUnitOfMeasure } from '@/hooks/useUnitsOfMeasure'
+import type { UnitOfMeasure } from '@/services/UnitOfMeasureService'
+import UnitOfMeasureForm from './UnitOfMeasureForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
-const CategoriesView = () => {
+const UnitsOfMeasureView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+    const [selectedUnit, setSelectedUnit] = useState<UnitOfMeasure | null>(null)
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
-        category: Category | null
-    }>({ open: false, category: null })
+        unit: UnitOfMeasure | null
+    }>({ open: false, unit: null })
 
-    const { data: categories = [], isLoading } = useCategories()
-    const deleteCategory = useDeleteCategory()
+    const { data: units = [], isLoading } = useUnitsOfMeasure()
+    const deleteUnit = useDeleteUnitOfMeasure()
 
     const handleCreate = () => {
-        setSelectedCategory(null)
+        setSelectedUnit(null)
         setIsFormOpen(true)
     }
 
-    const handleEdit = (category: Category) => {
-        setSelectedCategory(category)
+    const handleEdit = (unit: UnitOfMeasure) => {
+        setSelectedUnit(unit)
         setIsFormOpen(true)
     }
 
-    const handleDeleteClick = (category: Category) => {
-        setDeleteDialog({ open: true, category })
+    const handleDeleteClick = (unit: UnitOfMeasure) => {
+        setDeleteDialog({ open: true, unit })
     }
 
     const handleDeleteConfirm = async () => {
-        if (deleteDialog.category) {
+        if (deleteDialog.unit) {
             try {
-                await deleteCategory.mutateAsync(deleteDialog.category.id)
+                await deleteUnit.mutateAsync(deleteDialog.unit.id)
                 toast.push(
-                    <Notification title="Categoría eliminada" type="success">
-                        La categoría se eliminó correctamente
+                    <Notification title="Unidad eliminada" type="success">
+                        La unidad de medida se eliminó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, category: null })
+                setDeleteDialog({ open: false, unit: null })
             } catch (error: any) {
                 const errorMessage = error.response?.data?.detail
                     || error.response?.data?.message
-                    || 'Error al eliminar la categoría'
+                    || 'Error al eliminar la unidad de medida'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -63,10 +64,10 @@ const CategoriesView = () => {
 
     const handleFormClose = () => {
         setIsFormOpen(false)
-        setSelectedCategory(null)
+        setSelectedUnit(null)
     }
 
-    const columns: ColumnDef<Category>[] = [
+    const columns: ColumnDef<UnitOfMeasure>[] = [
         {
             header: 'ID',
             accessorKey: 'id',
@@ -84,6 +85,18 @@ const CategoriesView = () => {
             },
         },
         {
+            header: 'Símbolo',
+            accessorKey: 'symbol',
+            cell: (props) => {
+                const { row } = props
+                return (
+                    <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
+                        {row.original.symbol}
+                    </span>
+                )
+            },
+        },
+        {
             header: 'Descripción',
             accessorKey: 'description',
             cell: (props) => {
@@ -92,6 +105,20 @@ const CategoriesView = () => {
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                         {row.original.description || '-'}
                     </span>
+                )
+            },
+        },
+        {
+            header: 'Estado',
+            accessorKey: 'isActive',
+            cell: (props) => {
+                const { row } = props
+                return (
+                    <Badge
+                        className={row.original.isActive ? 'bg-emerald-500' : 'bg-gray-400'}
+                    >
+                        {row.original.isActive ? 'Activo' : 'Inactivo'}
+                    </Badge>
                 )
             },
         },
@@ -127,10 +154,10 @@ const CategoriesView = () => {
                     <div className="flex justify-between items-center mb-4">
                         <div>
                             <h4 className="text-lg font-semibold">
-                                Listado de Categorías
+                                Unidades de Medida
                             </h4>
                             <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las categorías de productos
+                                Gestiona las unidades de medida de los productos
                             </p>
                         </div>
                         <Button
@@ -139,53 +166,51 @@ const CategoriesView = () => {
                             icon={<HiPlus />}
                             onClick={handleCreate}
                         >
-                            Nueva Categoría
+                            Nueva Unidad
                         </Button>
                     </div>
 
                     <DataTable
                         columns={columns}
-                        data={categories}
+                        data={units}
                         loading={isLoading}
                     />
                 </div>
             </Card>
 
-            {/* Form Modal */}
-            <CategoryForm
+            <UnitOfMeasureForm
                 open={isFormOpen}
                 onClose={handleFormClose}
-                category={selectedCategory}
+                unitOfMeasure={selectedUnit}
             />
 
-            {/* Delete Confirmation Dialog */}
             <Dialog
                 isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, category: null })}
+                onClose={() => setDeleteDialog({ open: false, unit: null })}
                 onRequestClose={() =>
-                    setDeleteDialog({ open: false, category: null })
+                    setDeleteDialog({ open: false, unit: null })
                 }
             >
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar la categoría{' '}
-                    <strong>{deleteDialog.category?.name}</strong>? Esta acción no
-                    se puede deshacer.
+                    ¿Estás seguro de que deseas eliminar la unidad{' '}
+                    <strong>{deleteDialog.unit?.name} ({deleteDialog.unit?.symbol})</strong>?
+                    Esta acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
                         onClick={() =>
-                            setDeleteDialog({ open: false, category: null })
+                            setDeleteDialog({ open: false, unit: null })
                         }
-                        disabled={deleteCategory.isPending}
+                        disabled={deleteUnit.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
                         onClick={handleDeleteConfirm}
-                        loading={deleteCategory.isPending}
+                        loading={deleteUnit.isPending}
                     >
                         Eliminar
                     </Button>
@@ -195,4 +220,4 @@ const CategoriesView = () => {
     )
 }
 
-export default CategoriesView
+export default UnitsOfMeasureView

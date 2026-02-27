@@ -15,7 +15,7 @@ const appConfig: AppConfig = {
     tourPath: '/',
     locale: 'en',
     enableMock: false,
-    inventoryApiHost: 'http://localhost:3000',
+    inventoryApiHost: 'http://localhost:3000/api/admin',
 }
 
 export default appConfig

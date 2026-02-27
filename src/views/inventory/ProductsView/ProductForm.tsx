@@ -7,6 +7,7 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateProduct, useUpdateProduct } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
+import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
 import type { Product, ProductInput } from '@/services/InventoryService'
 
 interface ProductFormProps {
@@ -21,11 +22,13 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
         sku: '',
         description: '',
         categoryId: undefined,
+        unitOfMeasureId: undefined,
     })
 
     const createProduct = useCreateProduct()
     const updateProduct = useUpdateProduct()
     const { data: categories = [] } = useCategories()
+    const { data: unitsOfMeasure = [] } = useUnitsOfMeasure()
 
     const isEdit = !!product
 
@@ -38,6 +41,17 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
         })),
     ]
 
+    // Create options for unit of measure select
+    const unitOptions = [
+        { value: 0, label: 'Sin unidad' },
+        ...unitsOfMeasure
+            .filter((u) => u.isActive)
+            .map((u) => ({
+                value: u.id,
+                label: `${u.name} (${u.symbol})`,
+            })),
+    ]
+
     useEffect(() => {
         if (product) {
             setFormData({
@@ -45,6 +59,7 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                 sku: product.sku,
                 description: product.description || '',
                 categoryId: product.categoryId || undefined,
+                unitOfMeasureId: product.unitOfMeasureId || undefined,
             })
         } else {
             setFormData({
@@ -52,6 +67,7 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                 sku: '',
                 description: '',
                 categoryId: undefined,
+                unitOfMeasureId: undefined,
             })
         }
     }, [product, open])
@@ -193,6 +209,29 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                             />
                             <p className="text-xs text-gray-500 mt-1">
                                 Opcional: Seleccione la categoría del producto
+                            </p>
+                        </div>
+
+                        {/* Unit of Measure */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Unidad de Medida
+                            </label>
+                            <Select
+                                placeholder="Seleccione una unidad"
+                                value={unitOptions.find(
+                                    (opt) => opt.value === (formData.unitOfMeasureId || 0)
+                                )}
+                                options={unitOptions}
+                                onChange={(option) =>
+                                    setFormData({
+                                        ...formData,
+                                        unitOfMeasureId: option?.value === 0 ? undefined : option?.value,
+                                    })
+                                }
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Opcional: Seleccione la unidad de medida del producto
                             </p>
                         </div>
                     </div>

@@ -3,8 +3,11 @@ import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
+import Notification from '@/components/ui/Notification'
+import toast from '@/components/ui/toast'
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
+import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
 import type { Product } from '@/services/InventoryService'
 import ProductForm from './ProductForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
@@ -19,6 +22,7 @@ const ProductsView = () => {
 
     const { data: products = [], isLoading } = useProducts()
     const { data: categories = [] } = useCategories()
+    const { data: unitsOfMeasure = [] } = useUnitsOfMeasure()
     const deleteProduct = useDeleteProduct()
 
     // Create a lookup map for category ID to name
@@ -27,6 +31,13 @@ const ProductsView = () => {
         categories.forEach((cat) => map.set(cat.id, cat.name))
         return map
     }, [categories])
+
+    // Create a lookup map for unit of measure ID to symbol
+    const unitMap = useMemo(() => {
+        const map = new Map<number, string>()
+        unitsOfMeasure.forEach((u) => map.set(u.id, u.symbol))
+        return map
+    }, [unitsOfMeasure])
 
     const handleCreate = () => {
         setSelectedProduct(null)
@@ -46,9 +57,24 @@ const ProductsView = () => {
         if (deleteDialog.product) {
             try {
                 await deleteProduct.mutateAsync(deleteDialog.product.id)
+                toast.push(
+                    <Notification title="Producto eliminado" type="success">
+                        El producto se eliminó correctamente
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
                 setDeleteDialog({ open: false, product: null })
-            } catch (error) {
-                console.error('Error deleting product:', error)
+            } catch (error: any) {
+                const errorMessage = error.response?.data?.detail
+                    || error.response?.data?.message
+                    || 'Error al eliminar el producto'
+
+                toast.push(
+                    <Notification title="Error" type="danger">
+                        {errorMessage}
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
             }
         }
     }
@@ -109,6 +135,23 @@ const ProductsView = () => {
                     </span>
                 ) : (
                     <span className="text-gray-400">Sin categoría</span>
+                )
+            },
+        },
+        {
+            header: 'Unidad',
+            accessorKey: 'unitOfMeasureId',
+            cell: (props) => {
+                const { row } = props
+                const unitSymbol = row.original.unitOfMeasureId
+                    ? unitMap.get(row.original.unitOfMeasureId)
+                    : null
+                return unitSymbol ? (
+                    <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
+                        {unitSymbol}
+                    </span>
+                ) : (
+                    <span className="text-gray-400">-</span>
                 )
             },
         },

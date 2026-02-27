@@ -157,14 +157,15 @@ const CustomersView = () => {
             header: 'Estado',
             accessorKey: 'isActive',
             cell: ({ row }) => {
-                return row.original.isActive ? (
-                    <Badge className="bg-green-100 text-green-800">
-                        Activo
-                    </Badge>
-                ) : (
-                    <Badge className="bg-gray-100 text-gray-800">
-                        Inactivo
-                    </Badge>
+                return (
+                    <Badge
+                        content={row.original.isActive ? 'Activo' : 'Inactivo'}
+                        className={
+                            row.original.isActive
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                        }
+                    />
                 )
             },
         },
@@ -263,15 +264,14 @@ const CustomersView = () => {
                                         <Td>{customer.phone || '-'}</Td>
                                         <Td>{customer.city || '-'}</Td>
                                         <Td>
-                                            {customer.isActive ? (
-                                                <Badge className="bg-green-100 text-green-800">
-                                                    Activo
-                                                </Badge>
-                                            ) : (
-                                                <Badge className="bg-gray-100 text-gray-800">
-                                                    Inactivo
-                                                </Badge>
-                                            )}
+                                            <Badge
+                                                content={customer.isActive ? 'Activo' : 'Inactivo'}
+                                                className={
+                                                    customer.isActive
+                                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                                                }
+                                            />
                                         </Td>
                                         <Td>
                                             <div className="flex gap-2">

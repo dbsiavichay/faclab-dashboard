@@ -1,12 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import CustomerService, { CustomerInput } from '@/services/CustomerService'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export function useCustomers() {
     return useQuery({
         queryKey: ['customers'],
         queryFn: async () => {
             const response = await CustomerService.getCustomers()
-            return response.data.data
+            return response.data
         },
     })
 }

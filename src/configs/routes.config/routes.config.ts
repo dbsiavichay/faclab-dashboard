@@ -52,6 +52,22 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'inventory.warehouses',
+        path: '/warehouses',
+        component: lazy(() =>
+            import('@/views/inventory/WarehousesView')
+        ),
+        authority: [],
+    },
+    {
+        key: 'inventory.locations',
+        path: '/locations',
+        component: lazy(() =>
+            import('@/views/inventory/LocationsView')
+        ),
+        authority: [],
+    },
+    {
         key: 'sales.customers',
         path: '/customers',
         component: lazy(() =>

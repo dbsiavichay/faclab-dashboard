@@ -8,6 +8,7 @@ export interface Product {
     sku: string
     description?: string | null
     categoryId?: number | null
+    unitOfMeasureId?: number | null
 }
 
 export interface ProductInput {
@@ -15,6 +16,7 @@ export interface ProductInput {
     sku: string
     description?: string
     categoryId?: number
+    unitOfMeasureId?: number
     [key: string]: unknown
 }
 

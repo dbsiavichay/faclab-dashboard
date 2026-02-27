@@ -74,9 +74,7 @@ const ContactForm = ({
 
             toast.push(
                 <Notification
-                    title={
-                        isEdit ? 'Contacto actualizado' : 'Contacto creado'
-                    }
+                    title={isEdit ? 'Contacto actualizado' : 'Contacto creado'}
                     type="success"
                 >
                     {isEdit
@@ -121,7 +119,7 @@ const ContactForm = ({
                     {isEdit ? 'Editar Contacto' : 'Nuevo Contacto'}
                 </h5>
 
-                <form onSubmit={handleSubmit} className="flex-1">
+                <form className="flex-1" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         {/* Name */}
                         <div>
@@ -129,6 +127,7 @@ const ContactForm = ({
                                 Nombre <span className="text-red-500">*</span>
                             </label>
                             <Input
+                                required
                                 type="text"
                                 placeholder="Nombre del contacto"
                                 value={formData.name}
@@ -138,7 +137,6 @@ const ContactForm = ({
                                         name: e.target.value,
                                     })
                                 }
-                                required
                             />
                         </div>
 
@@ -202,11 +200,11 @@ const ContactForm = ({
                         <Button
                             type="button"
                             variant="plain"
-                            onClick={handleClose}
                             disabled={
                                 createContact.isPending ||
                                 updateContact.isPending
                             }
+                            onClick={handleClose}
                         >
                             Cancelar
                         </Button>

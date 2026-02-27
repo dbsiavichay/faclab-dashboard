@@ -10,7 +10,7 @@ export default function categoryFakeApi(server: Server, apiPrefix: string) {
     // GET /categories/:id - Obtener una categoría por ID
     server.get(`${apiPrefix}/categories/:id`, (schema, request) => {
         const { id } = request.params
-        const category = categoryData.find(item => item.id === parseInt(id))
+        const category = categoryData.find((item) => item.id === parseInt(id))
 
         if (category) {
             return category
@@ -27,8 +27,8 @@ export default function categoryFakeApi(server: Server, apiPrefix: string) {
     server.post(`${apiPrefix}/categories`, (schema, request) => {
         const attrs = JSON.parse(request.requestBody)
         const newCategory = {
-            id: Math.max(...categoryData.map(c => c.id)) + 1,
-            ...attrs
+            id: Math.max(...categoryData.map((c) => c.id)) + 1,
+            ...attrs,
         }
         categoryData.push(newCategory)
         return newCategory
@@ -38,12 +38,12 @@ export default function categoryFakeApi(server: Server, apiPrefix: string) {
     server.put(`${apiPrefix}/categories/:id`, (schema, request) => {
         const { id } = request.params
         const attrs = JSON.parse(request.requestBody)
-        const index = categoryData.findIndex(item => item.id === parseInt(id))
+        const index = categoryData.findIndex((item) => item.id === parseInt(id))
 
         if (index !== -1) {
             categoryData[index] = {
                 ...categoryData[index],
-                ...attrs
+                ...attrs,
             }
             return categoryData[index]
         }
@@ -58,7 +58,7 @@ export default function categoryFakeApi(server: Server, apiPrefix: string) {
     // DELETE /categories/:id - Eliminar categoría
     server.delete(`${apiPrefix}/categories/:id`, (schema, request) => {
         const { id } = request.params
-        const index = categoryData.findIndex(item => item.id === parseInt(id))
+        const index = categoryData.findIndex((item) => item.id === parseInt(id))
 
         if (index !== -1) {
             categoryData.splice(index, 1)

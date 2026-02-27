@@ -24,13 +24,13 @@ export interface CategoryConfig {
 
 class CategoryService {
     private config: CategoryConfig = {
-        host: ''
+        host: '',
     }
 
     constructor() {
         this.config.host = appConfig.enableMock
             ? appConfig.apiPrefix
-            : (appConfig.inventoryApiHost || '')
+            : appConfig.inventoryApiHost || ''
     }
 
     /**
@@ -48,7 +48,7 @@ class CategoryService {
     async getCategories() {
         return ApiService.fetchData<Category[]>({
             url: `${this.config.host}/categories`,
-            method: 'get'
+            method: 'get',
         })
     }
 
@@ -59,7 +59,7 @@ class CategoryService {
     async getCategoryById(id: number) {
         return ApiService.fetchData<Category>({
             url: `${this.config.host}/categories/${id}`,
-            method: 'get'
+            method: 'get',
         })
     }
 
@@ -71,7 +71,7 @@ class CategoryService {
         return ApiService.fetchData<Category>({
             url: `${this.config.host}/categories`,
             method: 'post',
-            data: category
+            data: category,
         })
     }
 
@@ -84,7 +84,7 @@ class CategoryService {
         return ApiService.fetchData<Category>({
             url: `${this.config.host}/categories/${id}`,
             method: 'put',
-            data: category
+            data: category,
         })
     }
 
@@ -95,7 +95,7 @@ class CategoryService {
     async deleteCategory(id: number) {
         return ApiService.fetchData({
             url: `${this.config.host}/categories/${id}`,
-            method: 'delete'
+            method: 'delete',
         })
     }
 }

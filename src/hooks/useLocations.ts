@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import LocationService, { LocationInput } from '@/services/LocationService'
 
-export function useLocations(params?: { warehouseId?: number; isActive?: boolean }) {
+export function useLocations(params?: {
+    warehouseId?: number
+    isActive?: boolean
+}) {
     return useQuery({
         queryKey: ['locations', params],
         queryFn: async () => {
@@ -38,10 +41,17 @@ export function useUpdateLocation() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Partial<LocationInput> }) =>
-            LocationService.updateLocation(id, data),
+        mutationFn: ({
+            id,
+            data,
+        }: {
+            id: number
+            data: Partial<LocationInput>
+        }) => LocationService.updateLocation(id, data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['locations', variables.id] })
+            queryClient.invalidateQueries({
+                queryKey: ['locations', variables.id],
+            })
             queryClient.invalidateQueries({ queryKey: ['locations'] })
         },
     })

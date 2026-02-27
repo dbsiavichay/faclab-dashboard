@@ -112,10 +112,7 @@ export default function customerFakeApi(server: Server) {
         }
 
         // Check if taxId is being changed and already exists
-        if (
-            attrs.taxId &&
-            attrs.taxId !== customerData[customerIndex].taxId
-        ) {
+        if (attrs.taxId && attrs.taxId !== customerData[customerIndex].taxId) {
             const existingCustomer = customerData.find(
                 (c) => c.taxId === attrs.taxId && c.id !== id
             )

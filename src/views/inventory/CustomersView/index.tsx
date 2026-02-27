@@ -265,7 +265,11 @@ const CustomersView = () => {
                                         <Td>{customer.city || '-'}</Td>
                                         <Td>
                                             <Badge
-                                                content={customer.isActive ? 'Activo' : 'Inactivo'}
+                                                content={
+                                                    customer.isActive
+                                                        ? 'Activo'
+                                                        : 'Inactivo'
+                                                }
                                                 className={
                                                     customer.isActive
                                                         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
@@ -322,8 +326,8 @@ const CustomersView = () => {
             {/* Form Modal */}
             <CustomerForm
                 open={formOpen}
-                onClose={handleCloseForm}
                 customer={selectedCustomer}
+                onClose={handleCloseForm}
             />
 
             {/* Delete Confirmation Dialog */}
@@ -334,8 +338,8 @@ const CustomersView = () => {
                 <h5 className="mb-4">Confirmar eliminación</h5>
                 <p className="mb-6">
                     ¿Está seguro que desea eliminar el cliente{' '}
-                    <strong>{customerToDelete?.name}</strong>? Esta acción no
-                    se puede deshacer.
+                    <strong>{customerToDelete?.name}</strong>? Esta acción no se
+                    puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
@@ -346,8 +350,8 @@ const CustomersView = () => {
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={handleDeleteConfirm}
                         loading={deleteCustomer.isPending}
+                        onClick={handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

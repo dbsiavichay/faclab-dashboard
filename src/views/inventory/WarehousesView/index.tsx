@@ -13,7 +13,8 @@ import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
 const WarehousesView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
+    const [selectedWarehouse, setSelectedWarehouse] =
+        useState<Warehouse | null>(null)
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
         warehouse: Warehouse | null
@@ -48,9 +49,10 @@ const WarehousesView = () => {
                 )
                 setDeleteDialog({ open: false, warehouse: null })
             } catch (error: any) {
-                const errorMessage = error.response?.data?.detail
-                    || error.response?.data?.message
-                    || 'Error al eliminar la bodega'
+                const errorMessage =
+                    error.response?.data?.detail ||
+                    error.response?.data?.message ||
+                    'Error al eliminar la bodega'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -81,7 +83,9 @@ const WarehousesView = () => {
             accessorKey: 'name',
             cell: (props) => {
                 const { row } = props
-                return <span className="font-semibold">{row.original.name}</span>
+                return (
+                    <span className="font-semibold">{row.original.name}</span>
+                )
             },
         },
         {
@@ -181,9 +185,7 @@ const WarehousesView = () => {
                 <div className="p-4">
                     <div className="flex justify-between items-center mb-4">
                         <div>
-                            <h4 className="text-lg font-semibold">
-                                Bodegas
-                            </h4>
+                            <h4 className="text-lg font-semibold">Bodegas</h4>
                             <p className="text-sm text-gray-500 mt-1">
                                 Gestiona las bodegas de almacenamiento
                             </p>
@@ -208,13 +210,15 @@ const WarehousesView = () => {
 
             <WarehouseForm
                 open={isFormOpen}
-                onClose={handleFormClose}
                 warehouse={selectedWarehouse}
+                onClose={handleFormClose}
             />
 
             <Dialog
                 isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, warehouse: null })}
+                onClose={() =>
+                    setDeleteDialog({ open: false, warehouse: null })
+                }
                 onRequestClose={() =>
                     setDeleteDialog({ open: false, warehouse: null })
                 }
@@ -222,23 +226,26 @@ const WarehousesView = () => {
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
                     ¿Estás seguro de que deseas eliminar la bodega{' '}
-                    <strong>{deleteDialog.warehouse?.name} ({deleteDialog.warehouse?.code})</strong>?
-                    Esta acción no se puede deshacer.
+                    <strong>
+                        {deleteDialog.warehouse?.name} (
+                        {deleteDialog.warehouse?.code})
+                    </strong>
+                    ? Esta acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
+                        disabled={deleteWarehouse.isPending}
                         onClick={() =>
                             setDeleteDialog({ open: false, warehouse: null })
                         }
-                        disabled={deleteWarehouse.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={handleDeleteConfirm}
                         loading={deleteWarehouse.isPending}
+                        onClick={handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

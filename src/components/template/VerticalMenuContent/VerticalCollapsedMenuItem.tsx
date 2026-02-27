@@ -55,7 +55,9 @@ const DefaultItem = ({ nav, onLinkClick, userAuthority }: DefaultItemProps) => {
                                 <Link
                                     className="h-full w-full flex items-center"
                                     to={subNav.path}
-                                    target={subNav.isExternalLink ? '_blank' :  ''}
+                                    target={
+                                        subNav.isExternalLink ? '_blank' : ''
+                                    }
                                     onClick={() =>
                                         onLinkClick?.({
                                             key: subNav.key,
@@ -119,7 +121,9 @@ const CollapsedItem = ({
                                 <Link
                                     className="h-full w-full flex items-center"
                                     to={subNav.path}
-                                    target={subNav.isExternalLink ? '_blank' :  ''}
+                                    target={
+                                        subNav.isExternalLink ? '_blank' : ''
+                                    }
                                     onClick={() =>
                                         onLinkClick?.({
                                             key: subNav.key,

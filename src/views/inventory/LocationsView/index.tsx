@@ -21,7 +21,9 @@ const LOCATION_TYPE_LABELS: Record<string, string> = {
 
 const LocationsView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+    const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+        null
+    )
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
         location: Location | null
@@ -59,9 +61,10 @@ const LocationsView = () => {
                 )
                 setDeleteDialog({ open: false, location: null })
             } catch (error: any) {
-                const errorMessage = error.response?.data?.detail
-                    || error.response?.data?.message
-                    || 'Error al eliminar la ubicación'
+                const errorMessage =
+                    error.response?.data?.detail ||
+                    error.response?.data?.message ||
+                    'Error al eliminar la ubicación'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -92,7 +95,9 @@ const LocationsView = () => {
             accessorKey: 'name',
             cell: (props) => {
                 const { row } = props
-                return <span className="font-semibold">{row.original.name}</span>
+                return (
+                    <span className="font-semibold">{row.original.name}</span>
+                )
             },
         },
         {
@@ -126,7 +131,10 @@ const LocationsView = () => {
                 const { row } = props
                 return (
                     <Badge
-                        content={LOCATION_TYPE_LABELS[row.original.type] || row.original.type}
+                        content={
+                            LOCATION_TYPE_LABELS[row.original.type] ||
+                            row.original.type
+                        }
                         className="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
                     />
                 )
@@ -139,7 +147,9 @@ const LocationsView = () => {
                 const { row } = props
                 return (
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.capacity != null ? row.original.capacity : '-'}
+                        {row.original.capacity != null
+                            ? row.original.capacity
+                            : '-'}
                     </span>
                 )
             },
@@ -219,8 +229,8 @@ const LocationsView = () => {
 
             <LocationForm
                 open={isFormOpen}
-                onClose={handleFormClose}
                 location={selectedLocation}
+                onClose={handleFormClose}
             />
 
             <Dialog
@@ -233,23 +243,26 @@ const LocationsView = () => {
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
                     ¿Estás seguro de que deseas eliminar la ubicación{' '}
-                    <strong>{deleteDialog.location?.name} ({deleteDialog.location?.code})</strong>?
-                    Esta acción no se puede deshacer.
+                    <strong>
+                        {deleteDialog.location?.name} (
+                        {deleteDialog.location?.code})
+                    </strong>
+                    ? Esta acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
+                        disabled={deleteLocation.isPending}
                         onClick={() =>
                             setDeleteDialog({ open: false, location: null })
                         }
-                        disabled={deleteLocation.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={handleDeleteConfirm}
                         loading={deleteLocation.isPending}
+                        onClick={handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

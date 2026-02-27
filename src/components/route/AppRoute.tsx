@@ -18,9 +18,7 @@ const AppRoute = <T extends Record<string, unknown>>({
     const location = useLocation()
 
     const layoutType = useThemeStore((state) => state.layout.type)
-    const previousLayout = useThemeStore(
-        (state) => state.layout.previousType
-    )
+    const previousLayout = useThemeStore((state) => state.layout.previousType)
     const setLayout = useThemeStore((state) => state.setLayout)
     const setPreviousLayout = useThemeStore((state) => state.setPreviousLayout)
     const setCurrentRouteKey = useBaseStore((state) => state.setCurrentRouteKey)
@@ -37,7 +35,15 @@ const AppRoute = <T extends Record<string, unknown>>({
             setLayout(previousLayout)
             setPreviousLayout('')
         }
-    }, [layoutType, previousLayout, props.layout, routeKey, setCurrentRouteKey, setLayout, setPreviousLayout])
+    }, [
+        layoutType,
+        previousLayout,
+        props.layout,
+        routeKey,
+        setCurrentRouteKey,
+        setLayout,
+        setPreviousLayout,
+    ])
 
     useEffect(() => {
         handleLayoutChange()

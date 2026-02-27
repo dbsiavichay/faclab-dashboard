@@ -35,7 +35,7 @@ class WarehouseService {
     constructor() {
         this.host = appConfig.enableMock
             ? appConfig.apiPrefix
-            : (appConfig.inventoryApiHost || '')
+            : appConfig.inventoryApiHost || ''
     }
 
     async getWarehouses(params?: { isActive?: boolean }) {

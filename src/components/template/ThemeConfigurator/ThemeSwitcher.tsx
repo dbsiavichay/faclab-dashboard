@@ -55,9 +55,7 @@ const ColorBadge = ({
     className?: string
     themeColor: string
 }) => {
-    const primaryColorLevel = useThemeStore(
-        (state) => state.primaryColorLevel
-    )
+    const primaryColorLevel = useThemeStore((state) => state.primaryColorLevel)
 
     return (
         <Badge
@@ -111,11 +109,11 @@ const CustomControl = ({ children, ...props }: ControlProps<ColorList>) => {
 
 const ThemeSwitcher = () => {
     const themeColor = useThemeStore((state) => state.themeColor)
-    const primaryColorLevel = useThemeStore(
-        (state) => state.primaryColorLevel
-    )
+    const primaryColorLevel = useThemeStore((state) => state.primaryColorLevel)
     const setThemeColor = useThemeStore((state) => state.setThemeColor)
-    const setThemeColorLevel = useThemeStore((state) => state.setThemeColorLevel)
+    const setThemeColorLevel = useThemeStore(
+        (state) => state.setThemeColorLevel
+    )
 
     const onThemeColorChange = ({ value }: ColorList) => {
         setThemeColor(value)

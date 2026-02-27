@@ -27,15 +27,11 @@ const sideNavCollapseStyle = {
 
 const SideNav = () => {
     const themeColor = useThemeStore((state) => state.themeColor)
-    const primaryColorLevel = useThemeStore(
-        (state) => state.primaryColorLevel
-    )
+    const primaryColorLevel = useThemeStore((state) => state.primaryColorLevel)
     const navMode = useThemeStore((state) => state.navMode)
     const mode = useThemeStore((state) => state.mode)
     const direction = useThemeStore((state) => state.direction)
-    const currentRouteKey = useBaseStore(
-        (state) => state.currentRouteKey
-    )
+    const currentRouteKey = useBaseStore((state) => state.currentRouteKey)
     const sideNavCollapse = useThemeStore(
         (state) => state.layout.sideNavCollapse
     )

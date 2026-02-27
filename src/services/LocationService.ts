@@ -29,7 +29,7 @@ class LocationService {
     constructor() {
         this.host = appConfig.enableMock
             ? appConfig.apiPrefix
-            : (appConfig.inventoryApiHost || '')
+            : appConfig.inventoryApiHost || ''
     }
 
     async getLocations(params?: { warehouseId?: number; isActive?: boolean }) {

@@ -7,7 +7,7 @@ import {
     HiOutlineUserGroup,
     HiOutlineScale,
     HiOutlineOfficeBuilding,
-    HiOutlineLocationMarker
+    HiOutlineLocationMarker,
 } from 'react-icons/hi'
 
 export type NavigationIcons = Record<string, JSX.Element>

@@ -8,7 +8,9 @@ const _SideNavToggle = ({ className }: CommonProps) => {
     const sideNavCollapse = useThemeStore(
         (state) => state.layout.sideNavCollapse
     )
-    const setSideNavCollapse = useThemeStore((state) => state.setSideNavCollapse)
+    const setSideNavCollapse = useThemeStore(
+        (state) => state.setSideNavCollapse
+    )
 
     const { larger } = useResponsive()
 

@@ -97,9 +97,7 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
 
             toast.push(
                 <Notification
-                    title={
-                        isEdit ? 'Cliente actualizado' : 'Cliente creado'
-                    }
+                    title={isEdit ? 'Cliente actualizado' : 'Cliente creado'}
                     type="success"
                 >
                     {isEdit
@@ -136,16 +134,19 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
     return (
         <Dialog
             isOpen={open}
+            width={800}
             onClose={handleClose}
             onRequestClose={handleClose}
-            width={800}
         >
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">
                     {isEdit ? 'Editar Cliente' : 'Nuevo Cliente'}
                 </h5>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+                <form
+                    className="flex-1 overflow-y-auto"
+                    onSubmit={handleSubmit}
+                >
                     <div className="space-y-4">
                         {/* Basic Information */}
                         <div>
@@ -160,6 +161,7 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
+                                        required
                                         type="text"
                                         placeholder="Nombre del cliente"
                                         value={formData.name}
@@ -169,7 +171,6 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                                 name: e.target.value,
                                             })
                                         }
-                                        required
                                     />
                                 </div>
 
@@ -180,6 +181,7 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                         <span className="text-red-500">*</span>
                                     </label>
                                     <Input
+                                        required
                                         type="text"
                                         placeholder="RUC, Cédula, Pasaporte..."
                                         value={formData.taxId}
@@ -189,7 +191,6 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                                 taxId: e.target.value,
                                             })
                                         }
-                                        required
                                     />
                                 </div>
 
@@ -208,7 +209,8 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                         onChange={(option) =>
                                             setFormData({
                                                 ...formData,
-                                                taxType: option?.value as TaxType,
+                                                taxType:
+                                                    option?.value as TaxType,
                                             })
                                         }
                                     />
@@ -355,6 +357,8 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                         type="number"
                                         placeholder="0.00"
                                         value={formData.creditLimit || ''}
+                                        min="0"
+                                        step="0.01"
                                         onChange={(e) =>
                                             setFormData({
                                                 ...formData,
@@ -363,8 +367,6 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                                     : undefined,
                                             })
                                         }
-                                        min="0"
-                                        step="0.01"
                                     />
                                 </div>
 
@@ -377,6 +379,7 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                         type="number"
                                         placeholder="30"
                                         value={formData.paymentTerms || ''}
+                                        min="0"
                                         onChange={(e) =>
                                             setFormData({
                                                 ...formData,
@@ -385,7 +388,6 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                                                     : undefined,
                                             })
                                         }
-                                        min="0"
                                     />
                                 </div>
                             </div>
@@ -418,11 +420,11 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                         <Button
                             type="button"
                             variant="plain"
-                            onClick={handleClose}
                             disabled={
                                 createCustomer.isPending ||
                                 updateCustomer.isPending
                             }
+                            onClick={handleClose}
                         >
                             Cancelar
                         </Button>

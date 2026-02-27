@@ -8,7 +8,11 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateLocation, useUpdateLocation } from '@/hooks/useLocations'
 import { useWarehouses } from '@/hooks/useWarehouses'
-import type { Location, LocationInput, LocationType } from '@/services/LocationService'
+import type {
+    Location,
+    LocationInput,
+    LocationType,
+} from '@/services/LocationService'
 
 interface LocationFormProps {
     open: boolean
@@ -96,22 +100,24 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
 
             toast.push(
                 <Notification
-                    title={isEdit ? 'Ubicación actualizada' : 'Ubicación creada'}
+                    title={
+                        isEdit ? 'Ubicación actualizada' : 'Ubicación creada'
+                    }
                     type="success"
                 >
                     {isEdit
                         ? 'La ubicación se actualizó correctamente'
-                        : 'La ubicación se creó correctamente'
-                    }
+                        : 'La ubicación se creó correctamente'}
                 </Notification>,
                 { placement: 'top-center' }
             )
 
             onClose()
         } catch (error: any) {
-            const errorMessage = error.response?.data?.detail
-                || error.message
-                || 'Error al guardar la ubicación'
+            const errorMessage =
+                error.response?.data?.detail ||
+                error.message ||
+                'Error al guardar la ubicación'
 
             toast.push(
                 <Notification title="Error" type="danger">
@@ -141,7 +147,7 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
                     {isEdit ? 'Editar Ubicación' : 'Nueva Ubicación'}
                 </h5>
 
-                <form onSubmit={handleSubmit} className="flex-1">
+                <form className="flex-1" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">
@@ -149,9 +155,12 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
                             </label>
                             <Select
                                 placeholder="Seleccione una bodega"
-                                value={warehouseOptions.find(
-                                    (opt) => opt.value === formData.warehouseId
-                                ) || null}
+                                value={
+                                    warehouseOptions.find(
+                                        (opt) =>
+                                            opt.value === formData.warehouseId
+                                    ) || null
+                                }
                                 options={warehouseOptions}
                                 onChange={(option) =>
                                     setFormData({
@@ -165,31 +174,39 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    Nombre <span className="text-red-500">*</span>
+                                    Nombre{' '}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <Input
+                                    required
                                     type="text"
                                     placeholder="Ej: Estante A1"
                                     value={formData.name}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, name: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            name: e.target.value,
+                                        })
                                     }
-                                    required
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    Código <span className="text-red-500">*</span>
+                                    Código{' '}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <Input
+                                    required
                                     type="text"
                                     placeholder="Ej: EST-A1"
                                     value={formData.code}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, code: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            code: e.target.value,
+                                        })
                                     }
-                                    required
                                 />
                             </div>
                         </div>
@@ -201,14 +218,18 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
                                 </label>
                                 <Select
                                     placeholder="Seleccione un tipo"
-                                    value={LOCATION_TYPES.find(
-                                        (opt) => opt.value === formData.type
-                                    ) || null}
+                                    value={
+                                        LOCATION_TYPES.find(
+                                            (opt) => opt.value === formData.type
+                                        ) || null
+                                    }
                                     options={LOCATION_TYPES}
                                     onChange={(option) =>
                                         setFormData({
                                             ...formData,
-                                            type: (option?.value as LocationType) || 'STORAGE',
+                                            type:
+                                                (option?.value as LocationType) ||
+                                                'STORAGE',
                                         })
                                     }
                                 />
@@ -225,7 +246,9 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
-                                            capacity: e.target.value ? Number(e.target.value) : null,
+                                            capacity: e.target.value
+                                                ? Number(e.target.value)
+                                                : null,
                                         })
                                     }
                                 />
@@ -236,10 +259,15 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
                             <Switcher
                                 checked={formData.isActive}
                                 onChange={(checked) =>
-                                    setFormData({ ...formData, isActive: !checked })
+                                    setFormData({
+                                        ...formData,
+                                        isActive: !checked,
+                                    })
                                 }
                             />
-                            <label className="text-sm font-medium">Activo</label>
+                            <label className="text-sm font-medium">
+                                Activo
+                            </label>
                         </div>
                     </div>
 
@@ -247,8 +275,8 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
                         <Button
                             type="button"
                             variant="plain"
-                            onClick={handleClose}
                             disabled={isPending}
+                            onClick={handleClose}
                         >
                             Cancelar
                         </Button>

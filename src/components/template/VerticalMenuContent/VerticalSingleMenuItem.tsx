@@ -52,7 +52,7 @@ const DefaultItem = (props: DefaultItemProps) => {
                 <Link
                     to={nav.path}
                     className="flex items-center h-full w-full"
-                    target={nav.isExternalLink ? '_blank' :  ''}
+                    target={nav.isExternalLink ? '_blank' : ''}
                     onClick={() =>
                         onLinkClick?.({
                             key: nav.key,

@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import InventoryService, { ProductInput } from '@/services/InventoryService'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 // GET /products - Obtener todos los productos
 export function useProducts() {
@@ -7,7 +7,7 @@ export function useProducts() {
         queryKey: ['products'],
         queryFn: async () => {
             const response = await InventoryService.getProducts()
-            return response.data.data // API retorna { data: Product[] }
+            return response.data
         },
     })
 }

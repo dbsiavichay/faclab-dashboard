@@ -6,51 +6,62 @@ import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useUnitsOfMeasure, useDeleteUnitOfMeasure } from '@/hooks/useUnitsOfMeasure'
-import type { UnitOfMeasure } from '@/services/UnitOfMeasureService'
-import UnitOfMeasureForm from './UnitOfMeasureForm'
+import { useLocations, useDeleteLocation } from '@/hooks/useLocations'
+import { useWarehouses } from '@/hooks/useWarehouses'
+import type { Location } from '@/services/LocationService'
+import LocationForm from './LocationForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
-const UnitsOfMeasureView = () => {
+const LOCATION_TYPE_LABELS: Record<string, string> = {
+    STORAGE: 'Almacenamiento',
+    RECEIVING: 'Recepción',
+    SHIPPING: 'Despacho',
+    RETURN: 'Devolución',
+}
+
+const LocationsView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedUnit, setSelectedUnit] = useState<UnitOfMeasure | null>(null)
+    const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
-        unit: UnitOfMeasure | null
-    }>({ open: false, unit: null })
+        location: Location | null
+    }>({ open: false, location: null })
 
-    const { data: units = [], isLoading } = useUnitsOfMeasure()
-    const deleteUnit = useDeleteUnitOfMeasure()
+    const { data: locations = [], isLoading } = useLocations()
+    const { data: warehouses = [] } = useWarehouses()
+    const deleteLocation = useDeleteLocation()
+
+    const warehouseMap = new Map(warehouses.map((w) => [w.id, w.name]))
 
     const handleCreate = () => {
-        setSelectedUnit(null)
+        setSelectedLocation(null)
         setIsFormOpen(true)
     }
 
-    const handleEdit = (unit: UnitOfMeasure) => {
-        setSelectedUnit(unit)
+    const handleEdit = (location: Location) => {
+        setSelectedLocation(location)
         setIsFormOpen(true)
     }
 
-    const handleDeleteClick = (unit: UnitOfMeasure) => {
-        setDeleteDialog({ open: true, unit })
+    const handleDeleteClick = (location: Location) => {
+        setDeleteDialog({ open: true, location })
     }
 
     const handleDeleteConfirm = async () => {
-        if (deleteDialog.unit) {
+        if (deleteDialog.location) {
             try {
-                await deleteUnit.mutateAsync(deleteDialog.unit.id)
+                await deleteLocation.mutateAsync(deleteDialog.location.id)
                 toast.push(
-                    <Notification title="Unidad eliminada" type="success">
-                        La unidad de medida se eliminó correctamente
+                    <Notification title="Ubicación eliminada" type="success">
+                        La ubicación se eliminó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, unit: null })
+                setDeleteDialog({ open: false, location: null })
             } catch (error: any) {
                 const errorMessage = error.response?.data?.detail
                     || error.response?.data?.message
-                    || 'Error al eliminar la unidad de medida'
+                    || 'Error al eliminar la ubicación'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -64,10 +75,10 @@ const UnitsOfMeasureView = () => {
 
     const handleFormClose = () => {
         setIsFormOpen(false)
-        setSelectedUnit(null)
+        setSelectedLocation(null)
     }
 
-    const columns: ColumnDef<UnitOfMeasure>[] = [
+    const columns: ColumnDef<Location>[] = [
         {
             header: 'ID',
             accessorKey: 'id',
@@ -85,25 +96,50 @@ const UnitsOfMeasureView = () => {
             },
         },
         {
-            header: 'Símbolo',
-            accessorKey: 'symbol',
+            header: 'Código',
+            accessorKey: 'code',
             cell: (props) => {
                 const { row } = props
                 return (
                     <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
-                        {row.original.symbol}
+                        {row.original.code}
                     </span>
                 )
             },
         },
         {
-            header: 'Descripción',
-            accessorKey: 'description',
+            header: 'Bodega',
+            accessorKey: 'warehouseId',
+            cell: (props) => {
+                const { row } = props
+                return (
+                    <span className="text-sm">
+                        {warehouseMap.get(row.original.warehouseId) || '-'}
+                    </span>
+                )
+            },
+        },
+        {
+            header: 'Tipo',
+            accessorKey: 'type',
+            cell: (props) => {
+                const { row } = props
+                return (
+                    <Badge
+                        content={LOCATION_TYPE_LABELS[row.original.type] || row.original.type}
+                        className="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
+                    />
+                )
+            },
+        },
+        {
+            header: 'Capacidad',
+            accessorKey: 'capacity',
             cell: (props) => {
                 const { row } = props
                 return (
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.description || '-'}
+                        {row.original.capacity != null ? row.original.capacity : '-'}
                     </span>
                 )
             },
@@ -157,10 +193,10 @@ const UnitsOfMeasureView = () => {
                     <div className="flex justify-between items-center mb-4">
                         <div>
                             <h4 className="text-lg font-semibold">
-                                Unidades de Medida
+                                Ubicaciones
                             </h4>
                             <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las unidades de medida de los productos
+                                Gestiona las ubicaciones dentro de las bodegas
                             </p>
                         </div>
                         <Button
@@ -169,51 +205,51 @@ const UnitsOfMeasureView = () => {
                             icon={<HiPlus />}
                             onClick={handleCreate}
                         >
-                            Nueva Unidad
+                            Nueva Ubicación
                         </Button>
                     </div>
 
                     <DataTable
                         columns={columns}
-                        data={units}
+                        data={locations}
                         loading={isLoading}
                     />
                 </div>
             </Card>
 
-            <UnitOfMeasureForm
+            <LocationForm
                 open={isFormOpen}
                 onClose={handleFormClose}
-                unitOfMeasure={selectedUnit}
+                location={selectedLocation}
             />
 
             <Dialog
                 isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, unit: null })}
+                onClose={() => setDeleteDialog({ open: false, location: null })}
                 onRequestClose={() =>
-                    setDeleteDialog({ open: false, unit: null })
+                    setDeleteDialog({ open: false, location: null })
                 }
             >
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar la unidad{' '}
-                    <strong>{deleteDialog.unit?.name} ({deleteDialog.unit?.symbol})</strong>?
+                    ¿Estás seguro de que deseas eliminar la ubicación{' '}
+                    <strong>{deleteDialog.location?.name} ({deleteDialog.location?.code})</strong>?
                     Esta acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
                         onClick={() =>
-                            setDeleteDialog({ open: false, unit: null })
+                            setDeleteDialog({ open: false, location: null })
                         }
-                        disabled={deleteUnit.isPending}
+                        disabled={deleteLocation.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
                         onClick={handleDeleteConfirm}
-                        loading={deleteUnit.isPending}
+                        loading={deleteLocation.isPending}
                     >
                         Eliminar
                     </Button>
@@ -223,4 +259,4 @@ const UnitsOfMeasureView = () => {
     )
 }
 
-export default UnitsOfMeasureView
+export default LocationsView

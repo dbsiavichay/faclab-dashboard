@@ -123,15 +123,14 @@ const CustomerDetailView = () => {
                         onClick={() => navigate('/customers')}
                     />
                     <h3>{customer.name}</h3>
-                    {customer.isActive ? (
-                        <Badge className="bg-green-100 text-green-800">
-                            Activo
-                        </Badge>
-                    ) : (
-                        <Badge className="bg-gray-100 text-gray-800">
-                            Inactivo
-                        </Badge>
-                    )}
+                    <Badge
+                        content={customer.isActive ? 'Activo' : 'Inactivo'}
+                        className={
+                            customer.isActive
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                        }
+                    />
                 </div>
             </div>
 

@@ -9,7 +9,7 @@ export function useCustomerContacts(customerId: number) {
         queryFn: async () => {
             const response =
                 await CustomerContactService.getCustomerContacts(customerId)
-            return response.data.data
+            return response.data
         },
         enabled: customerId > 0,
     })

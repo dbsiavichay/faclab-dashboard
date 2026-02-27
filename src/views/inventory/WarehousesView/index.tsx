@@ -6,51 +6,51 @@ import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useUnitsOfMeasure, useDeleteUnitOfMeasure } from '@/hooks/useUnitsOfMeasure'
-import type { UnitOfMeasure } from '@/services/UnitOfMeasureService'
-import UnitOfMeasureForm from './UnitOfMeasureForm'
+import { useWarehouses, useDeleteWarehouse } from '@/hooks/useWarehouses'
+import type { Warehouse } from '@/services/WarehouseService'
+import WarehouseForm from './WarehouseForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
-const UnitsOfMeasureView = () => {
+const WarehousesView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedUnit, setSelectedUnit] = useState<UnitOfMeasure | null>(null)
+    const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null)
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
-        unit: UnitOfMeasure | null
-    }>({ open: false, unit: null })
+        warehouse: Warehouse | null
+    }>({ open: false, warehouse: null })
 
-    const { data: units = [], isLoading } = useUnitsOfMeasure()
-    const deleteUnit = useDeleteUnitOfMeasure()
+    const { data: warehouses = [], isLoading } = useWarehouses()
+    const deleteWarehouse = useDeleteWarehouse()
 
     const handleCreate = () => {
-        setSelectedUnit(null)
+        setSelectedWarehouse(null)
         setIsFormOpen(true)
     }
 
-    const handleEdit = (unit: UnitOfMeasure) => {
-        setSelectedUnit(unit)
+    const handleEdit = (warehouse: Warehouse) => {
+        setSelectedWarehouse(warehouse)
         setIsFormOpen(true)
     }
 
-    const handleDeleteClick = (unit: UnitOfMeasure) => {
-        setDeleteDialog({ open: true, unit })
+    const handleDeleteClick = (warehouse: Warehouse) => {
+        setDeleteDialog({ open: true, warehouse })
     }
 
     const handleDeleteConfirm = async () => {
-        if (deleteDialog.unit) {
+        if (deleteDialog.warehouse) {
             try {
-                await deleteUnit.mutateAsync(deleteDialog.unit.id)
+                await deleteWarehouse.mutateAsync(deleteDialog.warehouse.id)
                 toast.push(
-                    <Notification title="Unidad eliminada" type="success">
-                        La unidad de medida se eliminó correctamente
+                    <Notification title="Bodega eliminada" type="success">
+                        La bodega se eliminó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, unit: null })
+                setDeleteDialog({ open: false, warehouse: null })
             } catch (error: any) {
                 const errorMessage = error.response?.data?.detail
                     || error.response?.data?.message
-                    || 'Error al eliminar la unidad de medida'
+                    || 'Error al eliminar la bodega'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -64,10 +64,10 @@ const UnitsOfMeasureView = () => {
 
     const handleFormClose = () => {
         setIsFormOpen(false)
-        setSelectedUnit(null)
+        setSelectedWarehouse(null)
     }
 
-    const columns: ColumnDef<UnitOfMeasure>[] = [
+    const columns: ColumnDef<Warehouse>[] = [
         {
             header: 'ID',
             accessorKey: 'id',
@@ -85,27 +85,52 @@ const UnitsOfMeasureView = () => {
             },
         },
         {
-            header: 'Símbolo',
-            accessorKey: 'symbol',
+            header: 'Código',
+            accessorKey: 'code',
             cell: (props) => {
                 const { row } = props
                 return (
                     <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
-                        {row.original.symbol}
+                        {row.original.code}
                     </span>
                 )
             },
         },
         {
-            header: 'Descripción',
-            accessorKey: 'description',
+            header: 'Ciudad',
+            accessorKey: 'city',
             cell: (props) => {
                 const { row } = props
                 return (
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.description || '-'}
+                        {row.original.city || '-'}
                     </span>
                 )
+            },
+        },
+        {
+            header: 'Responsable',
+            accessorKey: 'manager',
+            cell: (props) => {
+                const { row } = props
+                return (
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {row.original.manager || '-'}
+                    </span>
+                )
+            },
+        },
+        {
+            header: 'Por defecto',
+            accessorKey: 'isDefault',
+            cell: (props) => {
+                const { row } = props
+                return row.original.isDefault ? (
+                    <Badge
+                        content="Por defecto"
+                        className="bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"
+                    />
+                ) : null
             },
         },
         {
@@ -157,10 +182,10 @@ const UnitsOfMeasureView = () => {
                     <div className="flex justify-between items-center mb-4">
                         <div>
                             <h4 className="text-lg font-semibold">
-                                Unidades de Medida
+                                Bodegas
                             </h4>
                             <p className="text-sm text-gray-500 mt-1">
-                                Gestiona las unidades de medida de los productos
+                                Gestiona las bodegas de almacenamiento
                             </p>
                         </div>
                         <Button
@@ -169,51 +194,51 @@ const UnitsOfMeasureView = () => {
                             icon={<HiPlus />}
                             onClick={handleCreate}
                         >
-                            Nueva Unidad
+                            Nueva Bodega
                         </Button>
                     </div>
 
                     <DataTable
                         columns={columns}
-                        data={units}
+                        data={warehouses}
                         loading={isLoading}
                     />
                 </div>
             </Card>
 
-            <UnitOfMeasureForm
+            <WarehouseForm
                 open={isFormOpen}
                 onClose={handleFormClose}
-                unitOfMeasure={selectedUnit}
+                warehouse={selectedWarehouse}
             />
 
             <Dialog
                 isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, unit: null })}
+                onClose={() => setDeleteDialog({ open: false, warehouse: null })}
                 onRequestClose={() =>
-                    setDeleteDialog({ open: false, unit: null })
+                    setDeleteDialog({ open: false, warehouse: null })
                 }
             >
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar la unidad{' '}
-                    <strong>{deleteDialog.unit?.name} ({deleteDialog.unit?.symbol})</strong>?
+                    ¿Estás seguro de que deseas eliminar la bodega{' '}
+                    <strong>{deleteDialog.warehouse?.name} ({deleteDialog.warehouse?.code})</strong>?
                     Esta acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
                         onClick={() =>
-                            setDeleteDialog({ open: false, unit: null })
+                            setDeleteDialog({ open: false, warehouse: null })
                         }
-                        disabled={deleteUnit.isPending}
+                        disabled={deleteWarehouse.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
                         onClick={handleDeleteConfirm}
-                        loading={deleteUnit.isPending}
+                        loading={deleteWarehouse.isPending}
                     >
                         Eliminar
                     </Button>
@@ -223,4 +248,4 @@ const UnitsOfMeasureView = () => {
     )
 }
 
-export default UnitsOfMeasureView
+export default WarehousesView

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import StockService, { Stock, StockQueryParams } from '@/services/StockService'
+import StockService, { StockQueryParams } from '@/services/StockService'
 
 export function useStock(params?: StockQueryParams) {
     return useQuery({

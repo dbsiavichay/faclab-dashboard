@@ -12,7 +12,9 @@ import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
 const CategoriesView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+        null
+    )
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
         category: Category | null
@@ -47,9 +49,10 @@ const CategoriesView = () => {
                 )
                 setDeleteDialog({ open: false, category: null })
             } catch (error: any) {
-                const errorMessage = error.response?.data?.detail
-                    || error.response?.data?.message
-                    || 'Error al eliminar la categoría'
+                const errorMessage =
+                    error.response?.data?.detail ||
+                    error.response?.data?.message ||
+                    'Error al eliminar la categoría'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -80,7 +83,9 @@ const CategoriesView = () => {
             accessorKey: 'name',
             cell: (props) => {
                 const { row } = props
-                return <span className="font-semibold">{row.original.name}</span>
+                return (
+                    <span className="font-semibold">{row.original.name}</span>
+                )
             },
         },
         {
@@ -154,8 +159,8 @@ const CategoriesView = () => {
             {/* Form Modal */}
             <CategoryForm
                 open={isFormOpen}
-                onClose={handleFormClose}
                 category={selectedCategory}
+                onClose={handleFormClose}
             />
 
             {/* Delete Confirmation Dialog */}
@@ -169,23 +174,23 @@ const CategoriesView = () => {
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
                     ¿Estás seguro de que deseas eliminar la categoría{' '}
-                    <strong>{deleteDialog.category?.name}</strong>? Esta acción no
-                    se puede deshacer.
+                    <strong>{deleteDialog.category?.name}</strong>? Esta acción
+                    no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
+                        disabled={deleteCategory.isPending}
                         onClick={() =>
                             setDeleteDialog({ open: false, category: null })
                         }
-                        disabled={deleteCategory.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={handleDeleteConfirm}
                         loading={deleteCategory.isPending}
+                        onClick={handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

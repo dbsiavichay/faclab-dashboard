@@ -92,8 +92,7 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                 >
                     {isEdit
                         ? 'El producto se actualizó correctamente'
-                        : 'El producto se creó correctamente'
-                    }
+                        : 'El producto se creó correctamente'}
                 </Notification>,
                 {
                     placement: 'top-center',
@@ -102,9 +101,10 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
 
             onClose()
         } catch (error: any) {
-            const errorMessage = error.response?.data?.detail
-                || error.message
-                || 'Error al guardar el producto'
+            const errorMessage =
+                error.response?.data?.detail ||
+                error.message ||
+                'Error al guardar el producto'
 
             toast.push(
                 <Notification title="Error" type="danger">
@@ -136,7 +136,7 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                     {isEdit ? 'Editar Producto' : 'Nuevo Producto'}
                 </h5>
 
-                <form onSubmit={handleSubmit} className="flex-1">
+                <form className="flex-1" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         {/* Name */}
                         <div>
@@ -144,13 +144,16 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                                 Nombre <span className="text-red-500">*</span>
                             </label>
                             <Input
+                                required
                                 type="text"
                                 placeholder="Nombre del producto"
                                 value={formData.name}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, name: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        name: e.target.value,
+                                    })
                                 }
-                                required
                             />
                         </div>
 
@@ -160,13 +163,16 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                                 SKU <span className="text-red-500">*</span>
                             </label>
                             <Input
+                                required
                                 type="text"
                                 placeholder="SKU del producto"
                                 value={formData.sku}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, sku: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        sku: e.target.value,
+                                    })
                                 }
-                                required
                             />
                         </div>
 
@@ -179,13 +185,13 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                                 textArea
                                 placeholder="Descripción del producto"
                                 value={formData.description}
+                                style={{ minHeight: '80px' }}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
                                         description: e.target.value,
                                     })
                                 }
-                                style={{ minHeight: '80px' }}
                             />
                         </div>
 
@@ -197,13 +203,17 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                             <Select
                                 placeholder="Seleccione una categoría"
                                 value={categoryOptions.find(
-                                    (opt) => opt.value === (formData.categoryId || 0)
+                                    (opt) =>
+                                        opt.value === (formData.categoryId || 0)
                                 )}
                                 options={categoryOptions}
                                 onChange={(option) =>
                                     setFormData({
                                         ...formData,
-                                        categoryId: option?.value === 0 ? undefined : option?.value,
+                                        categoryId:
+                                            option?.value === 0
+                                                ? undefined
+                                                : option?.value,
                                     })
                                 }
                             />
@@ -220,18 +230,24 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                             <Select
                                 placeholder="Seleccione una unidad"
                                 value={unitOptions.find(
-                                    (opt) => opt.value === (formData.unitOfMeasureId || 0)
+                                    (opt) =>
+                                        opt.value ===
+                                        (formData.unitOfMeasureId || 0)
                                 )}
                                 options={unitOptions}
                                 onChange={(option) =>
                                     setFormData({
                                         ...formData,
-                                        unitOfMeasureId: option?.value === 0 ? undefined : option?.value,
+                                        unitOfMeasureId:
+                                            option?.value === 0
+                                                ? undefined
+                                                : option?.value,
                                     })
                                 }
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                Opcional: Seleccione la unidad de medida del producto
+                                Opcional: Seleccione la unidad de medida del
+                                producto
                             </p>
                         </div>
                     </div>
@@ -241,10 +257,11 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                         <Button
                             type="button"
                             variant="plain"
-                            onClick={handleClose}
                             disabled={
-                                createProduct.isPending || updateProduct.isPending
+                                createProduct.isPending ||
+                                updateProduct.isPending
                             }
+                            onClick={handleClose}
                         >
                             Cancelar
                         </Button>
@@ -252,7 +269,8 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                             type="submit"
                             variant="solid"
                             loading={
-                                createProduct.isPending || updateProduct.isPending
+                                createProduct.isPending ||
+                                updateProduct.isPending
                             }
                         >
                             {isEdit ? 'Actualizar' : 'Crear'}

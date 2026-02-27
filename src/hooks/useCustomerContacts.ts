@@ -7,8 +7,9 @@ export function useCustomerContacts(customerId: number) {
     return useQuery({
         queryKey: ['customerContacts', customerId],
         queryFn: async () => {
-            const response =
-                await CustomerContactService.getCustomerContacts(customerId)
+            const response = await CustomerContactService.getCustomerContacts(
+                customerId
+            )
             return response.data
         },
         enabled: customerId > 0,
@@ -19,8 +20,7 @@ export function useCustomerContact(id: number) {
     return useQuery({
         queryKey: ['customerContacts', 'detail', id],
         queryFn: async () => {
-            const response =
-                await CustomerContactService.getCustomerContact(id)
+            const response = await CustomerContactService.getCustomerContact(id)
             return response.data
         },
         enabled: id > 0,
@@ -38,11 +38,10 @@ export function useCreateCustomerContact() {
             customerId: number
             contact: CustomerContactInput
         }) => {
-            const response =
-                await CustomerContactService.createCustomerContact(
-                    customerId,
-                    contact
-                )
+            const response = await CustomerContactService.createCustomerContact(
+                customerId,
+                contact
+            )
             return response.data
         },
         onSuccess: (_, variables) => {
@@ -65,8 +64,10 @@ export function useUpdateCustomerContact() {
             id: number
             contact: CustomerContactInput
         }) => {
-            const response =
-                await CustomerContactService.updateCustomerContact(id, contact)
+            const response = await CustomerContactService.updateCustomerContact(
+                id,
+                contact
+            )
             return response.data
         },
         onSuccess: (data) => {

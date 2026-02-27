@@ -151,7 +151,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">Nuevo Movimiento</h5>
 
-                <form onSubmit={handleSubmit} className="flex-1">
+                <form className="flex-1" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         {/* Product ID */}
                         <div>
@@ -160,17 +160,18 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                                 <span className="text-red-500">*</span>
                             </label>
                             <Input
+                                required
                                 type="number"
                                 placeholder="ID del producto"
                                 value={formData.productId || ''}
+                                min="1"
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        productId: parseInt(e.target.value) || 0,
+                                        productId:
+                                            parseInt(e.target.value) || 0,
                                     })
                                 }
-                                required
-                                min="1"
                             />
                         </div>
 
@@ -199,6 +200,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                                 Cantidad <span className="text-red-500">*</span>
                             </label>
                             <Input
+                                required
                                 type="number"
                                 placeholder={
                                     formData.type === 'in'
@@ -207,7 +209,6 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                                 }
                                 value={formData.quantity || ''}
                                 onChange={handleQuantityChange}
-                                required
                             />
                             <p className="text-xs text-gray-500 mt-1">
                                 {formData.type === 'in'
@@ -225,13 +226,13 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                                 textArea
                                 placeholder="Motivo del movimiento (opcional)"
                                 value={formData.reason}
+                                style={{ minHeight: '80px' }}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
                                         reason: e.target.value,
                                     })
                                 }
-                                style={{ minHeight: '80px' }}
                             />
                         </div>
 
@@ -262,8 +263,8 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                         <Button
                             type="button"
                             variant="plain"
-                            onClick={handleClose}
                             disabled={createMovement.isPending}
+                            onClick={handleClose}
                         >
                             Cancelar
                         </Button>

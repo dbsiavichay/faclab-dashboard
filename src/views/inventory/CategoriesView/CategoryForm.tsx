@@ -53,23 +53,27 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
 
             toast.push(
                 <Notification
-                    title={isEditMode ? 'Categoría actualizada' : 'Categoría creada'}
+                    title={
+                        isEditMode
+                            ? 'Categoría actualizada'
+                            : 'Categoría creada'
+                    }
                     type="success"
                 >
                     {isEditMode
                         ? 'La categoría se actualizó correctamente'
-                        : 'La categoría se creó correctamente'
-                    }
+                        : 'La categoría se creó correctamente'}
                 </Notification>,
                 { placement: 'top-center' }
             )
 
             onClose()
         } catch (error: any) {
-            const errorMessage = error.response?.data?.detail
-                || error.response?.data?.message
-                || error.message
-                || 'Error al guardar la categoría'
+            const errorMessage =
+                error.response?.data?.detail ||
+                error.response?.data?.message ||
+                error.message ||
+                'Error al guardar la categoría'
 
             toast.push(
                 <Notification title="Error" type="danger">
@@ -85,10 +89,10 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
     return (
         <Dialog
             isOpen={open}
-            onClose={onClose}
-            onRequestClose={onClose}
             shouldCloseOnEsc={!isPending}
             shouldCloseOnOverlayClick={!isPending}
+            onClose={onClose}
+            onRequestClose={onClose}
         >
             <h5 className="mb-4">
                 {isEditMode ? 'Editar Categoría' : 'Nueva Categoría'}
@@ -102,13 +106,16 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
                             Nombre <span className="text-red-500">*</span>
                         </label>
                         <Input
+                            required
                             placeholder="Nombre de la categoría"
                             value={formData.name}
-                            onChange={(e) =>
-                                setFormData({ ...formData, name: e.target.value })
-                            }
-                            required
                             disabled={isPending}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    name: e.target.value,
+                                })
+                            }
                         />
                     </div>
 
@@ -121,14 +128,14 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
                             textArea
                             placeholder="Descripción de la categoría"
                             value={formData.description}
+                            style={{ minHeight: '80px' }}
+                            disabled={isPending}
                             onChange={(e) =>
                                 setFormData({
                                     ...formData,
                                     description: e.target.value,
                                 })
                             }
-                            style={{ minHeight: '80px' }}
-                            disabled={isPending}
                         />
                     </div>
                 </div>
@@ -137,8 +144,8 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
                     <Button
                         type="button"
                         variant="plain"
-                        onClick={onClose}
                         disabled={isPending}
+                        onClick={onClose}
                     >
                         Cancelar
                     </Button>

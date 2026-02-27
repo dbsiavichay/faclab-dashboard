@@ -83,17 +83,17 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                 >
                     {isEdit
                         ? 'La bodega se actualizó correctamente'
-                        : 'La bodega se creó correctamente'
-                    }
+                        : 'La bodega se creó correctamente'}
                 </Notification>,
                 { placement: 'top-center' }
             )
 
             onClose()
         } catch (error: any) {
-            const errorMessage = error.response?.data?.detail
-                || error.message
-                || 'Error al guardar la bodega'
+            const errorMessage =
+                error.response?.data?.detail ||
+                error.message ||
+                'Error al guardar la bodega'
 
             toast.push(
                 <Notification title="Error" type="danger">
@@ -115,45 +115,53 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
     return (
         <Dialog
             isOpen={open}
+            width={600}
             onClose={handleClose}
             onRequestClose={handleClose}
-            width={600}
         >
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">
                     {isEdit ? 'Editar Bodega' : 'Nueva Bodega'}
                 </h5>
 
-                <form onSubmit={handleSubmit} className="flex-1">
+                <form className="flex-1" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    Nombre <span className="text-red-500">*</span>
+                                    Nombre{' '}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <Input
+                                    required
                                     type="text"
                                     placeholder="Ej: Bodega Principal"
                                     value={formData.name}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, name: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            name: e.target.value,
+                                        })
                                     }
-                                    required
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    Código <span className="text-red-500">*</span>
+                                    Código{' '}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <Input
+                                    required
                                     type="text"
                                     placeholder="Ej: BOD-001"
                                     value={formData.code}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, code: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            code: e.target.value,
+                                        })
                                     }
-                                    required
                                 />
                             </div>
                         </div>
@@ -167,7 +175,10 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                                 placeholder="Dirección de la bodega"
                                 value={formData.address || ''}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, address: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        address: e.target.value,
+                                    })
                                 }
                             />
                         </div>
@@ -182,7 +193,10 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                                     placeholder="Ej: Quito"
                                     value={formData.city || ''}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, city: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            city: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
@@ -196,7 +210,10 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                                     placeholder="Ej: Ecuador"
                                     value={formData.country || ''}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, country: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            country: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
@@ -212,7 +229,10 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                                     placeholder="Nombre del responsable"
                                     value={formData.manager || ''}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, manager: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            manager: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
@@ -226,7 +246,10 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                                     placeholder="Ej: +593 99 999 9999"
                                     value={formData.phone || ''}
                                     onChange={(e) =>
-                                        setFormData({ ...formData, phone: e.target.value })
+                                        setFormData({
+                                            ...formData,
+                                            phone: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
@@ -241,7 +264,10 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                                 placeholder="bodega@ejemplo.com"
                                 value={formData.email || ''}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, email: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        email: e.target.value,
+                                    })
                                 }
                             />
                         </div>
@@ -251,20 +277,30 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                                 <Switcher
                                     checked={formData.isActive}
                                     onChange={(checked) =>
-                                        setFormData({ ...formData, isActive: !checked })
+                                        setFormData({
+                                            ...formData,
+                                            isActive: !checked,
+                                        })
                                     }
                                 />
-                                <label className="text-sm font-medium">Activo</label>
+                                <label className="text-sm font-medium">
+                                    Activo
+                                </label>
                             </div>
 
                             <div className="flex items-center gap-3">
                                 <Switcher
                                     checked={formData.isDefault}
                                     onChange={(checked) =>
-                                        setFormData({ ...formData, isDefault: !checked })
+                                        setFormData({
+                                            ...formData,
+                                            isDefault: !checked,
+                                        })
                                     }
                                 />
-                                <label className="text-sm font-medium">Por defecto</label>
+                                <label className="text-sm font-medium">
+                                    Por defecto
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -273,8 +309,8 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
                         <Button
                             type="button"
                             variant="plain"
-                            onClick={handleClose}
                             disabled={isPending}
+                            onClick={handleClose}
                         >
                             Cancelar
                         </Button>

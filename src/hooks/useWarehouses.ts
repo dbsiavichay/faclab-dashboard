@@ -38,10 +38,17 @@ export function useUpdateWarehouse() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Partial<WarehouseInput> }) =>
-            WarehouseService.updateWarehouse(id, data),
+        mutationFn: ({
+            id,
+            data,
+        }: {
+            id: number
+            data: Partial<WarehouseInput>
+        }) => WarehouseService.updateWarehouse(id, data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['warehouses', variables.id] })
+            queryClient.invalidateQueries({
+                queryKey: ['warehouses', variables.id],
+            })
             queryClient.invalidateQueries({ queryKey: ['warehouses'] })
         },
     })

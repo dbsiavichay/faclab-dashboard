@@ -82,8 +82,10 @@ const MovementsView = () => {
             header: 'Motivo',
             accessorKey: 'reason',
             cell: ({ row }) => {
-                return row.original.reason || (
-                    <span className="text-gray-400 italic">Sin motivo</span>
+                return (
+                    row.original.reason || (
+                        <span className="text-gray-400 italic">Sin motivo</span>
+                    )
                 )
             },
         },
@@ -151,11 +153,11 @@ const MovementsView = () => {
                             Tipo
                         </label>
                         <Select
-                            value={typeOptions.find((opt) => opt.value === type)}
+                            value={typeOptions.find(
+                                (opt) => opt.value === type
+                            )}
                             options={typeOptions}
-                            onChange={(option) =>
-                                setType(option?.value || '')
-                            }
+                            onChange={(option) => setType(option?.value || '')}
                         />
                     </div>
                     <div>
@@ -186,9 +188,9 @@ const MovementsView = () => {
                             type="number"
                             placeholder="100"
                             value={limit}
-                            onChange={(e) => setLimit(e.target.value)}
                             min="1"
                             max="1000"
+                            onChange={(e) => setLimit(e.target.value)}
                         />
                     </div>
                     <div>
@@ -199,8 +201,8 @@ const MovementsView = () => {
                             type="number"
                             placeholder="0"
                             value={offset}
-                            onChange={(e) => setOffset(e.target.value)}
                             min="0"
+                            onChange={(e) => setOffset(e.target.value)}
                         />
                     </div>
                 </div>
@@ -208,7 +210,8 @@ const MovementsView = () => {
                     <div className="text-sm text-gray-600">
                         Mostrando {movements.length} movimiento(s)
                         {productId && ` del producto ${productId}`}
-                        {type && ` tipo ${type === 'in' ? 'entrada' : 'salida'}`}
+                        {type &&
+                            ` tipo ${type === 'in' ? 'entrada' : 'salida'}`}
                     </div>
                     <Button variant="plain" onClick={handleReset}>
                         Limpiar Filtros

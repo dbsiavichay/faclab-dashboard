@@ -14,9 +14,7 @@ const SecondaryHeader = (props: SecondaryHeaderProps) => {
 
     const navMode = useThemeStore((state) => state.navMode)
     const themeColor = useThemeStore((state) => state.themeColor)
-    const primaryColorLevel = useThemeStore(
-        (state) => state.primaryColorLevel
-    )
+    const primaryColorLevel = useThemeStore((state) => state.primaryColorLevel)
     const userAuthority = useAuthStore((state) => state.user?.authority)
 
     const { larger } = useResponsive()

@@ -44,12 +44,19 @@ export function useUpdateProduct() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Partial<ProductInput> }) =>
-            InventoryService.updateProduct(id, data),
+        mutationFn: ({
+            id,
+            data,
+        }: {
+            id: number
+            data: Partial<ProductInput>
+        }) => InventoryService.updateProduct(id, data),
 
         onSuccess: (_, variables) => {
             // Invalida el producto específico y la lista
-            queryClient.invalidateQueries({ queryKey: ['products', variables.id] })
+            queryClient.invalidateQueries({
+                queryKey: ['products', variables.id],
+            })
             queryClient.invalidateQueries({ queryKey: ['products'] })
         },
     })

@@ -150,15 +150,11 @@ const CustomerDetailView = () => {
                     </div>
                     <div>
                         <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">
-                            {customer.email || '-'}
-                        </p>
+                        <p className="font-medium">{customer.email || '-'}</p>
                     </div>
                     <div>
                         <p className="text-sm text-gray-500">Teléfono</p>
-                        <p className="font-medium">
-                            {customer.phone || '-'}
-                        </p>
+                        <p className="font-medium">{customer.phone || '-'}</p>
                     </div>
                     <div>
                         <p className="text-sm text-gray-500">Ciudad</p>
@@ -172,9 +168,7 @@ const CustomerDetailView = () => {
                     </div>
                     <div>
                         <p className="text-sm text-gray-500">País</p>
-                        <p className="font-medium">
-                            {customer.country || '-'}
-                        </p>
+                        <p className="font-medium">{customer.country || '-'}</p>
                     </div>
                     <div>
                         <p className="text-sm text-gray-500">
@@ -275,9 +269,9 @@ const CustomerDetailView = () => {
             {/* Contact Form Modal */}
             <ContactForm
                 open={contactFormOpen}
-                onClose={handleCloseContactForm}
                 customerId={customerId}
                 contact={selectedContact}
+                onClose={handleCloseContactForm}
             />
 
             {/* Delete Confirmation Dialog */}
@@ -288,8 +282,8 @@ const CustomerDetailView = () => {
                 <h5 className="mb-4">Confirmar eliminación</h5>
                 <p className="mb-6">
                     ¿Está seguro que desea eliminar el contacto{' '}
-                    <strong>{contactToDelete?.name}</strong>? Esta acción no
-                    se puede deshacer.
+                    <strong>{contactToDelete?.name}</strong>? Esta acción no se
+                    puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
@@ -300,8 +294,8 @@ const CustomerDetailView = () => {
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={handleDeleteConfirm}
                         loading={deleteContact.isPending}
+                        onClick={handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

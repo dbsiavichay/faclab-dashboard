@@ -6,9 +6,7 @@ import classNames from 'classnames'
 
 const ConfiguratorToggle = () => {
     const themeColor = useThemeStore((state) => state.themeColor)
-    const primaryColorLevel = useThemeStore(
-        (state) => state.primaryColorLevel
-    )
+    const primaryColorLevel = useThemeStore((state) => state.primaryColorLevel)
     const setPanelExpand = useThemeStore((state) => state.setPanelExpand)
 
     return (

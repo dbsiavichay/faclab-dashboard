@@ -23,7 +23,7 @@ class UnitOfMeasureService {
     constructor() {
         this.host = appConfig.enableMock
             ? appConfig.apiPrefix
-            : (appConfig.inventoryApiHost || '')
+            : appConfig.inventoryApiHost || ''
     }
 
     async getUnitsOfMeasure(params?: { isActive?: boolean }) {

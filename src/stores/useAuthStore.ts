@@ -29,17 +29,19 @@ export const useAuthStore = create<AuthState>()(
             signedIn: false,
 
             // Actions
-            signInSuccess: (token, user) => set({
-                token,
-                user,
-                signedIn: true
-            }),
+            signInSuccess: (token, user) =>
+                set({
+                    token,
+                    user,
+                    signedIn: true,
+                }),
 
-            signOutSuccess: () => set({
-                user: null,
-                token: null,
-                signedIn: false
-            }),
+            signOutSuccess: () =>
+                set({
+                    user: null,
+                    token: null,
+                    signedIn: false,
+                }),
 
             setUser: (user) => set({ user }),
         }),

@@ -115,7 +115,8 @@ export const useThemeStore = create<ThemeState>()(
                     newNavMode = NAV_MODE_TRANSPARENT
                 }
 
-                const availableColorNav = availableNavColorLayouts.includes(type)
+                const availableColorNav =
+                    availableNavColorLayouts.includes(type)
 
                 if (availableColorNav && state.mode === MODE_LIGHT) {
                     newNavMode = NAV_MODE_LIGHT
@@ -183,7 +184,8 @@ export const useThemeStore = create<ThemeState>()(
 
             setThemeColor: (themeColor) => set({ themeColor }),
 
-            setThemeColorLevel: (primaryColorLevel) => set({ primaryColorLevel }),
+            setThemeColorLevel: (primaryColorLevel) =>
+                set({ primaryColorLevel }),
         }),
         {
             name: 'theme-storage',

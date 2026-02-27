@@ -55,8 +55,12 @@ const StockView = () => {
             header: 'Ubicación',
             accessorKey: 'location',
             cell: ({ row }) => {
-                return row.original.location || (
-                    <span className="text-gray-400 italic">Sin ubicación</span>
+                return (
+                    row.original.location || (
+                        <span className="text-gray-400 italic">
+                            Sin ubicación
+                        </span>
+                    )
                 )
             },
         },
@@ -96,9 +100,9 @@ const StockView = () => {
                             type="number"
                             placeholder="100"
                             value={limit}
-                            onChange={(e) => setLimit(e.target.value)}
                             min="1"
                             max="1000"
+                            onChange={(e) => setLimit(e.target.value)}
                         />
                     </div>
                     <div>
@@ -109,8 +113,8 @@ const StockView = () => {
                             type="number"
                             placeholder="0"
                             value={offset}
-                            onChange={(e) => setOffset(e.target.value)}
                             min="0"
+                            onChange={(e) => setOffset(e.target.value)}
                         />
                     </div>
                     <div className="flex items-end">

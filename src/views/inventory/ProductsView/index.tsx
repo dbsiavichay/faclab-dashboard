@@ -65,9 +65,10 @@ const ProductsView = () => {
                 )
                 setDeleteDialog({ open: false, product: null })
             } catch (error: any) {
-                const errorMessage = error.response?.data?.detail
-                    || error.response?.data?.message
-                    || 'Error al eliminar el producto'
+                const errorMessage =
+                    error.response?.data?.detail ||
+                    error.response?.data?.message ||
+                    'Error al eliminar el producto'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -98,7 +99,11 @@ const ProductsView = () => {
             accessorKey: 'sku',
             cell: (props) => {
                 const { row } = props
-                return <span className="font-mono text-sm">{row.original.sku}</span>
+                return (
+                    <span className="font-mono text-sm">
+                        {row.original.sku}
+                    </span>
+                )
             },
         },
         {
@@ -106,7 +111,9 @@ const ProductsView = () => {
             accessorKey: 'name',
             cell: (props) => {
                 const { row } = props
-                return <span className="font-semibold">{row.original.name}</span>
+                return (
+                    <span className="font-semibold">{row.original.name}</span>
+                )
             },
         },
         {
@@ -214,8 +221,8 @@ const ProductsView = () => {
             {/* Form Modal */}
             <ProductForm
                 open={isFormOpen}
-                onClose={handleFormClose}
                 product={selectedProduct}
+                onClose={handleFormClose}
             />
 
             {/* Delete Confirmation Dialog */}
@@ -229,23 +236,23 @@ const ProductsView = () => {
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
                     ¿Estás seguro de que deseas eliminar el producto{' '}
-                    <strong>{deleteDialog.product?.name}</strong>? Esta acción no
-                    se puede deshacer.
+                    <strong>{deleteDialog.product?.name}</strong>? Esta acción
+                    no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
+                        disabled={deleteProduct.isPending}
                         onClick={() =>
                             setDeleteDialog({ open: false, product: null })
                         }
-                        disabled={deleteProduct.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={handleDeleteConfirm}
                         loading={deleteProduct.isPending}
+                        onClick={handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

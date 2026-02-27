@@ -43,11 +43,18 @@ export function useUpdateCategory() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: number; data: Partial<CategoryInput> }) =>
-            CategoryService.updateCategory(id, data),
+        mutationFn: ({
+            id,
+            data,
+        }: {
+            id: number
+            data: Partial<CategoryInput>
+        }) => CategoryService.updateCategory(id, data),
 
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['categories', variables.id] })
+            queryClient.invalidateQueries({
+                queryKey: ['categories', variables.id],
+            })
             queryClient.invalidateQueries({ queryKey: ['categories'] })
         },
     })

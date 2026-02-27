@@ -6,7 +6,10 @@ import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useUnitsOfMeasure, useDeleteUnitOfMeasure } from '@/hooks/useUnitsOfMeasure'
+import {
+    useUnitsOfMeasure,
+    useDeleteUnitOfMeasure,
+} from '@/hooks/useUnitsOfMeasure'
 import type { UnitOfMeasure } from '@/services/UnitOfMeasureService'
 import UnitOfMeasureForm from './UnitOfMeasureForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
@@ -48,9 +51,10 @@ const UnitsOfMeasureView = () => {
                 )
                 setDeleteDialog({ open: false, unit: null })
             } catch (error: any) {
-                const errorMessage = error.response?.data?.detail
-                    || error.response?.data?.message
-                    || 'Error al eliminar la unidad de medida'
+                const errorMessage =
+                    error.response?.data?.detail ||
+                    error.response?.data?.message ||
+                    'Error al eliminar la unidad de medida'
 
                 toast.push(
                     <Notification title="Error" type="danger">
@@ -81,7 +85,9 @@ const UnitsOfMeasureView = () => {
             accessorKey: 'name',
             cell: (props) => {
                 const { row } = props
-                return <span className="font-semibold">{row.original.name}</span>
+                return (
+                    <span className="font-semibold">{row.original.name}</span>
+                )
             },
         },
         {
@@ -183,8 +189,8 @@ const UnitsOfMeasureView = () => {
 
             <UnitOfMeasureForm
                 open={isFormOpen}
-                onClose={handleFormClose}
                 unitOfMeasure={selectedUnit}
+                onClose={handleFormClose}
             />
 
             <Dialog
@@ -197,23 +203,25 @@ const UnitsOfMeasureView = () => {
                 <h5 className="mb-4">Confirmar Eliminación</h5>
                 <p className="mb-6">
                     ¿Estás seguro de que deseas eliminar la unidad{' '}
-                    <strong>{deleteDialog.unit?.name} ({deleteDialog.unit?.symbol})</strong>?
-                    Esta acción no se puede deshacer.
+                    <strong>
+                        {deleteDialog.unit?.name} ({deleteDialog.unit?.symbol})
+                    </strong>
+                    ? Esta acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
+                        disabled={deleteUnit.isPending}
                         onClick={() =>
                             setDeleteDialog({ open: false, unit: null })
                         }
-                        disabled={deleteUnit.isPending}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={handleDeleteConfirm}
                         loading={deleteUnit.isPending}
+                        onClick={handleDeleteConfirm}
                     >
                         Eliminar
                     </Button>

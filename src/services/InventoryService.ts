@@ -30,12 +30,14 @@ export interface InventoryConfig {
 
 class InventoryService {
     private config: InventoryConfig = {
-        host: ''
+        host: '',
     }
 
     constructor() {
         // Usa el host específico para inventario si está definido, o el apiPrefix general
-        this.config.host = appConfig.enableMock ? appConfig.apiPrefix : (appConfig.inventoryApiHost || '')
+        this.config.host = appConfig.enableMock
+            ? appConfig.apiPrefix
+            : appConfig.inventoryApiHost || ''
     }
 
     /**
@@ -53,7 +55,7 @@ class InventoryService {
     async getProducts() {
         return ApiService.fetchData<ProductResponse>({
             url: `${this.config.host}/products`,
-            method: 'get'
+            method: 'get',
         })
     }
 
@@ -64,7 +66,7 @@ class InventoryService {
     async getProductById(id: number) {
         return ApiService.fetchData<Product>({
             url: `${this.config.host}/products/${id}`,
-            method: 'get'
+            method: 'get',
         })
     }
 
@@ -76,7 +78,7 @@ class InventoryService {
         return ApiService.fetchData<Product>({
             url: `${this.config.host}/products`,
             method: 'post',
-            data: product
+            data: product,
         })
     }
 
@@ -89,7 +91,7 @@ class InventoryService {
         return ApiService.fetchData<Product>({
             url: `${this.config.host}/products/${id}`,
             method: 'put',
-            data: product
+            data: product,
         })
     }
 
@@ -100,7 +102,7 @@ class InventoryService {
     async deleteProduct(id: number) {
         return ApiService.fetchData({
             url: `${this.config.host}/products/${id}`,
-            method: 'delete'
+            method: 'delete',
         })
     }
 }

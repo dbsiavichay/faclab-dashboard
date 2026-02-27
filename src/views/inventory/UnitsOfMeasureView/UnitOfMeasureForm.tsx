@@ -5,8 +5,14 @@ import Button from '@/components/ui/Button'
 import Switcher from '@/components/ui/Switcher'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useCreateUnitOfMeasure, useUpdateUnitOfMeasure } from '@/hooks/useUnitsOfMeasure'
-import type { UnitOfMeasure, UnitOfMeasureInput } from '@/services/UnitOfMeasureService'
+import {
+    useCreateUnitOfMeasure,
+    useUpdateUnitOfMeasure,
+} from '@/hooks/useUnitsOfMeasure'
+import type {
+    UnitOfMeasure,
+    UnitOfMeasureInput,
+} from '@/services/UnitOfMeasureService'
 
 interface UnitOfMeasureFormProps {
     open: boolean
@@ -14,7 +20,11 @@ interface UnitOfMeasureFormProps {
     unitOfMeasure: UnitOfMeasure | null
 }
 
-const UnitOfMeasureForm = ({ open, onClose, unitOfMeasure }: UnitOfMeasureFormProps) => {
+const UnitOfMeasureForm = ({
+    open,
+    onClose,
+    unitOfMeasure,
+}: UnitOfMeasureFormProps) => {
     const [formData, setFormData] = useState<UnitOfMeasureInput>({
         name: '',
         symbol: '',
@@ -65,17 +75,17 @@ const UnitOfMeasureForm = ({ open, onClose, unitOfMeasure }: UnitOfMeasureFormPr
                 >
                     {isEdit
                         ? 'La unidad de medida se actualizó correctamente'
-                        : 'La unidad de medida se creó correctamente'
-                    }
+                        : 'La unidad de medida se creó correctamente'}
                 </Notification>,
                 { placement: 'top-center' }
             )
 
             onClose()
         } catch (error: any) {
-            const errorMessage = error.response?.data?.detail
-                || error.message
-                || 'Error al guardar la unidad de medida'
+            const errorMessage =
+                error.response?.data?.detail ||
+                error.message ||
+                'Error al guardar la unidad de medida'
 
             toast.push(
                 <Notification title="Error" type="danger">
@@ -102,23 +112,28 @@ const UnitOfMeasureForm = ({ open, onClose, unitOfMeasure }: UnitOfMeasureFormPr
         >
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">
-                    {isEdit ? 'Editar Unidad de Medida' : 'Nueva Unidad de Medida'}
+                    {isEdit
+                        ? 'Editar Unidad de Medida'
+                        : 'Nueva Unidad de Medida'}
                 </h5>
 
-                <form onSubmit={handleSubmit} className="flex-1">
+                <form className="flex-1" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">
                                 Nombre <span className="text-red-500">*</span>
                             </label>
                             <Input
+                                required
                                 type="text"
                                 placeholder="Ej: Kilogramo"
                                 value={formData.name}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, name: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        name: e.target.value,
+                                    })
                                 }
-                                required
                             />
                         </div>
 
@@ -127,13 +142,16 @@ const UnitOfMeasureForm = ({ open, onClose, unitOfMeasure }: UnitOfMeasureFormPr
                                 Símbolo <span className="text-red-500">*</span>
                             </label>
                             <Input
+                                required
                                 type="text"
                                 placeholder="Ej: kg"
                                 value={formData.symbol}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, symbol: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        symbol: e.target.value,
+                                    })
                                 }
-                                required
                             />
                         </div>
 
@@ -145,13 +163,13 @@ const UnitOfMeasureForm = ({ open, onClose, unitOfMeasure }: UnitOfMeasureFormPr
                                 textArea
                                 placeholder="Descripción de la unidad"
                                 value={formData.description || ''}
+                                style={{ minHeight: '80px' }}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
                                         description: e.target.value,
                                     })
                                 }
-                                style={{ minHeight: '80px' }}
                             />
                         </div>
 
@@ -159,10 +177,15 @@ const UnitOfMeasureForm = ({ open, onClose, unitOfMeasure }: UnitOfMeasureFormPr
                             <Switcher
                                 checked={formData.isActive}
                                 onChange={(checked) =>
-                                    setFormData({ ...formData, isActive: !checked })
+                                    setFormData({
+                                        ...formData,
+                                        isActive: !checked,
+                                    })
                                 }
                             />
-                            <label className="text-sm font-medium">Activo</label>
+                            <label className="text-sm font-medium">
+                                Activo
+                            </label>
                         </div>
                     </div>
 
@@ -170,8 +193,8 @@ const UnitOfMeasureForm = ({ open, onClose, unitOfMeasure }: UnitOfMeasureFormPr
                         <Button
                             type="button"
                             variant="plain"
-                            onClick={handleClose}
                             disabled={isPending}
+                            onClick={handleClose}
                         >
                             Cancelar
                         </Button>

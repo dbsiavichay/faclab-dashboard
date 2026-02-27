@@ -9,7 +9,7 @@ module.exports = {
     "prettier",
     "eslint-config-prettier",
   ],
-  plugins: ["react-refresh"],
+  plugins: ["react-refresh", "unused-imports"],
   settings: {
     react: {
       version: "detect",
@@ -25,6 +25,12 @@ module.exports = {
     }
   },
   rules: {
+    "@typescript-eslint/no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      { "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
+    ],
     "react-refresh/only-export-components": [
       "warn",
       { "allowConstantExport": true }

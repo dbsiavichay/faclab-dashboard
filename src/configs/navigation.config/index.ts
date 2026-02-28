@@ -149,6 +149,27 @@ const navigationConfig: NavigationTree[] = [
             },
         ],
     },
+    {
+        key: 'purchases',
+        path: '',
+        title: 'Purchases',
+        translateKey: 'nav.purchases.title',
+        icon: '',
+        type: NAV_ITEM_TYPE_TITLE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'purchases.suppliers',
+                path: '/suppliers',
+                title: 'Suppliers',
+                translateKey: 'nav.purchases.suppliers',
+                icon: 'purchasesSuppliers',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
 ]
 
 export default navigationConfig

@@ -25,10 +25,10 @@
 | # | Módulo | Complejidad | Dependencias |
 |---|--------|-------------|--------------|
 | ~~1~~ | ~~Unidades de medida~~ | ~~Baja~~ | ~~Completado en Sesión 1~~ |
-| 2 | Bodegas | Baja | Ninguna |
-| 3 | Ubicaciones | Baja | Bodegas |
-| 4 | Proveedores | Media | Ninguna |
-| 5 | Contactos de proveedor | Baja | Proveedores |
+| ~~2~~ | ~~Bodegas~~ | ~~Baja~~ | ~~Completado en Sesión 2~~ |
+| ~~3~~ | ~~Ubicaciones~~ | ~~Baja~~ | ~~Completado en Sesión 2~~ |
+| ~~4~~ | ~~Proveedores~~ | ~~Media~~ | ~~Completado en Sesión 3~~ |
+| ~~5~~ | ~~Contactos de proveedor~~ | ~~Baja~~ | ~~Completado en Sesión 3~~ |
 | 6 | Productos de proveedor | Media | Proveedores, Productos |
 | 7 | Lotes | Media | Productos |
 | 8 | Números de serie | Media | Productos, Lotes, Ubicaciones |

@@ -7,6 +7,7 @@ import Switcher from '@/components/ui/Switcher'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateCustomer, useUpdateCustomer } from '@/hooks/useCustomers'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type {
     Customer,
     CustomerInput,
@@ -108,11 +109,11 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al guardar el cliente'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">

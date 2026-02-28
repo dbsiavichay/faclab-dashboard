@@ -2,8 +2,7 @@ import type { ThemeConfiguratorProps } from '@/components/template/ThemeConfigur
 
 export type SidePanelContentProps = ThemeConfiguratorProps
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SidePanelContent = (props: SidePanelContentProps) => {
+const SidePanelContent = (_props: SidePanelContentProps) => {
     return <div>Content</div>
 }
 

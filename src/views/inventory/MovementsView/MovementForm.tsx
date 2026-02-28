@@ -6,6 +6,7 @@ import Select from '@/components/ui/Select'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateMovement } from '@/hooks/useMovements'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { MovementInput, MovementType } from '@/services/MovementService'
 
 interface MovementFormProps {
@@ -98,11 +99,11 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al crear el movimiento'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">
@@ -121,7 +122,9 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
         }
     }
 
-    const handleTypeChange = (option: any) => {
+    const handleTypeChange = (
+        option: { value: string; label: string } | null
+    ) => {
         const newType = option?.value as MovementType
         setFormData({
             ...formData,

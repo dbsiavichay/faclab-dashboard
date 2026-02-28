@@ -16,6 +16,7 @@ import toast from '@/components/ui/toast'
 import type { ColumnDef } from '@tanstack/react-table'
 import type { Customer } from '@/services/CustomerService'
 import { TAX_TYPE_LABELS } from '@/services/CustomerService'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import CustomerForm from './CustomerForm'
 import {
     HiOutlinePlus,
@@ -77,11 +78,10 @@ const CustomersView = () => {
             )
             setDeleteDialogOpen(false)
             setCustomerToDelete(null)
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.push(
                 <Notification title="Error" type="danger">
-                    {error.response?.data?.detail ||
-                        'Error al eliminar el cliente'}
+                    {getErrorMessage(error, 'Error al eliminar el cliente')}
                 </Notification>,
                 { placement: 'top-center' }
             )
@@ -107,11 +107,13 @@ const CustomersView = () => {
                     { placement: 'top-center' }
                 )
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.push(
                 <Notification title="Error" type="danger">
-                    {error.response?.data?.detail ||
-                        'Error al cambiar el estado del cliente'}
+                    {getErrorMessage(
+                        error,
+                        'Error al cambiar el estado del cliente'
+                    )}
                 </Notification>,
                 { placement: 'top-center' }
             )

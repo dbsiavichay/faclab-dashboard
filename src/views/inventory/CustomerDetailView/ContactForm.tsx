@@ -8,6 +8,7 @@ import {
     useCreateCustomerContact,
     useUpdateCustomerContact,
 } from '@/hooks/useCustomerContacts'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type {
     CustomerContact,
     CustomerContactInput,
@@ -85,11 +86,11 @@ const ContactForm = ({
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al guardar el contacto'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">

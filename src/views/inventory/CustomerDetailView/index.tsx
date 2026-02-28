@@ -13,6 +13,7 @@ import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { TAX_TYPE_LABELS } from '@/services/CustomerService'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { CustomerContact } from '@/services/CustomerContactService'
 import ContactForm from './ContactForm'
 import {
@@ -78,11 +79,10 @@ const CustomerDetailView = () => {
             )
             setDeleteDialogOpen(false)
             setContactToDelete(null)
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.push(
                 <Notification title="Error" type="danger">
-                    {error.response?.data?.detail ||
-                        'Error al eliminar el contacto'}
+                    {getErrorMessage(error, 'Error al eliminar el contacto')}
                 </Notification>,
                 { placement: 'top-center' }
             )

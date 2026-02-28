@@ -9,6 +9,7 @@ import {
     useCreateUnitOfMeasure,
     useUpdateUnitOfMeasure,
 } from '@/hooks/useUnitsOfMeasure'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type {
     UnitOfMeasure,
     UnitOfMeasureInput,
@@ -81,11 +82,11 @@ const UnitOfMeasureForm = ({
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al guardar la unidad de medida'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">

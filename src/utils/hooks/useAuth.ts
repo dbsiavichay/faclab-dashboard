@@ -16,7 +16,6 @@ function useAuth() {
     const signedIn = useAuthStore((state) => state.signedIn)
     const signInSuccess = useAuthStore((state) => state.signInSuccess)
     const signOutSuccess = useAuthStore((state) => state.signOutSuccess)
-    const setUser = useAuthStore((state) => state.setUser)
 
     const signIn = async (
         values: SignInCredential

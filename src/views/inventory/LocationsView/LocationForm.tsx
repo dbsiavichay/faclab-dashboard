@@ -7,6 +7,7 @@ import Switcher from '@/components/ui/Switcher'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateLocation, useUpdateLocation } from '@/hooks/useLocations'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useWarehouses } from '@/hooks/useWarehouses'
 import type {
     Location,
@@ -113,11 +114,11 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al guardar la ubicación'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">

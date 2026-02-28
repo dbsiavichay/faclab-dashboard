@@ -19,6 +19,8 @@
 | Clientes | ✅ | ✅ | ✅ | CRUD + activar/desactivar |
 | Contactos de cliente | ✅ | ✅ | ✅ | CRUD dentro de detalle de cliente |
 | Autenticación | ✅ | ✅ | ✅ | Sign in/up/out, recovery |
+| Proveedores | ✅ | ✅ | ✅ | CRUD + activar/desactivar + contactos |
+| Productos de proveedor | ✅ | ✅ | ✅ | CRUD en detalle de proveedor con tabs |
 
 ### Módulos pendientes
 
@@ -29,7 +31,7 @@
 | ~~3~~ | ~~Ubicaciones~~ | ~~Baja~~ | ~~Completado en Sesión 2~~ |
 | ~~4~~ | ~~Proveedores~~ | ~~Media~~ | ~~Completado en Sesión 3~~ |
 | ~~5~~ | ~~Contactos de proveedor~~ | ~~Baja~~ | ~~Completado en Sesión 3~~ |
-| 6 | Productos de proveedor | Media | Proveedores, Productos |
+| ~~6~~ | ~~Productos de proveedor~~ | ~~Media~~ | ~~Completado en Sesión 4~~ |
 | 7 | Lotes | Media | Productos |
 | 8 | Números de serie | Media | Productos, Lotes, Ubicaciones |
 | 9 | Ajustes de inventario | Alta | Productos, Ubicaciones, Bodegas |

@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateCategory, useUpdateCategory } from '@/hooks/useCategories'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { Category } from '@/services/CategoryService'
 
 interface CategoryFormProps {
@@ -68,12 +69,11 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.response?.data?.message ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al guardar la categoría'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">

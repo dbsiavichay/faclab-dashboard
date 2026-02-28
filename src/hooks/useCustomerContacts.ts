@@ -89,7 +89,7 @@ export function useDeleteCustomerContact() {
     return useMutation({
         mutationFn: async ({
             id,
-            customerId,
+            customerId: _customerId,
         }: {
             id: number
             customerId: number

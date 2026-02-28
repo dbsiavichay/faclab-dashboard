@@ -6,6 +6,7 @@ import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCategories, useDeleteCategory } from '@/hooks/useCategories'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { Category } from '@/services/CategoryService'
 import CategoryForm from './CategoryForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
@@ -48,11 +49,11 @@ const CategoriesView = () => {
                     { placement: 'top-center' }
                 )
                 setDeleteDialog({ open: false, category: null })
-            } catch (error: any) {
-                const errorMessage =
-                    error.response?.data?.detail ||
-                    error.response?.data?.message ||
+            } catch (error: unknown) {
+                const errorMessage = getErrorMessage(
+                    error,
                     'Error al eliminar la categoría'
+                )
 
                 toast.push(
                     <Notification title="Error" type="danger">

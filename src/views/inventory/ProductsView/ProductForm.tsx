@@ -6,6 +6,7 @@ import Select from '@/components/ui/Select'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateProduct, useUpdateProduct } from '@/hooks/useProducts'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCategories } from '@/hooks/useCategories'
 import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
 import type { Product, ProductInput } from '@/services/InventoryService'
@@ -100,11 +101,11 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al guardar el producto'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">

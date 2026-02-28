@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useLocations, useDeleteLocation } from '@/hooks/useLocations'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useWarehouses } from '@/hooks/useWarehouses'
 import type { Location } from '@/services/LocationService'
 import LocationForm from './LocationForm'
@@ -60,11 +61,11 @@ const LocationsView = () => {
                     { placement: 'top-center' }
                 )
                 setDeleteDialog({ open: false, location: null })
-            } catch (error: any) {
-                const errorMessage =
-                    error.response?.data?.detail ||
-                    error.response?.data?.message ||
+            } catch (error: unknown) {
+                const errorMessage = getErrorMessage(
+                    error,
                     'Error al eliminar la ubicación'
+                )
 
                 toast.push(
                     <Notification title="Error" type="danger">

@@ -7,6 +7,7 @@ import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useWarehouses, useDeleteWarehouse } from '@/hooks/useWarehouses'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { Warehouse } from '@/services/WarehouseService'
 import WarehouseForm from './WarehouseForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
@@ -48,11 +49,11 @@ const WarehousesView = () => {
                     { placement: 'top-center' }
                 )
                 setDeleteDialog({ open: false, warehouse: null })
-            } catch (error: any) {
-                const errorMessage =
-                    error.response?.data?.detail ||
-                    error.response?.data?.message ||
+            } catch (error: unknown) {
+                const errorMessage = getErrorMessage(
+                    error,
                     'Error al eliminar la bodega'
+                )
 
                 toast.push(
                     <Notification title="Error" type="danger">

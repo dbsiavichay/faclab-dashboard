@@ -65,8 +65,7 @@ const Day = forwardRef<HTMLButtonElement, DayProps>((props, ref) => {
         hideOutOfMonthDates,
         renderDay,
         disabled,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        fullWidth,
+        fullWidth: _fullWidth,
         ...others
     } = props
 

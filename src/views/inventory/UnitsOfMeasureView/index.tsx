@@ -1,18 +1,20 @@
-import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
-import Badge from '@/components/ui/Badge'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 import {
-    useUnitsOfMeasure,
     useDeleteUnitOfMeasure,
+    useUnitsOfMeasure,
 } from '@/hooks/useUnitsOfMeasure'
+
+import Badge from '@/components/ui/Badge'
+import Button from '@/components/ui/Button'
+import Card from '@/components/ui/Card'
+import Dialog from '@/components/ui/Dialog'
+import Notification from '@/components/ui/Notification'
 import type { UnitOfMeasure } from '@/services/UnitOfMeasureService'
 import UnitOfMeasureForm from './UnitOfMeasureForm'
-import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
+import { getErrorMessage } from '@/utils/getErrorMessage'
+import toast from '@/components/ui/toast'
+import { useState } from 'react'
 
 const UnitsOfMeasureView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
@@ -50,11 +52,12 @@ const UnitsOfMeasureView = () => {
                     { placement: 'top-center' }
                 )
                 setDeleteDialog({ open: false, unit: null })
-            } catch (error: any) {
-                const errorMessage =
-                    error.response?.data?.detail ||
-                    error.response?.data?.message ||
+            } catch (error: unknown) {
+                console.log('Error deleting unit of measure:', error)
+                const errorMessage = getErrorMessage(
+                    error,
                     'Error al eliminar la unidad de medida'
+                )
 
                 toast.push(
                     <Notification title="Error" type="danger">

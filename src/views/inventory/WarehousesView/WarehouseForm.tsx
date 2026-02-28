@@ -6,6 +6,7 @@ import Switcher from '@/components/ui/Switcher'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateWarehouse, useUpdateWarehouse } from '@/hooks/useWarehouses'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { Warehouse, WarehouseInput } from '@/services/WarehouseService'
 
 interface WarehouseFormProps {
@@ -89,11 +90,11 @@ const WarehouseForm = ({ open, onClose, warehouse }: WarehouseFormProps) => {
             )
 
             onClose()
-        } catch (error: any) {
-            const errorMessage =
-                error.response?.data?.detail ||
-                error.message ||
+        } catch (error: unknown) {
+            const errorMessage = getErrorMessage(
+                error,
                 'Error al guardar la bodega'
+            )
 
             toast.push(
                 <Notification title="Error" type="danger">

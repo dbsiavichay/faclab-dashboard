@@ -6,6 +6,7 @@ import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useProducts, useDeleteProduct } from '@/hooks/useProducts'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCategories } from '@/hooks/useCategories'
 import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
 import type { Product } from '@/services/InventoryService'
@@ -64,11 +65,11 @@ const ProductsView = () => {
                     { placement: 'top-center' }
                 )
                 setDeleteDialog({ open: false, product: null })
-            } catch (error: any) {
-                const errorMessage =
-                    error.response?.data?.detail ||
-                    error.response?.data?.message ||
+            } catch (error: unknown) {
+                const errorMessage = getErrorMessage(
+                    error,
                     'Error al eliminar el producto'
+                )
 
                 toast.push(
                     <Notification title="Error" type="danger">

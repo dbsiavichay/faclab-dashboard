@@ -5,17 +5,25 @@ import {
     useSupplierContacts,
     useDeleteSupplierContact,
 } from '@/hooks/useSupplierContacts'
+import {
+    useSupplierProducts,
+    useDeleteSupplierProduct,
+} from '@/hooks/useSupplierProducts'
+import { useProducts } from '@/hooks/useProducts'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Table from '@/components/ui/Table'
+import Tabs from '@/components/ui/Tabs'
 import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { TAX_TYPE_LABELS } from '@/services/SupplierService'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { SupplierContact } from '@/services/SupplierContactService'
+import type { SupplierProduct } from '@/services/SupplierProductService'
 import ContactForm from './ContactForm'
+import SupplierProductForm from './SupplierProductForm'
 import {
     HiOutlineArrowLeft,
     HiOutlinePlus,
@@ -24,6 +32,7 @@ import {
 } from 'react-icons/hi'
 
 const { Tr, Th, Td, THead, TBody } = Table
+const { TabList, TabNav, TabContent } = Tabs
 
 const SupplierDetailView = () => {
     const { id } = useParams<{ id: string }>()
@@ -34,15 +43,31 @@ const SupplierDetailView = () => {
         useSupplier(supplierId)
     const { data: contacts = [], isLoading: contactsLoading } =
         useSupplierContacts(supplierId)
+    const { data: supplierProducts = [], isLoading: productsLoading } =
+        useSupplierProducts(supplierId)
+    const { data: products = [] } = useProducts()
     const deleteContact = useDeleteSupplierContact()
+    const deleteSupplierProduct = useDeleteSupplierProduct()
 
+    // Contact state
     const [contactFormOpen, setContactFormOpen] = useState(false)
     const [selectedContact, setSelectedContact] =
         useState<SupplierContact | null>(null)
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [deleteContactDialogOpen, setDeleteContactDialogOpen] =
+        useState(false)
     const [contactToDelete, setContactToDelete] =
         useState<SupplierContact | null>(null)
 
+    // Product state
+    const [productFormOpen, setProductFormOpen] = useState(false)
+    const [selectedProduct, setSelectedProduct] =
+        useState<SupplierProduct | null>(null)
+    const [deleteProductDialogOpen, setDeleteProductDialogOpen] =
+        useState(false)
+    const [productToDelete, setProductToDelete] =
+        useState<SupplierProduct | null>(null)
+
+    // Contact handlers
     const handleCreateContact = () => {
         setSelectedContact(null)
         setContactFormOpen(true)
@@ -58,12 +83,12 @@ const SupplierDetailView = () => {
         setSelectedContact(null)
     }
 
-    const handleDeleteClick = (contact: SupplierContact) => {
+    const handleDeleteContactClick = (contact: SupplierContact) => {
         setContactToDelete(contact)
-        setDeleteDialogOpen(true)
+        setDeleteContactDialogOpen(true)
     }
 
-    const handleDeleteConfirm = async () => {
+    const handleDeleteContactConfirm = async () => {
         if (!contactToDelete) return
 
         try {
@@ -77,7 +102,7 @@ const SupplierDetailView = () => {
                 </Notification>,
                 { placement: 'top-center' }
             )
-            setDeleteDialogOpen(false)
+            setDeleteContactDialogOpen(false)
             setContactToDelete(null)
         } catch (error: unknown) {
             toast.push(
@@ -87,6 +112,58 @@ const SupplierDetailView = () => {
                 { placement: 'top-center' }
             )
         }
+    }
+
+    // Product handlers
+    const handleCreateProduct = () => {
+        setSelectedProduct(null)
+        setProductFormOpen(true)
+    }
+
+    const handleEditProduct = (product: SupplierProduct) => {
+        setSelectedProduct(product)
+        setProductFormOpen(true)
+    }
+
+    const handleCloseProductForm = () => {
+        setProductFormOpen(false)
+        setSelectedProduct(null)
+    }
+
+    const handleDeleteProductClick = (product: SupplierProduct) => {
+        setProductToDelete(product)
+        setDeleteProductDialogOpen(true)
+    }
+
+    const handleDeleteProductConfirm = async () => {
+        if (!productToDelete) return
+
+        try {
+            await deleteSupplierProduct.mutateAsync({
+                id: productToDelete.id,
+                supplierId: supplierId,
+            })
+            toast.push(
+                <Notification title="Producto eliminado" type="success">
+                    El producto se eliminó del proveedor correctamente
+                </Notification>,
+                { placement: 'top-center' }
+            )
+            setDeleteProductDialogOpen(false)
+            setProductToDelete(null)
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al eliminar el producto')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
+    }
+
+    const getProductName = (productId: number) => {
+        const product = products.find((p) => p.id === productId)
+        return product ? `${product.name} (${product.sku})` : `#${productId}`
     }
 
     if (supplierLoading) {
@@ -215,71 +292,204 @@ const SupplierDetailView = () => {
                 )}
             </Card>
 
-            {/* Contacts */}
+            {/* Tabs: Contacts & Products */}
             <Card>
-                <div className="flex items-center justify-between mb-4">
-                    <h5>Contactos ({contacts.length})</h5>
-                    <Button
-                        size="sm"
-                        variant="solid"
-                        icon={<HiOutlinePlus />}
-                        onClick={handleCreateContact}
-                    >
-                        Nuevo Contacto
-                    </Button>
-                </div>
+                <Tabs defaultValue="contacts" variant="underline">
+                    <TabList>
+                        <TabNav value="contacts">
+                            Contactos ({contacts.length})
+                        </TabNav>
+                        <TabNav value="products">
+                            Productos ({supplierProducts.length})
+                        </TabNav>
+                    </TabList>
 
-                {contactsLoading ? (
-                    <div className="flex justify-center items-center h-32">
-                        <div>Cargando contactos...</div>
-                    </div>
-                ) : contacts.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                        No hay contactos registrados para este proveedor
-                    </div>
-                ) : (
-                    <Table>
-                        <THead>
-                            <Tr>
-                                <Th>Nombre</Th>
-                                <Th>Cargo</Th>
-                                <Th>Email</Th>
-                                <Th>Teléfono</Th>
-                                <Th>Acciones</Th>
-                            </Tr>
-                        </THead>
-                        <TBody>
-                            {contacts.map((contact) => (
-                                <Tr key={contact.id}>
-                                    <Td>{contact.name}</Td>
-                                    <Td>{contact.role || '-'}</Td>
-                                    <Td>{contact.email || '-'}</Td>
-                                    <Td>{contact.phone || '-'}</Td>
-                                    <Td>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="plain"
-                                                icon={<HiOutlinePencil />}
-                                                onClick={() =>
-                                                    handleEditContact(contact)
-                                                }
-                                            />
-                                            <Button
-                                                size="sm"
-                                                variant="plain"
-                                                icon={<HiOutlineTrash />}
-                                                onClick={() =>
-                                                    handleDeleteClick(contact)
-                                                }
-                                            />
-                                        </div>
-                                    </Td>
-                                </Tr>
-                            ))}
-                        </TBody>
-                    </Table>
-                )}
+                    {/* Contacts Tab */}
+                    <TabContent value="contacts">
+                        <div className="mt-4">
+                            <div className="flex items-center justify-end mb-4">
+                                <Button
+                                    size="sm"
+                                    variant="solid"
+                                    icon={<HiOutlinePlus />}
+                                    onClick={handleCreateContact}
+                                >
+                                    Nuevo Contacto
+                                </Button>
+                            </div>
+
+                            {contactsLoading ? (
+                                <div className="flex justify-center items-center h-32">
+                                    <div>Cargando contactos...</div>
+                                </div>
+                            ) : contacts.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    No hay contactos registrados para este
+                                    proveedor
+                                </div>
+                            ) : (
+                                <Table>
+                                    <THead>
+                                        <Tr>
+                                            <Th>Nombre</Th>
+                                            <Th>Cargo</Th>
+                                            <Th>Email</Th>
+                                            <Th>Teléfono</Th>
+                                            <Th>Acciones</Th>
+                                        </Tr>
+                                    </THead>
+                                    <TBody>
+                                        {contacts.map((contact) => (
+                                            <Tr key={contact.id}>
+                                                <Td>{contact.name}</Td>
+                                                <Td>{contact.role || '-'}</Td>
+                                                <Td>{contact.email || '-'}</Td>
+                                                <Td>{contact.phone || '-'}</Td>
+                                                <Td>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="plain"
+                                                            icon={
+                                                                <HiOutlinePencil />
+                                                            }
+                                                            onClick={() =>
+                                                                handleEditContact(
+                                                                    contact
+                                                                )
+                                                            }
+                                                        />
+                                                        <Button
+                                                            size="sm"
+                                                            variant="plain"
+                                                            icon={
+                                                                <HiOutlineTrash />
+                                                            }
+                                                            onClick={() =>
+                                                                handleDeleteContactClick(
+                                                                    contact
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                </Td>
+                                            </Tr>
+                                        ))}
+                                    </TBody>
+                                </Table>
+                            )}
+                        </div>
+                    </TabContent>
+
+                    {/* Products Tab */}
+                    <TabContent value="products">
+                        <div className="mt-4">
+                            <div className="flex items-center justify-end mb-4">
+                                <Button
+                                    size="sm"
+                                    variant="solid"
+                                    icon={<HiOutlinePlus />}
+                                    onClick={handleCreateProduct}
+                                >
+                                    Agregar Producto
+                                </Button>
+                            </div>
+
+                            {productsLoading ? (
+                                <div className="flex justify-center items-center h-32">
+                                    <div>Cargando productos...</div>
+                                </div>
+                            ) : supplierProducts.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    No hay productos registrados para este
+                                    proveedor
+                                </div>
+                            ) : (
+                                <Table>
+                                    <THead>
+                                        <Tr>
+                                            <Th>Producto</Th>
+                                            <Th>SKU Proveedor</Th>
+                                            <Th>Precio de Compra</Th>
+                                            <Th>Cant. Mín.</Th>
+                                            <Th>Tiempo Entrega</Th>
+                                            <Th>Preferido</Th>
+                                            <Th>Acciones</Th>
+                                        </Tr>
+                                    </THead>
+                                    <TBody>
+                                        {supplierProducts.map((sp) => (
+                                            <Tr key={sp.id}>
+                                                <Td>
+                                                    {getProductName(
+                                                        sp.productId
+                                                    )}
+                                                </Td>
+                                                <Td>{sp.supplierSku || '-'}</Td>
+                                                <Td>
+                                                    $
+                                                    {Number(
+                                                        sp.purchasePrice
+                                                    ).toFixed(2)}
+                                                </Td>
+                                                <Td>
+                                                    {sp.minOrderQuantity || '-'}
+                                                </Td>
+                                                <Td>
+                                                    {sp.leadTimeDays
+                                                        ? `${sp.leadTimeDays} días`
+                                                        : '-'}
+                                                </Td>
+                                                <Td>
+                                                    <Badge
+                                                        content={
+                                                            sp.isPreferred
+                                                                ? 'Sí'
+                                                                : 'No'
+                                                        }
+                                                        className={
+                                                            sp.isPreferred
+                                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                                                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                                                        }
+                                                    />
+                                                </Td>
+                                                <Td>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="plain"
+                                                            icon={
+                                                                <HiOutlinePencil />
+                                                            }
+                                                            onClick={() =>
+                                                                handleEditProduct(
+                                                                    sp
+                                                                )
+                                                            }
+                                                        />
+                                                        <Button
+                                                            size="sm"
+                                                            variant="plain"
+                                                            icon={
+                                                                <HiOutlineTrash />
+                                                            }
+                                                            onClick={() =>
+                                                                handleDeleteProductClick(
+                                                                    sp
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                </Td>
+                                            </Tr>
+                                        ))}
+                                    </TBody>
+                                </Table>
+                            )}
+                        </div>
+                    </TabContent>
+                </Tabs>
             </Card>
 
             {/* Contact Form Modal */}
@@ -290,10 +500,18 @@ const SupplierDetailView = () => {
                 onClose={handleCloseContactForm}
             />
 
-            {/* Delete Confirmation Dialog */}
+            {/* Product Form Modal */}
+            <SupplierProductForm
+                open={productFormOpen}
+                supplierId={supplierId}
+                supplierProduct={selectedProduct}
+                onClose={handleCloseProductForm}
+            />
+
+            {/* Delete Contact Confirmation Dialog */}
             <Dialog
-                isOpen={deleteDialogOpen}
-                onClose={() => setDeleteDialogOpen(false)}
+                isOpen={deleteContactDialogOpen}
+                onClose={() => setDeleteContactDialogOpen(false)}
             >
                 <h5 className="mb-4">Confirmar eliminación</h5>
                 <p className="mb-6">
@@ -304,14 +522,41 @@ const SupplierDetailView = () => {
                 <div className="flex justify-end gap-2">
                     <Button
                         variant="plain"
-                        onClick={() => setDeleteDialogOpen(false)}
+                        onClick={() => setDeleteContactDialogOpen(false)}
                     >
                         Cancelar
                     </Button>
                     <Button
                         variant="solid"
                         loading={deleteContact.isPending}
-                        onClick={handleDeleteConfirm}
+                        onClick={handleDeleteContactConfirm}
+                    >
+                        Eliminar
+                    </Button>
+                </div>
+            </Dialog>
+
+            {/* Delete Product Confirmation Dialog */}
+            <Dialog
+                isOpen={deleteProductDialogOpen}
+                onClose={() => setDeleteProductDialogOpen(false)}
+            >
+                <h5 className="mb-4">Confirmar eliminación</h5>
+                <p className="mb-6">
+                    ¿Está seguro que desea eliminar este producto del proveedor?
+                    Esta acción no se puede deshacer.
+                </p>
+                <div className="flex justify-end gap-2">
+                    <Button
+                        variant="plain"
+                        onClick={() => setDeleteProductDialogOpen(false)}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant="solid"
+                        loading={deleteSupplierProduct.isPending}
+                        onClick={handleDeleteProductConfirm}
                     >
                         Eliminar
                     </Button>

@@ -16,6 +16,10 @@
         "sales": {
             "title": "Ventas",
             "customers": "Clientes"
+        },
+        "purchases": {
+            "title": "Compras",
+            "suppliers": "Proveedores"
         }
     }
 }

@@ -21,6 +21,8 @@
 | Autenticación | ✅ | ✅ | ✅ | Sign in/up/out, recovery |
 | Proveedores | ✅ | ✅ | ✅ | CRUD + activar/desactivar + contactos |
 | Productos de proveedor | ✅ | ✅ | ✅ | CRUD en detalle de proveedor con tabs |
+| Lotes | ✅ | ✅ | ✅ | CRUD con filtros (productId, expiringInDays) |
+| Números de serie | ✅ | ✅ | ✅ | CRUD con filtros + cambio de estado |
 
 ### Módulos pendientes
 
@@ -32,8 +34,8 @@
 | ~~4~~ | ~~Proveedores~~ | ~~Media~~ | ~~Completado en Sesión 3~~ |
 | ~~5~~ | ~~Contactos de proveedor~~ | ~~Baja~~ | ~~Completado en Sesión 3~~ |
 | ~~6~~ | ~~Productos de proveedor~~ | ~~Media~~ | ~~Completado en Sesión 4~~ |
-| 7 | Lotes | Media | Productos |
-| 8 | Números de serie | Media | Productos, Lotes, Ubicaciones |
+| ~~7~~ | ~~Lotes~~ | ~~Media~~ | ~~Completado en Sesión 5~~ |
+| ~~8~~ | ~~Números de serie~~ | ~~Media~~ | ~~Completado en Sesión 5~~ |
 | 9 | Ajustes de inventario | Alta | Productos, Ubicaciones, Bodegas |
 | 10 | Transferencias | Alta | Productos, Ubicaciones |
 | 11 | Órdenes de compra | Alta | Proveedores, Productos |

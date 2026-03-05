@@ -1,5 +1,10 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type {
+    PaginatedResponse,
+    DataResponse,
+    PaginationParams,
+} from '@/@types/api'
 
 export interface UnitOfMeasure {
     id: number
@@ -17,6 +22,10 @@ export interface UnitOfMeasureInput {
     [key: string]: unknown
 }
 
+export interface UnitOfMeasureQueryParams extends PaginationParams {
+    isActive?: boolean
+}
+
 class UnitOfMeasureService {
     private host: string
 
@@ -26,23 +35,33 @@ class UnitOfMeasureService {
             : appConfig.inventoryApiHost || ''
     }
 
-    async getUnitsOfMeasure(params?: { isActive?: boolean }) {
-        return ApiService.fetchData<UnitOfMeasure[]>({
-            url: `${this.host}/units-of-measure`,
+    async getUnitsOfMeasure(params?: UnitOfMeasureQueryParams) {
+        const queryParams = new URLSearchParams()
+        if (params?.isActive !== undefined)
+            queryParams.append('isActive', params.isActive.toString())
+        if (params?.limit !== undefined)
+            queryParams.append('limit', params.limit.toString())
+        if (params?.offset !== undefined)
+            queryParams.append('offset', params.offset.toString())
+        const queryString = queryParams.toString()
+        const url = queryString
+            ? `${this.host}/units-of-measure?${queryString}`
+            : `${this.host}/units-of-measure`
+        return ApiService.fetchData<PaginatedResponse<UnitOfMeasure>>({
+            url,
             method: 'get',
-            params,
         })
     }
 
     async getUnitOfMeasureById(id: number) {
-        return ApiService.fetchData<UnitOfMeasure>({
+        return ApiService.fetchData<DataResponse<UnitOfMeasure>>({
             url: `${this.host}/units-of-measure/${id}`,
             method: 'get',
         })
     }
 
     async createUnitOfMeasure(data: UnitOfMeasureInput) {
-        return ApiService.fetchData<UnitOfMeasure>({
+        return ApiService.fetchData<DataResponse<UnitOfMeasure>>({
             url: `${this.host}/units-of-measure`,
             method: 'post',
             data,
@@ -50,7 +69,7 @@ class UnitOfMeasureService {
     }
 
     async updateUnitOfMeasure(id: number, data: Partial<UnitOfMeasureInput>) {
-        return ApiService.fetchData<UnitOfMeasure>({
+        return ApiService.fetchData<DataResponse<UnitOfMeasure>>({
             url: `${this.host}/units-of-measure/${id}`,
             method: 'put',
             data,

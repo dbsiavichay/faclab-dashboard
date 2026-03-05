@@ -10,7 +10,7 @@ export function useSupplierProducts(supplierId: number) {
             const response = await SupplierProductService.getSupplierProducts(
                 supplierId
             )
-            return response.data
+            return response.data.data
         },
         enabled: supplierId > 0,
     })
@@ -24,7 +24,7 @@ export function useSupplierProductsByProduct(productId: number) {
                 await SupplierProductService.getSupplierProductsByProduct(
                     productId
                 )
-            return response.data
+            return response.data.data
         },
         enabled: productId > 0,
     })
@@ -45,7 +45,7 @@ export function useCreateSupplierProduct() {
                 supplierId,
                 product
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -70,7 +70,7 @@ export function useUpdateSupplierProduct() {
                 id,
                 product
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({

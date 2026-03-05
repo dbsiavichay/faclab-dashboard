@@ -24,7 +24,13 @@ const UnitsOfMeasureView = () => {
         unit: UnitOfMeasure | null
     }>({ open: false, unit: null })
 
-    const { data: units = [], isLoading } = useUnitsOfMeasure()
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
+
+    const { data, isLoading } = useUnitsOfMeasure({ limit: pageSize, offset })
+    const units = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
     const deleteUnit = useDeleteUnitOfMeasure()
 
     const handleCreate = () => {
@@ -186,6 +192,12 @@ const UnitsOfMeasureView = () => {
                         columns={columns}
                         data={units}
                         loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
                     />
                 </div>
             </Card>

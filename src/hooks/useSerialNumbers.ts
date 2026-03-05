@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+    useQuery,
+    useMutation,
+    useQueryClient,
+    keepPreviousData,
+} from '@tanstack/react-query'
 import SerialNumberService, {
     type SerialNumberInput,
     type SerialNumberQueryParams,
@@ -10,8 +15,10 @@ export function useSerialNumbers(params?: SerialNumberQueryParams) {
         queryKey: ['serialNumbers', params],
         queryFn: async () => {
             const response = await SerialNumberService.getSerialNumbers(params)
-            return response.data
+            const body = response.data
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }
 
@@ -20,7 +27,7 @@ export function useSerialNumber(id: number) {
         queryKey: ['serialNumbers', id],
         queryFn: async () => {
             const response = await SerialNumberService.getSerialNumber(id)
-            return response.data
+            return response.data.data
         },
         enabled: id > 0,
     })
@@ -34,7 +41,7 @@ export function useCreateSerialNumber() {
             const response = await SerialNumberService.createSerialNumber(
                 serialNumber
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['serialNumbers'] })
@@ -57,7 +64,7 @@ export function useUpdateSerialNumber() {
                 id,
                 data
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['serialNumbers'] })
@@ -90,7 +97,7 @@ export function useChangeSerialNumberStatus() {
             status: SerialStatus
         }) => {
             const response = await SerialNumberService.changeStatus(id, status)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['serialNumbers'] })

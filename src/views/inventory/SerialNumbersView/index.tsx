@@ -66,15 +66,22 @@ const SerialNumbersView = () => {
     const [statusFilter, setStatusFilter] = useState<string>('')
     const [lotId, setLotId] = useState<string>('')
     const [locationId, setLocationId] = useState<string>('')
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
 
     const queryParams: SerialNumberQueryParams = {
         productId: productId ? parseInt(productId) : undefined,
         status: (statusFilter as SerialStatus) || undefined,
         lotId: lotId ? parseInt(lotId) : undefined,
         locationId: locationId ? parseInt(locationId) : undefined,
+        limit: pageSize,
+        offset,
     }
 
-    const { data: serials = [], isLoading } = useSerialNumbers(queryParams)
+    const { data, isLoading } = useSerialNumbers(queryParams)
+    const serials = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
     const deleteSerial = useDeleteSerialNumber()
 
     const handleCreate = () => {
@@ -141,6 +148,7 @@ const SerialNumbersView = () => {
         setStatusFilter('')
         setLotId('')
         setLocationId('')
+        setPageIndex(1)
     }
 
     const columns: ColumnDef<SerialNumber>[] = [
@@ -327,6 +335,12 @@ const SerialNumbersView = () => {
                         columns={columns}
                         data={serials}
                         loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
                     />
                 </div>
             </Card>

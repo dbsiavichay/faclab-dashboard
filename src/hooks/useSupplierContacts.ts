@@ -10,7 +10,7 @@ export function useSupplierContacts(supplierId: number) {
             const response = await SupplierContactService.getSupplierContacts(
                 supplierId
             )
-            return response.data
+            return response.data.data
         },
         enabled: supplierId > 0,
     })
@@ -21,7 +21,7 @@ export function useSupplierContact(id: number) {
         queryKey: ['supplierContacts', 'detail', id],
         queryFn: async () => {
             const response = await SupplierContactService.getSupplierContact(id)
-            return response.data
+            return response.data.data
         },
         enabled: id > 0,
     })
@@ -42,7 +42,7 @@ export function useCreateSupplierContact() {
                 supplierId,
                 contact
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -67,7 +67,7 @@ export function useUpdateSupplierContact() {
                 id,
                 contact
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({

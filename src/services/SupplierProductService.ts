@@ -1,5 +1,6 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type { DataResponse } from '@/@types/api'
 
 export interface SupplierProduct {
     id: number
@@ -24,17 +25,13 @@ export interface SupplierProductInput {
     isPreferred?: boolean
 }
 
-export interface SupplierProductsResponse {
-    data: SupplierProduct[]
-}
-
 class SupplierProductService {
     private config = {
         host: appConfig.inventoryApiHost || 'http://localhost:3000',
     }
 
     async getSupplierProducts(supplierId: number) {
-        return ApiService.fetchData<SupplierProductsResponse>({
+        return ApiService.fetchData<DataResponse<SupplierProduct[]>>({
             url: `${this.config.host}/suppliers/${supplierId}/products`,
             method: 'get',
         })
@@ -44,7 +41,7 @@ class SupplierProductService {
         supplierId: number,
         product: SupplierProductInput
     ) {
-        return ApiService.fetchData<SupplierProduct>({
+        return ApiService.fetchData<DataResponse<SupplierProduct>>({
             url: `${this.config.host}/suppliers/${supplierId}/products`,
             method: 'post',
             data: product,
@@ -52,7 +49,7 @@ class SupplierProductService {
     }
 
     async updateSupplierProduct(id: number, product: SupplierProductInput) {
-        return ApiService.fetchData<SupplierProduct>({
+        return ApiService.fetchData<DataResponse<SupplierProduct>>({
             url: `${this.config.host}/supplier-products/${id}`,
             method: 'put',
             data: product,
@@ -67,7 +64,7 @@ class SupplierProductService {
     }
 
     async getSupplierProductsByProduct(productId: number) {
-        return ApiService.fetchData<SupplierProductsResponse>({
+        return ApiService.fetchData<DataResponse<SupplierProduct[]>>({
             url: `${this.config.host}/supplier-products/by-product/${productId}`,
             method: 'get',
         })

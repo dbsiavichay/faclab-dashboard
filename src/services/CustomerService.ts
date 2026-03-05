@@ -1,7 +1,11 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type {
+    PaginatedResponse,
+    DataResponse,
+    PaginationParams,
+} from '@/@types/api'
 
-// TaxType enum: 1=RUC, 2=NATIONAL_ID, 3=PASSPORT, 4=FOREIGN_ID
 export type TaxType = 1 | 2 | 3 | 4
 
 export const TAX_TYPE_LABELS: Record<TaxType, string> = {
@@ -42,38 +46,43 @@ export interface CustomerInput {
     isActive?: boolean
 }
 
-export interface CustomersResponse {
-    data: Customer[]
-}
-
 class CustomerService {
     private config = {
         host: appConfig.inventoryApiHost || 'http://localhost:3000',
     }
 
-    async getCustomers() {
-        return ApiService.fetchData<CustomersResponse>({
-            url: `${this.config.host}/customers`,
+    async getCustomers(params?: PaginationParams) {
+        const queryParams = new URLSearchParams()
+        if (params?.limit !== undefined)
+            queryParams.append('limit', params.limit.toString())
+        if (params?.offset !== undefined)
+            queryParams.append('offset', params.offset.toString())
+        const queryString = queryParams.toString()
+        const url = queryString
+            ? `${this.config.host}/customers?${queryString}`
+            : `${this.config.host}/customers`
+        return ApiService.fetchData<PaginatedResponse<Customer>>({
+            url,
             method: 'get',
         })
     }
 
     async getCustomer(id: number) {
-        return ApiService.fetchData<Customer>({
+        return ApiService.fetchData<DataResponse<Customer>>({
             url: `${this.config.host}/customers/${id}`,
             method: 'get',
         })
     }
 
     async searchCustomerByTaxId(taxId: string) {
-        return ApiService.fetchData<Customer>({
+        return ApiService.fetchData<DataResponse<Customer>>({
             url: `${this.config.host}/customers/search/by-tax-id?tax_id=${taxId}`,
             method: 'get',
         })
     }
 
     async createCustomer(customer: CustomerInput) {
-        return ApiService.fetchData<Customer>({
+        return ApiService.fetchData<DataResponse<Customer>>({
             url: `${this.config.host}/customers`,
             method: 'post',
             data: customer,
@@ -81,7 +90,7 @@ class CustomerService {
     }
 
     async updateCustomer(id: number, customer: CustomerInput) {
-        return ApiService.fetchData<Customer>({
+        return ApiService.fetchData<DataResponse<Customer>>({
             url: `${this.config.host}/customers/${id}`,
             method: 'put',
             data: customer,
@@ -96,14 +105,14 @@ class CustomerService {
     }
 
     async activateCustomer(id: number) {
-        return ApiService.fetchData<Customer>({
+        return ApiService.fetchData<DataResponse<Customer>>({
             url: `${this.config.host}/customers/${id}/activate`,
             method: 'post',
         })
     }
 
     async deactivateCustomer(id: number) {
-        return ApiService.fetchData<Customer>({
+        return ApiService.fetchData<DataResponse<Customer>>({
             url: `${this.config.host}/customers/${id}/deactivate`,
             method: 'post',
         })

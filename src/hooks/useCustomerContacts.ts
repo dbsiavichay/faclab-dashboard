@@ -10,7 +10,7 @@ export function useCustomerContacts(customerId: number) {
             const response = await CustomerContactService.getCustomerContacts(
                 customerId
             )
-            return response.data
+            return response.data.data
         },
         enabled: customerId > 0,
     })
@@ -21,7 +21,7 @@ export function useCustomerContact(id: number) {
         queryKey: ['customerContacts', 'detail', id],
         queryFn: async () => {
             const response = await CustomerContactService.getCustomerContact(id)
-            return response.data
+            return response.data.data
         },
         enabled: id > 0,
     })
@@ -42,10 +42,9 @@ export function useCreateCustomerContact() {
                 customerId,
                 contact
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: (_, variables) => {
-            // Invalidate the contacts list for this customer
             queryClient.invalidateQueries({
                 queryKey: ['customerContacts', variables.customerId],
             })
@@ -68,14 +67,12 @@ export function useUpdateCustomerContact() {
                 id,
                 contact
             )
-            return response.data
+            return response.data.data
         },
         onSuccess: (data) => {
-            // Invalidate the contacts list for this customer
             queryClient.invalidateQueries({
                 queryKey: ['customerContacts', data.customerId],
             })
-            // Invalidate the specific contact
             queryClient.invalidateQueries({
                 queryKey: ['customerContacts', 'detail', data.id],
             })
@@ -87,17 +84,10 @@ export function useDeleteCustomerContact() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({
-            id,
-            customerId: _customerId,
-        }: {
-            id: number
-            customerId: number
-        }) => {
+        mutationFn: async ({ id }: { id: number; customerId: number }) => {
             await CustomerContactService.deleteCustomerContact(id)
         },
         onSuccess: (_, variables) => {
-            // Invalidate the contacts list for this customer
             queryClient.invalidateQueries({
                 queryKey: ['customerContacts', variables.customerId],
             })

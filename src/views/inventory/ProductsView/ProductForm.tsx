@@ -28,8 +28,10 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
 
     const createProduct = useCreateProduct()
     const updateProduct = useUpdateProduct()
-    const { data: categories = [] } = useCategories()
-    const { data: unitsOfMeasure = [] } = useUnitsOfMeasure()
+    const { data: categoriesData } = useCategories()
+    const categories = categoriesData?.items ?? []
+    const { data: unitsData } = useUnitsOfMeasure()
+    const unitsOfMeasure = unitsData?.items ?? []
 
     const isEdit = !!product
 

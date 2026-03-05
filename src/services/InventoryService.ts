@@ -1,7 +1,11 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type {
+    PaginatedResponse,
+    DataResponse,
+    PaginationParams,
+} from '@/@types/api'
 
-// Interfaces para el servicio de inventario
 export interface Product {
     id: number
     name: string
@@ -20,10 +24,6 @@ export interface ProductInput {
     [key: string]: unknown
 }
 
-export interface ProductResponse {
-    data: Product[]
-}
-
 export interface InventoryConfig {
     host: string
 }
@@ -34,71 +34,55 @@ class InventoryService {
     }
 
     constructor() {
-        // Usa el host específico para inventario si está definido, o el apiPrefix general
         this.config.host = appConfig.enableMock
             ? appConfig.apiPrefix
             : appConfig.inventoryApiHost || ''
     }
 
-    /**
-     * Configura el host para el servicio de inventario
-     * @param config Configuración del servicio
-     */
     setConfig(config: Partial<InventoryConfig>) {
         this.config = { ...this.config, ...config }
         return this
     }
 
-    /**
-     * Obtiene la lista completa de productos
-     */
-    async getProducts() {
-        return ApiService.fetchData<ProductResponse>({
-            url: `${this.config.host}/products`,
+    async getProducts(params?: PaginationParams) {
+        const queryParams = new URLSearchParams()
+        if (params?.limit !== undefined)
+            queryParams.append('limit', params.limit.toString())
+        if (params?.offset !== undefined)
+            queryParams.append('offset', params.offset.toString())
+        const queryString = queryParams.toString()
+        const url = queryString
+            ? `${this.config.host}/products?${queryString}`
+            : `${this.config.host}/products`
+        return ApiService.fetchData<PaginatedResponse<Product>>({
+            url,
             method: 'get',
         })
     }
 
-    /**
-     * Obtiene un producto por su ID
-     * @param id ID del producto
-     */
     async getProductById(id: number) {
-        return ApiService.fetchData<Product>({
+        return ApiService.fetchData<DataResponse<Product>>({
             url: `${this.config.host}/products/${id}`,
             method: 'get',
         })
     }
 
-    /**
-     * Crea un nuevo producto
-     * @param product Datos del producto
-     */
     async createProduct(product: ProductInput) {
-        return ApiService.fetchData<Product>({
+        return ApiService.fetchData<DataResponse<Product>>({
             url: `${this.config.host}/products`,
             method: 'post',
             data: product,
         })
     }
 
-    /**
-     * Actualiza un producto existente
-     * @param id ID del producto
-     * @param product Datos del producto
-     */
     async updateProduct(id: number, product: Partial<ProductInput>) {
-        return ApiService.fetchData<Product>({
+        return ApiService.fetchData<DataResponse<Product>>({
             url: `${this.config.host}/products/${id}`,
             method: 'put',
             data: product,
         })
     }
 
-    /**
-     * Elimina un producto
-     * @param id ID del producto
-     */
     async deleteProduct(id: number) {
         return ApiService.fetchData({
             url: `${this.config.host}/products/${id}`,

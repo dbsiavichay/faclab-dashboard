@@ -1,5 +1,10 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type {
+    PaginatedResponse,
+    DataResponse,
+    PaginationParams,
+} from '@/@types/api'
 
 export type SerialStatus =
     | 'AVAILABLE'
@@ -39,7 +44,7 @@ export interface SerialNumberInput {
     notes?: string
 }
 
-export interface SerialNumberQueryParams {
+export interface SerialNumberQueryParams extends PaginationParams {
     productId?: number
     status?: SerialStatus
     lotId?: number
@@ -66,27 +71,33 @@ class SerialNumberService {
         if (params?.locationId) {
             queryParams.append('locationId', params.locationId.toString())
         }
+        if (params?.limit !== undefined) {
+            queryParams.append('limit', params.limit.toString())
+        }
+        if (params?.offset !== undefined) {
+            queryParams.append('offset', params.offset.toString())
+        }
 
         const queryString = queryParams.toString()
         const url = queryString
             ? `${this.config.host}/serials?${queryString}`
             : `${this.config.host}/serials`
 
-        return ApiService.fetchData<SerialNumber[]>({
+        return ApiService.fetchData<PaginatedResponse<SerialNumber>>({
             url,
             method: 'get',
         })
     }
 
     async getSerialNumber(id: number) {
-        return ApiService.fetchData<SerialNumber>({
+        return ApiService.fetchData<DataResponse<SerialNumber>>({
             url: `${this.config.host}/serials/${id}`,
             method: 'get',
         })
     }
 
     async createSerialNumber(serialNumber: SerialNumberInput) {
-        return ApiService.fetchData<SerialNumber>({
+        return ApiService.fetchData<DataResponse<SerialNumber>>({
             url: `${this.config.host}/serials`,
             method: 'post',
             data: serialNumber,
@@ -94,7 +105,7 @@ class SerialNumberService {
     }
 
     async updateSerialNumber(id: number, serialNumber: SerialNumberInput) {
-        return ApiService.fetchData<SerialNumber>({
+        return ApiService.fetchData<DataResponse<SerialNumber>>({
             url: `${this.config.host}/serials/${id}`,
             method: 'put',
             data: serialNumber,
@@ -109,7 +120,7 @@ class SerialNumberService {
     }
 
     async changeStatus(id: number, status: SerialStatus) {
-        return ApiService.fetchData<SerialNumber>({
+        return ApiService.fetchData<DataResponse<SerialNumber>>({
             url: `${this.config.host}/serials/${id}/status`,
             method: 'put',
             data: { status },

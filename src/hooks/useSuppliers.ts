@@ -1,13 +1,21 @@
 import SupplierService, { SupplierInput } from '@/services/SupplierService'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+    keepPreviousData,
+} from '@tanstack/react-query'
+import type { PaginationParams } from '@/@types/api'
 
-export function useSuppliers() {
+export function useSuppliers(params?: PaginationParams) {
     return useQuery({
-        queryKey: ['suppliers'],
+        queryKey: ['suppliers', params],
         queryFn: async () => {
-            const response = await SupplierService.getSuppliers()
-            return response.data
+            const response = await SupplierService.getSuppliers(params)
+            const body = response.data
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }
 
@@ -16,7 +24,7 @@ export function useSupplier(id: number) {
         queryKey: ['suppliers', id],
         queryFn: async () => {
             const response = await SupplierService.getSupplier(id)
-            return response.data
+            return response.data.data
         },
         enabled: id > 0,
     })
@@ -28,7 +36,7 @@ export function useCreateSupplier() {
     return useMutation({
         mutationFn: async (supplier: SupplierInput) => {
             const response = await SupplierService.createSupplier(supplier)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['suppliers'] })
@@ -48,7 +56,7 @@ export function useUpdateSupplier() {
             data: SupplierInput
         }) => {
             const response = await SupplierService.updateSupplier(id, data)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['suppliers'] })
@@ -75,7 +83,7 @@ export function useActivateSupplier() {
     return useMutation({
         mutationFn: async (id: number) => {
             const response = await SupplierService.activateSupplier(id)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['suppliers'] })
@@ -89,7 +97,7 @@ export function useDeactivateSupplier() {
     return useMutation({
         mutationFn: async (id: number) => {
             const response = await SupplierService.deactivateSupplier(id)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['suppliers'] })

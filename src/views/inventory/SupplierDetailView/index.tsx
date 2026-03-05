@@ -45,7 +45,8 @@ const SupplierDetailView = () => {
         useSupplierContacts(supplierId)
     const { data: supplierProducts = [], isLoading: productsLoading } =
         useSupplierProducts(supplierId)
-    const { data: products = [] } = useProducts()
+    const { data: productsData } = useProducts()
+    const products = productsData?.items ?? []
     const deleteContact = useDeleteSupplierContact()
     const deleteSupplierProduct = useDeleteSupplierProduct()
 

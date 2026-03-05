@@ -1,5 +1,6 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type { DataResponse } from '@/@types/api'
 
 export interface SupplierContact {
     id: number
@@ -17,24 +18,20 @@ export interface SupplierContactInput {
     phone?: string
 }
 
-export interface SupplierContactsResponse {
-    data: SupplierContact[]
-}
-
 class SupplierContactService {
     private config = {
         host: appConfig.inventoryApiHost || 'http://localhost:3000',
     }
 
     async getSupplierContacts(supplierId: number) {
-        return ApiService.fetchData<SupplierContactsResponse>({
+        return ApiService.fetchData<DataResponse<SupplierContact[]>>({
             url: `${this.config.host}/suppliers/${supplierId}/contacts`,
             method: 'get',
         })
     }
 
     async getSupplierContact(id: number) {
-        return ApiService.fetchData<SupplierContact>({
+        return ApiService.fetchData<DataResponse<SupplierContact>>({
             url: `${this.config.host}/supplier-contacts/${id}`,
             method: 'get',
         })
@@ -44,7 +41,7 @@ class SupplierContactService {
         supplierId: number,
         contact: SupplierContactInput
     ) {
-        return ApiService.fetchData<SupplierContact>({
+        return ApiService.fetchData<DataResponse<SupplierContact>>({
             url: `${this.config.host}/suppliers/${supplierId}/contacts`,
             method: 'post',
             data: contact,
@@ -52,7 +49,7 @@ class SupplierContactService {
     }
 
     async updateSupplierContact(id: number, contact: SupplierContactInput) {
-        return ApiService.fetchData<SupplierContact>({
+        return ApiService.fetchData<DataResponse<SupplierContact>>({
             url: `${this.config.host}/supplier-contacts/${id}`,
             method: 'put',
             data: contact,

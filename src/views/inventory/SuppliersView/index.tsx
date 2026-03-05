@@ -6,8 +6,8 @@ import {
     useActivateSupplier,
     useDeactivateSupplier,
 } from '@/hooks'
+import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
-import Table from '@/components/ui/Table'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
@@ -26,11 +26,8 @@ import {
     HiOutlineEye,
 } from 'react-icons/hi'
 
-const { Tr, Th, Td, THead, TBody } = Table
-
 const SuppliersView = () => {
     const navigate = useNavigate()
-    const { data: suppliers = [], isLoading } = useSuppliers()
     const deleteSupplier = useDeleteSupplier()
     const activateSupplier = useActivateSupplier()
     const deactivateSupplier = useDeactivateSupplier()
@@ -43,6 +40,14 @@ const SuppliersView = () => {
     const [supplierToDelete, setSupplierToDelete] = useState<Supplier | null>(
         null
     )
+
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
+
+    const { data, isLoading } = useSuppliers({ limit: pageSize, offset })
+    const suppliers = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
 
     const handleEdit = (supplier: Supplier) => {
         setSelectedSupplier(supplier)
@@ -119,142 +124,152 @@ const SuppliersView = () => {
         }
     }
 
-    return (
-        <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <h3>Proveedores</h3>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlinePlus />}
-                    onClick={handleCreate}
-                >
-                    Nuevo Proveedor
-                </Button>
-            </div>
-
-            <Card>
-                {isLoading ? (
-                    <div className="flex justify-center items-center h-48">
-                        <div>Cargando...</div>
-                    </div>
-                ) : (
-                    <Table>
-                        <THead>
-                            <Tr>
-                                <Th>ID</Th>
-                                <Th>Nombre</Th>
-                                <Th>Tax ID</Th>
-                                <Th>Tipo</Th>
-                                <Th>Email</Th>
-                                <Th>Teléfono</Th>
-                                <Th>Ciudad</Th>
-                                <Th>Estado</Th>
-                                <Th>Acciones</Th>
-                            </Tr>
-                        </THead>
-                        <TBody>
-                            {suppliers.length === 0 ? (
-                                <Tr>
-                                    <Td
-                                        colSpan={9}
-                                        className="text-center py-8"
-                                    >
-                                        No hay proveedores registrados
-                                    </Td>
-                                </Tr>
+    const columns: ColumnDef<Supplier>[] = [
+        {
+            header: 'ID',
+            accessorKey: 'id',
+            cell: (props) => {
+                const { row } = props
+                return <span className="font-medium">#{row.original.id}</span>
+            },
+        },
+        {
+            header: 'Nombre',
+            accessorKey: 'name',
+            cell: (props) => {
+                const { row } = props
+                return (
+                    <span className="font-semibold">{row.original.name}</span>
+                )
+            },
+        },
+        {
+            header: 'Tax ID',
+            accessorKey: 'taxId',
+        },
+        {
+            header: 'Tipo',
+            accessorKey: 'taxType',
+            cell: ({ row }) => TAX_TYPE_LABELS[row.original.taxType],
+        },
+        {
+            header: 'Email',
+            accessorKey: 'email',
+            cell: ({ row }) => row.original.email || '-',
+        },
+        {
+            header: 'Teléfono',
+            accessorKey: 'phone',
+            cell: ({ row }) => row.original.phone || '-',
+        },
+        {
+            header: 'Ciudad',
+            accessorKey: 'city',
+            cell: ({ row }) => row.original.city || '-',
+        },
+        {
+            header: 'Estado',
+            accessorKey: 'isActive',
+            cell: ({ row }) => (
+                <Badge
+                    content={row.original.isActive ? 'Activo' : 'Inactivo'}
+                    className={
+                        row.original.isActive
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                    }
+                />
+            ),
+        },
+        {
+            header: 'Acciones',
+            id: 'actions',
+            cell: ({ row }) => (
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlineEye />}
+                        onClick={() =>
+                            navigate(`/suppliers/${row.original.id}`)
+                        }
+                    />
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlinePencil />}
+                        onClick={() => handleEdit(row.original)}
+                    />
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={
+                            row.original.isActive ? (
+                                <HiOutlineXCircle />
                             ) : (
-                                suppliers.map((supplier) => (
-                                    <Tr key={supplier.id}>
-                                        <Td>{supplier.id}</Td>
-                                        <Td>{supplier.name}</Td>
-                                        <Td>{supplier.taxId}</Td>
-                                        <Td>
-                                            {TAX_TYPE_LABELS[supplier.taxType]}
-                                        </Td>
-                                        <Td>{supplier.email || '-'}</Td>
-                                        <Td>{supplier.phone || '-'}</Td>
-                                        <Td>{supplier.city || '-'}</Td>
-                                        <Td>
-                                            <Badge
-                                                content={
-                                                    supplier.isActive
-                                                        ? 'Activo'
-                                                        : 'Inactivo'
-                                                }
-                                                className={
-                                                    supplier.isActive
-                                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                                                }
-                                            />
-                                        </Td>
-                                        <Td>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="plain"
-                                                    icon={<HiOutlineEye />}
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/suppliers/${supplier.id}`
-                                                        )
-                                                    }
-                                                />
-                                                <Button
-                                                    size="sm"
-                                                    variant="plain"
-                                                    icon={<HiOutlinePencil />}
-                                                    onClick={() =>
-                                                        handleEdit(supplier)
-                                                    }
-                                                />
-                                                <Button
-                                                    size="sm"
-                                                    variant="plain"
-                                                    icon={
-                                                        supplier.isActive ? (
-                                                            <HiOutlineXCircle />
-                                                        ) : (
-                                                            <HiOutlineCheckCircle />
-                                                        )
-                                                    }
-                                                    onClick={() =>
-                                                        handleToggleStatus(
-                                                            supplier
-                                                        )
-                                                    }
-                                                />
-                                                <Button
-                                                    size="sm"
-                                                    variant="plain"
-                                                    icon={<HiOutlineTrash />}
-                                                    onClick={() =>
-                                                        handleDeleteClick(
-                                                            supplier
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                        </Td>
-                                    </Tr>
-                                ))
-                            )}
-                        </TBody>
-                    </Table>
-                )}
+                                <HiOutlineCheckCircle />
+                            )
+                        }
+                        onClick={() => handleToggleStatus(row.original)}
+                    />
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlineTrash />}
+                        onClick={() => handleDeleteClick(row.original)}
+                    />
+                </div>
+            ),
+        },
+    ]
+
+    return (
+        <>
+            <Card>
+                <div className="p-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h4 className="text-lg font-semibold">
+                                Proveedores
+                            </h4>
+                            <p className="text-sm text-gray-500 mt-1">
+                                Gestiona los proveedores registrados
+                            </p>
+                        </div>
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiOutlinePlus />}
+                            onClick={handleCreate}
+                        >
+                            Nuevo Proveedor
+                        </Button>
+                    </div>
+
+                    <DataTable
+                        columns={columns}
+                        data={suppliers}
+                        loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
+                    />
+                </div>
             </Card>
 
-            {/* Form Modal */}
             <SupplierForm
                 open={formOpen}
                 supplier={selectedSupplier}
                 onClose={handleCloseForm}
             />
 
-            {/* Delete Confirmation Dialog */}
             <Dialog
                 isOpen={deleteDialogOpen}
                 onClose={() => setDeleteDialogOpen(false)}
+                onRequestClose={() => setDeleteDialogOpen(false)}
             >
                 <h5 className="mb-4">Confirmar eliminación</h5>
                 <p className="mb-6">
@@ -278,7 +293,7 @@ const SuppliersView = () => {
                     </Button>
                 </div>
             </Dialog>
-        </div>
+        </>
     )
 }
 

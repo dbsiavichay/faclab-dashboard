@@ -21,7 +21,13 @@ const CategoriesView = () => {
         category: Category | null
     }>({ open: false, category: null })
 
-    const { data: categories = [], isLoading } = useCategories()
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
+
+    const { data, isLoading } = useCategories({ limit: pageSize, offset })
+    const categories = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
     const deleteCategory = useDeleteCategory()
 
     const handleCreate = () => {
@@ -153,6 +159,12 @@ const CategoriesView = () => {
                         columns={columns}
                         data={categories}
                         loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
                     />
                 </div>
             </Card>

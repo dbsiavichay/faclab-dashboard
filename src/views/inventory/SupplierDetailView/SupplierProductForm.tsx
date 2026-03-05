@@ -41,7 +41,8 @@ const SupplierProductForm = ({
 
     const createSupplierProduct = useCreateSupplierProduct()
     const updateSupplierProduct = useUpdateSupplierProduct()
-    const { data: products = [] } = useProducts()
+    const { data: productsData } = useProducts()
+    const products = productsData?.items ?? []
 
     const isEdit = !!supplierProduct
 

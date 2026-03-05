@@ -23,13 +23,20 @@ const LotsView = () => {
 
     const [productId, setProductId] = useState<string>('')
     const [expiringInDays, setExpiringInDays] = useState<string>('')
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
 
     const queryParams: LotQueryParams = {
         productId: productId ? parseInt(productId) : undefined,
         expiringInDays: expiringInDays ? parseInt(expiringInDays) : undefined,
+        limit: pageSize,
+        offset,
     }
 
-    const { data: lots = [], isLoading } = useLots(queryParams)
+    const { data, isLoading } = useLots(queryParams)
+    const lots = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
     const deleteLot = useDeleteLot()
 
     const handleCreate = () => {
@@ -81,6 +88,7 @@ const LotsView = () => {
     const handleReset = () => {
         setProductId('')
         setExpiringInDays('')
+        setPageIndex(1)
     }
 
     const getExpiryBadge = (lot: Lot) => {
@@ -296,6 +304,12 @@ const LotsView = () => {
                         columns={columns}
                         data={lots}
                         loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
                     />
                 </div>
             </Card>

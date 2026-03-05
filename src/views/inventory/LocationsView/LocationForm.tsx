@@ -40,7 +40,8 @@ const LocationForm = ({ open, onClose, location }: LocationFormProps) => {
 
     const createLocation = useCreateLocation()
     const updateLocation = useUpdateLocation()
-    const { data: warehouses = [] } = useWarehouses({ isActive: true })
+    const { data: warehousesData } = useWarehouses({ isActive: true })
+    const warehouses = warehousesData?.items ?? []
 
     const isEdit = !!location
 

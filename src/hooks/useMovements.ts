@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+    useQuery,
+    useMutation,
+    useQueryClient,
+    keepPreviousData,
+} from '@tanstack/react-query'
 import MovementService, {
     MovementInput,
     MovementQueryParams,
@@ -9,8 +14,10 @@ export function useMovements(params?: MovementQueryParams) {
         queryKey: ['movements', params],
         queryFn: async () => {
             const response = await MovementService.getMovements(params)
-            return response.data
+            const body = response.data
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }
 
@@ -20,12 +27,10 @@ export function useCreateMovement() {
     return useMutation({
         mutationFn: async (movement: MovementInput) => {
             const response = await MovementService.createMovement(movement)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
-            // Invalidate all movement queries to refetch
             queryClient.invalidateQueries({ queryKey: ['movements'] })
-            // Also invalidate stock queries since movements affect stock
             queryClient.invalidateQueries({ queryKey: ['stock'] })
         },
     })

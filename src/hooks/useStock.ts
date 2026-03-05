@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import StockService, { StockQueryParams } from '@/services/StockService'
 
 export function useStock(params?: StockQueryParams) {
@@ -6,7 +6,9 @@ export function useStock(params?: StockQueryParams) {
         queryKey: ['stock', params],
         queryFn: async () => {
             const response = await StockService.getStock(params)
-            return response.data
+            const body = response.data
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }

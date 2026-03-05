@@ -21,24 +21,31 @@ const ProductsView = () => {
         product: Product | null
     }>({ open: false, product: null })
 
-    const { data: products = [], isLoading } = useProducts()
-    const { data: categories = [] } = useCategories()
-    const { data: unitsOfMeasure = [] } = useUnitsOfMeasure()
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
+
+    const { data, isLoading } = useProducts({ limit: pageSize, offset })
+    const items = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
+
+    const { data: categoriesData } = useCategories()
+    const { data: unitsData } = useUnitsOfMeasure()
     const deleteProduct = useDeleteProduct()
 
-    // Create a lookup map for category ID to name
     const categoryMap = useMemo(() => {
+        const categories = categoriesData?.items ?? []
         const map = new Map<number, string>()
         categories.forEach((cat) => map.set(cat.id, cat.name))
         return map
-    }, [categories])
+    }, [categoriesData])
 
-    // Create a lookup map for unit of measure ID to symbol
     const unitMap = useMemo(() => {
+        const unitsOfMeasure = unitsData?.items ?? []
         const map = new Map<number, string>()
         unitsOfMeasure.forEach((u) => map.set(u.id, u.symbol))
         return map
-    }, [unitsOfMeasure])
+    }, [unitsData])
 
     const handleCreate = () => {
         setSelectedProduct(null)
@@ -213,20 +220,24 @@ const ProductsView = () => {
 
                     <DataTable
                         columns={columns}
-                        data={products}
+                        data={items}
                         loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
                     />
                 </div>
             </Card>
 
-            {/* Form Modal */}
             <ProductForm
                 open={isFormOpen}
                 product={selectedProduct}
                 onClose={handleFormClose}
             />
 
-            {/* Delete Confirmation Dialog */}
             <Dialog
                 isOpen={deleteDialog.open}
                 onClose={() => setDeleteDialog({ open: false, product: null })}

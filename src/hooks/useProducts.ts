@@ -1,59 +1,64 @@
 import InventoryService, { ProductInput } from '@/services/InventoryService'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+    keepPreviousData,
+} from '@tanstack/react-query'
+import type { PaginationParams } from '@/@types/api'
 
-// GET /products - Obtener todos los productos
-export function useProducts() {
+export function useProducts(params?: PaginationParams) {
     return useQuery({
-        queryKey: ['products'],
+        queryKey: ['products', params],
         queryFn: async () => {
-            const response = await InventoryService.getProducts()
-            return response.data
+            const response = await InventoryService.getProducts(params)
+            const body = response.data
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }
 
-// GET /products/:id - Obtener un producto por ID
 export function useProduct(id: number) {
     return useQuery({
         queryKey: ['products', id],
         queryFn: async () => {
             const response = await InventoryService.getProductById(id)
-            return response.data
+            return response.data.data
         },
         enabled: !!id,
     })
 }
 
-// POST /products - Crear un nuevo producto
 export function useCreateProduct() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (product: ProductInput) =>
-            InventoryService.createProduct(product),
-
+        mutationFn: async (product: ProductInput) => {
+            const response = await InventoryService.createProduct(product)
+            return response.data.data
+        },
         onSuccess: () => {
-            // Invalida el cache para refrescar la lista
             queryClient.invalidateQueries({ queryKey: ['products'] })
         },
     })
 }
 
-// PUT /products/:id - Actualizar un producto
 export function useUpdateProduct() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: ({
+        mutationFn: async ({
             id,
             data,
         }: {
             id: number
             data: Partial<ProductInput>
-        }) => InventoryService.updateProduct(id, data),
-
+        }) => {
+            const response = await InventoryService.updateProduct(id, data)
+            return response.data.data
+        },
         onSuccess: (_, variables) => {
-            // Invalida el producto específico y la lista
             queryClient.invalidateQueries({
                 queryKey: ['products', variables.id],
             })
@@ -62,13 +67,11 @@ export function useUpdateProduct() {
     })
 }
 
-// DELETE /products/:id - Eliminar un producto
 export function useDeleteProduct() {
     const queryClient = useQueryClient()
 
     return useMutation({
         mutationFn: (id: number) => InventoryService.deleteProduct(id),
-
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] })
         },

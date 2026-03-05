@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+    useQuery,
+    useMutation,
+    useQueryClient,
+    keepPreviousData,
+} from '@tanstack/react-query'
 import LotService, {
     type LotInput,
     type LotQueryParams,
@@ -9,8 +14,10 @@ export function useLots(params?: LotQueryParams) {
         queryKey: ['lots', params],
         queryFn: async () => {
             const response = await LotService.getLots(params)
-            return response.data
+            const body = response.data
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }
 
@@ -19,7 +26,7 @@ export function useLot(id: number) {
         queryKey: ['lots', id],
         queryFn: async () => {
             const response = await LotService.getLot(id)
-            return response.data
+            return response.data.data
         },
         enabled: id > 0,
     })
@@ -31,7 +38,7 @@ export function useCreateLot() {
     return useMutation({
         mutationFn: async (lot: LotInput) => {
             const response = await LotService.createLot(lot)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['lots'] })
@@ -45,7 +52,7 @@ export function useUpdateLot() {
     return useMutation({
         mutationFn: async ({ id, data }: { id: number; data: LotInput }) => {
             const response = await LotService.updateLot(id, data)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['lots'] })

@@ -1,13 +1,21 @@
 import CustomerService, { CustomerInput } from '@/services/CustomerService'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+    keepPreviousData,
+} from '@tanstack/react-query'
+import type { PaginationParams } from '@/@types/api'
 
-export function useCustomers() {
+export function useCustomers(params?: PaginationParams) {
     return useQuery({
-        queryKey: ['customers'],
+        queryKey: ['customers', params],
         queryFn: async () => {
-            const response = await CustomerService.getCustomers()
-            return response.data
+            const response = await CustomerService.getCustomers(params)
+            const body = response.data
+            return { items: body.data, pagination: body.meta.pagination }
         },
+        placeholderData: keepPreviousData,
     })
 }
 
@@ -16,7 +24,7 @@ export function useCustomer(id: number) {
         queryKey: ['customers', id],
         queryFn: async () => {
             const response = await CustomerService.getCustomer(id)
-            return response.data
+            return response.data.data
         },
         enabled: id > 0,
     })
@@ -27,7 +35,7 @@ export function useSearchCustomerByTaxId(taxId: string) {
         queryKey: ['customers', 'search', taxId],
         queryFn: async () => {
             const response = await CustomerService.searchCustomerByTaxId(taxId)
-            return response.data
+            return response.data.data
         },
         enabled: !!taxId,
     })
@@ -39,7 +47,7 @@ export function useCreateCustomer() {
     return useMutation({
         mutationFn: async (customer: CustomerInput) => {
             const response = await CustomerService.createCustomer(customer)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -59,7 +67,7 @@ export function useUpdateCustomer() {
             data: CustomerInput
         }) => {
             const response = await CustomerService.updateCustomer(id, data)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -86,7 +94,7 @@ export function useActivateCustomer() {
     return useMutation({
         mutationFn: async (id: number) => {
             const response = await CustomerService.activateCustomer(id)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -100,7 +108,7 @@ export function useDeactivateCustomer() {
     return useMutation({
         mutationFn: async (id: number) => {
             const response = await CustomerService.deactivateCustomer(id)
-            return response.data
+            return response.data.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })

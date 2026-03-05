@@ -1,5 +1,6 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type { PaginatedResponse, DataResponse } from '@/@types/api'
 
 export type MovementType = 'in' | 'out'
 
@@ -9,7 +10,7 @@ export interface Movement {
     quantity: number
     type: MovementType
     reason?: string | null
-    date?: string | null // ISO 8601 datetime
+    date?: string | null
 }
 
 export interface MovementInput {
@@ -17,16 +18,16 @@ export interface MovementInput {
     quantity: number
     type: MovementType
     reason?: string
-    date?: string // ISO 8601 datetime
+    date?: string
 }
 
 export interface MovementQueryParams {
     productId?: number
     type?: MovementType
-    fromDate?: string // ISO 8601 datetime
-    toDate?: string // ISO 8601 datetime
-    limit?: number // default: 100, range: 1-1000
-    offset?: number // default: 0
+    fromDate?: string
+    toDate?: string
+    limit?: number
+    offset?: number
 }
 
 class MovementService {
@@ -34,12 +35,6 @@ class MovementService {
         host: appConfig.inventoryApiHost || 'http://localhost:3000',
     }
 
-    /**
-     * Validates a movement before sending to API
-     * - If type is "in", quantity must be positive
-     * - If type is "out", quantity must be negative
-     * - Quantity cannot be zero
-     */
     validateMovement(movement: MovementInput): {
         valid: boolean
         error?: string
@@ -92,20 +87,19 @@ class MovementService {
             ? `${this.config.host}/movements?${queryString}`
             : `${this.config.host}/movements`
 
-        return ApiService.fetchData<Movement[]>({
+        return ApiService.fetchData<PaginatedResponse<Movement>>({
             url,
             method: 'get',
         })
     }
 
     async createMovement(movement: MovementInput) {
-        // Validate before sending
         const validation = this.validateMovement(movement)
         if (!validation.valid) {
             throw new Error(validation.error)
         }
 
-        return ApiService.fetchData<Movement>({
+        return ApiService.fetchData<DataResponse<Movement>>({
             url: `${this.config.host}/movements`,
             method: 'post',
             data: movement,

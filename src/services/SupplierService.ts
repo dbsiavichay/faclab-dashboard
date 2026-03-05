@@ -1,7 +1,11 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type {
+    PaginatedResponse,
+    DataResponse,
+    PaginationParams,
+} from '@/@types/api'
 
-// TaxType enum: 1=RUC, 2=NATIONAL_ID, 3=PASSPORT, 4=FOREIGN_ID
 export type TaxType = 1 | 2 | 3 | 4
 
 export const TAX_TYPE_LABELS: Record<TaxType, string> = {
@@ -46,31 +50,36 @@ export interface SupplierInput {
     isActive?: boolean
 }
 
-export interface SuppliersResponse {
-    data: Supplier[]
-}
-
 class SupplierService {
     private config = {
         host: appConfig.inventoryApiHost || 'http://localhost:3000',
     }
 
-    async getSuppliers() {
-        return ApiService.fetchData<SuppliersResponse>({
-            url: `${this.config.host}/suppliers`,
+    async getSuppliers(params?: PaginationParams) {
+        const queryParams = new URLSearchParams()
+        if (params?.limit !== undefined)
+            queryParams.append('limit', params.limit.toString())
+        if (params?.offset !== undefined)
+            queryParams.append('offset', params.offset.toString())
+        const queryString = queryParams.toString()
+        const url = queryString
+            ? `${this.config.host}/suppliers?${queryString}`
+            : `${this.config.host}/suppliers`
+        return ApiService.fetchData<PaginatedResponse<Supplier>>({
+            url,
             method: 'get',
         })
     }
 
     async getSupplier(id: number) {
-        return ApiService.fetchData<Supplier>({
+        return ApiService.fetchData<DataResponse<Supplier>>({
             url: `${this.config.host}/suppliers/${id}`,
             method: 'get',
         })
     }
 
     async createSupplier(supplier: SupplierInput) {
-        return ApiService.fetchData<Supplier>({
+        return ApiService.fetchData<DataResponse<Supplier>>({
             url: `${this.config.host}/suppliers`,
             method: 'post',
             data: supplier,
@@ -78,7 +87,7 @@ class SupplierService {
     }
 
     async updateSupplier(id: number, supplier: SupplierInput) {
-        return ApiService.fetchData<Supplier>({
+        return ApiService.fetchData<DataResponse<Supplier>>({
             url: `${this.config.host}/suppliers/${id}`,
             method: 'put',
             data: supplier,
@@ -93,14 +102,14 @@ class SupplierService {
     }
 
     async activateSupplier(id: number) {
-        return ApiService.fetchData<Supplier>({
+        return ApiService.fetchData<DataResponse<Supplier>>({
             url: `${this.config.host}/suppliers/${id}/activate`,
             method: 'post',
         })
     }
 
     async deactivateSupplier(id: number) {
-        return ApiService.fetchData<Supplier>({
+        return ApiService.fetchData<DataResponse<Supplier>>({
             url: `${this.config.host}/suppliers/${id}/deactivate`,
             method: 'post',
         })

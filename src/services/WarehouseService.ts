@@ -1,5 +1,10 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type {
+    PaginatedResponse,
+    DataResponse,
+    PaginationParams,
+} from '@/@types/api'
 
 export interface Warehouse {
     id: number
@@ -29,6 +34,10 @@ export interface WarehouseInput {
     [key: string]: unknown
 }
 
+export interface WarehouseQueryParams extends PaginationParams {
+    isActive?: boolean
+}
+
 class WarehouseService {
     private host: string
 
@@ -38,23 +47,33 @@ class WarehouseService {
             : appConfig.inventoryApiHost || ''
     }
 
-    async getWarehouses(params?: { isActive?: boolean }) {
-        return ApiService.fetchData<Warehouse[]>({
-            url: `${this.host}/warehouses`,
+    async getWarehouses(params?: WarehouseQueryParams) {
+        const queryParams = new URLSearchParams()
+        if (params?.isActive !== undefined)
+            queryParams.append('isActive', params.isActive.toString())
+        if (params?.limit !== undefined)
+            queryParams.append('limit', params.limit.toString())
+        if (params?.offset !== undefined)
+            queryParams.append('offset', params.offset.toString())
+        const queryString = queryParams.toString()
+        const url = queryString
+            ? `${this.host}/warehouses?${queryString}`
+            : `${this.host}/warehouses`
+        return ApiService.fetchData<PaginatedResponse<Warehouse>>({
+            url,
             method: 'get',
-            params,
         })
     }
 
     async getWarehouseById(id: number) {
-        return ApiService.fetchData<Warehouse>({
+        return ApiService.fetchData<DataResponse<Warehouse>>({
             url: `${this.host}/warehouses/${id}`,
             method: 'get',
         })
     }
 
     async createWarehouse(data: WarehouseInput) {
-        return ApiService.fetchData<Warehouse>({
+        return ApiService.fetchData<DataResponse<Warehouse>>({
             url: `${this.host}/warehouses`,
             method: 'post',
             data,
@@ -62,7 +81,7 @@ class WarehouseService {
     }
 
     async updateWarehouse(id: number, data: Partial<WarehouseInput>) {
-        return ApiService.fetchData<Warehouse>({
+        return ApiService.fetchData<DataResponse<Warehouse>>({
             url: `${this.host}/warehouses/${id}`,
             method: 'put',
             data,

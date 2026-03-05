@@ -1,5 +1,6 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type { PaginatedResponse } from '@/@types/api'
 
 export interface Stock {
     id: number
@@ -10,8 +11,8 @@ export interface Stock {
 
 export interface StockQueryParams {
     productId?: number
-    limit?: number // default: 100, range: 1-1000
-    offset?: number // default: 0
+    limit?: number
+    offset?: number
 }
 
 class StockService {
@@ -37,7 +38,7 @@ class StockService {
             ? `${this.config.host}/stock?${queryString}`
             : `${this.config.host}/stock`
 
-        return ApiService.fetchData<Stock[]>({
+        return ApiService.fetchData<PaginatedResponse<Stock>>({
             url,
             method: 'get',
         })

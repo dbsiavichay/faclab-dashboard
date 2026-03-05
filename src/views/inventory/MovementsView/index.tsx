@@ -1,41 +1,46 @@
 import { useState } from 'react'
 import { useMovements } from '@/hooks'
+import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
-import Table from '@/components/ui/Table'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
-import type { ColumnDef } from '@tanstack/react-table'
 import type { Movement } from '@/services/MovementService'
 import MovementForm from './MovementForm'
 import { HiOutlinePlus } from 'react-icons/hi'
-
-const { Tr, Th, Td, THead, TBody } = Table
 
 const MovementsView = () => {
     const [productId, setProductId] = useState<string>('')
     const [type, setType] = useState<string>('')
     const [fromDate, setFromDate] = useState<string>('')
     const [toDate, setToDate] = useState<string>('')
-    const [limit, setLimit] = useState<string>('100')
-    const [offset, setOffset] = useState<string>('0')
     const [formOpen, setFormOpen] = useState(false)
+
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
 
     const queryParams = {
         productId: productId ? parseInt(productId) : undefined,
         type: type ? (type as 'in' | 'out') : undefined,
         fromDate: fromDate || undefined,
         toDate: toDate || undefined,
-        limit: limit ? parseInt(limit) : 100,
-        offset: offset ? parseInt(offset) : 0,
+        limit: pageSize,
+        offset,
     }
 
-    const { data: movements = [], isLoading } = useMovements(queryParams)
+    const { data, isLoading } = useMovements(queryParams)
+    const movements = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
 
     const columns: ColumnDef<Movement>[] = [
         {
             header: 'ID',
             accessorKey: 'id',
+            cell: (props) => {
+                const { row } = props
+                return <span className="font-medium">#{row.original.id}</span>
+            },
         },
         {
             header: 'ID Producto',
@@ -81,13 +86,10 @@ const MovementsView = () => {
         {
             header: 'Motivo',
             accessorKey: 'reason',
-            cell: ({ row }) => {
-                return (
-                    row.original.reason || (
-                        <span className="text-gray-400 italic">Sin motivo</span>
-                    )
-                )
-            },
+            cell: ({ row }) =>
+                row.original.reason || (
+                    <span className="text-gray-400 italic">Sin motivo</span>
+                ),
         },
         {
             header: 'Fecha',
@@ -111,8 +113,7 @@ const MovementsView = () => {
         setType('')
         setFromDate('')
         setToDate('')
-        setLimit('100')
-        setOffset('0')
+        setPageIndex(1)
     }
 
     const typeOptions = [
@@ -122,193 +123,101 @@ const MovementsView = () => {
     ]
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <h3>Movimientos</h3>
-                <Button
-                    variant="solid"
-                    icon={<HiOutlinePlus />}
-                    onClick={() => setFormOpen(true)}
-                >
-                    Nuevo Movimiento
-                </Button>
-            </div>
-
-            {/* Filters */}
-            <Card>
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            ID Producto
-                        </label>
-                        <Input
-                            type="number"
-                            placeholder="Filtrar por producto"
-                            value={productId}
-                            onChange={(e) => setProductId(e.target.value)}
-                        />
+        <>
+            <Card className="mb-4">
+                <div className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                ID Producto
+                            </label>
+                            <Input
+                                type="number"
+                                placeholder="Filtrar por producto"
+                                value={productId}
+                                onChange={(e) => setProductId(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Tipo
+                            </label>
+                            <Select
+                                value={typeOptions.find(
+                                    (opt) => opt.value === type
+                                )}
+                                options={typeOptions}
+                                onChange={(option) =>
+                                    setType(option?.value || '')
+                                }
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Desde
+                            </label>
+                            <Input
+                                type="datetime-local"
+                                value={fromDate}
+                                onChange={(e) => setFromDate(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Hasta
+                            </label>
+                            <Input
+                                type="datetime-local"
+                                value={toDate}
+                                onChange={(e) => setToDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex items-end">
+                            <Button variant="plain" onClick={handleReset}>
+                                Limpiar Filtros
+                            </Button>
+                        </div>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Tipo
-                        </label>
-                        <Select
-                            value={typeOptions.find(
-                                (opt) => opt.value === type
-                            )}
-                            options={typeOptions}
-                            onChange={(option) => setType(option?.value || '')}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Desde
-                        </label>
-                        <Input
-                            type="datetime-local"
-                            value={fromDate}
-                            onChange={(e) => setFromDate(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Hasta
-                        </label>
-                        <Input
-                            type="datetime-local"
-                            value={toDate}
-                            onChange={(e) => setToDate(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Límite
-                        </label>
-                        <Input
-                            type="number"
-                            placeholder="100"
-                            value={limit}
-                            min="1"
-                            max="1000"
-                            onChange={(e) => setLimit(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Offset
-                        </label>
-                        <Input
-                            type="number"
-                            placeholder="0"
-                            value={offset}
-                            min="0"
-                            onChange={(e) => setOffset(e.target.value)}
-                        />
-                    </div>
-                </div>
-                <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        Mostrando {movements.length} movimiento(s)
-                        {productId && ` del producto ${productId}`}
-                        {type &&
-                            ` tipo ${type === 'in' ? 'entrada' : 'salida'}`}
-                    </div>
-                    <Button variant="plain" onClick={handleReset}>
-                        Limpiar Filtros
-                    </Button>
                 </div>
             </Card>
 
-            {/* Table */}
             <Card>
-                {isLoading ? (
-                    <div className="flex justify-center items-center h-48">
-                        <div>Cargando...</div>
+                <div className="p-4">
+                    <div className="flex justify-between items-center mb-4">
+                        <div>
+                            <h4 className="text-lg font-semibold">
+                                Movimientos
+                            </h4>
+                            <p className="text-sm text-gray-500 mt-1">
+                                Gestiona los movimientos de inventario
+                            </p>
+                        </div>
+                        <Button
+                            variant="solid"
+                            size="sm"
+                            icon={<HiOutlinePlus />}
+                            onClick={() => setFormOpen(true)}
+                        >
+                            Nuevo Movimiento
+                        </Button>
                     </div>
-                ) : (
-                    <Table>
-                        <THead>
-                            <Tr>
-                                {columns.map((column) => (
-                                    <Th key={column.header as string}>
-                                        {column.header as string}
-                                    </Th>
-                                ))}
-                            </Tr>
-                        </THead>
-                        <TBody>
-                            {movements.length === 0 ? (
-                                <Tr>
-                                    <Td
-                                        colSpan={columns.length}
-                                        className="text-center py-8"
-                                    >
-                                        No hay movimientos registrados
-                                    </Td>
-                                </Tr>
-                            ) : (
-                                movements.map((movement) => (
-                                    <Tr key={movement.id}>
-                                        <Td>{movement.id}</Td>
-                                        <Td>{movement.productId}</Td>
-                                        <Td>
-                                            <span
-                                                className={`px-2 py-1 rounded text-xs font-semibold ${
-                                                    movement.type === 'in'
-                                                        ? 'bg-green-100 text-green-800'
-                                                        : 'bg-red-100 text-red-800'
-                                                }`}
-                                            >
-                                                {movement.type === 'in'
-                                                    ? 'Entrada'
-                                                    : 'Salida'}
-                                            </span>
-                                        </Td>
-                                        <Td>
-                                            <span
-                                                className={
-                                                    movement.quantity > 0
-                                                        ? 'text-green-600 font-semibold'
-                                                        : 'text-red-600 font-semibold'
-                                                }
-                                            >
-                                                {movement.quantity > 0
-                                                    ? '+'
-                                                    : ''}
-                                                {movement.quantity}
-                                            </span>
-                                        </Td>
-                                        <Td>
-                                            {movement.reason || (
-                                                <span className="text-gray-400 italic">
-                                                    Sin motivo
-                                                </span>
-                                            )}
-                                        </Td>
-                                        <Td>
-                                            {movement.date
-                                                ? new Date(
-                                                      movement.date
-                                                  ).toLocaleString('es-ES', {
-                                                      year: 'numeric',
-                                                      month: '2-digit',
-                                                      day: '2-digit',
-                                                      hour: '2-digit',
-                                                      minute: '2-digit',
-                                                  })
-                                                : '-'}
-                                        </Td>
-                                    </Tr>
-                                ))
-                            )}
-                        </TBody>
-                    </Table>
-                )}
+
+                    <DataTable
+                        columns={columns}
+                        data={movements}
+                        loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
+                    />
+                </div>
             </Card>
 
-            {/* Form Modal */}
             <MovementForm open={formOpen} onClose={() => setFormOpen(false)} />
-        </div>
+        </>
     )
 }
 

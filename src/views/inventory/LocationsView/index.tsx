@@ -30,8 +30,16 @@ const LocationsView = () => {
         location: Location | null
     }>({ open: false, location: null })
 
-    const { data: locations = [], isLoading } = useLocations()
-    const { data: warehouses = [] } = useWarehouses()
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
+
+    const { data, isLoading } = useLocations({ limit: pageSize, offset })
+    const locations = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
+
+    const { data: warehousesData } = useWarehouses()
+    const warehouses = warehousesData?.items ?? []
     const deleteLocation = useDeleteLocation()
 
     const warehouseMap = new Map(warehouses.map((w) => [w.id, w.name]))
@@ -224,6 +232,12 @@ const LocationsView = () => {
                         columns={columns}
                         data={locations}
                         loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
                     />
                 </div>
             </Card>

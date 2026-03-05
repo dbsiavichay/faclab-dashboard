@@ -21,7 +21,13 @@ const WarehousesView = () => {
         warehouse: Warehouse | null
     }>({ open: false, warehouse: null })
 
-    const { data: warehouses = [], isLoading } = useWarehouses()
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
+
+    const { data, isLoading } = useWarehouses({ limit: pageSize, offset })
+    const warehouses = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
     const deleteWarehouse = useDeleteWarehouse()
 
     const handleCreate = () => {
@@ -205,6 +211,12 @@ const WarehousesView = () => {
                         columns={columns}
                         data={warehouses}
                         loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
                     />
                 </div>
             </Card>

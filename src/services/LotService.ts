@@ -1,5 +1,10 @@
 import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import type {
+    PaginatedResponse,
+    DataResponse,
+    PaginationParams,
+} from '@/@types/api'
 
 export interface Lot {
     id: number
@@ -25,7 +30,7 @@ export interface LotInput {
     notes?: string
 }
 
-export interface LotQueryParams {
+export interface LotQueryParams extends PaginationParams {
     productId?: number
     expiringInDays?: number
 }
@@ -47,27 +52,33 @@ class LotService {
                 params.expiringInDays.toString()
             )
         }
+        if (params?.limit !== undefined) {
+            queryParams.append('limit', params.limit.toString())
+        }
+        if (params?.offset !== undefined) {
+            queryParams.append('offset', params.offset.toString())
+        }
 
         const queryString = queryParams.toString()
         const url = queryString
             ? `${this.config.host}/lots?${queryString}`
             : `${this.config.host}/lots`
 
-        return ApiService.fetchData<Lot[]>({
+        return ApiService.fetchData<PaginatedResponse<Lot>>({
             url,
             method: 'get',
         })
     }
 
     async getLot(id: number) {
-        return ApiService.fetchData<Lot>({
+        return ApiService.fetchData<DataResponse<Lot>>({
             url: `${this.config.host}/lots/${id}`,
             method: 'get',
         })
     }
 
     async createLot(lot: LotInput) {
-        return ApiService.fetchData<Lot>({
+        return ApiService.fetchData<DataResponse<Lot>>({
             url: `${this.config.host}/lots`,
             method: 'post',
             data: lot,
@@ -75,7 +86,7 @@ class LotService {
     }
 
     async updateLot(id: number, lot: LotInput) {
-        return ApiService.fetchData<Lot>({
+        return ApiService.fetchData<DataResponse<Lot>>({
             url: `${this.config.host}/lots/${id}`,
             method: 'put',
             data: lot,

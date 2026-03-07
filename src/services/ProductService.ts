@@ -10,26 +10,47 @@ export interface Product {
     id: number
     name: string
     sku: string
-    description?: string | null
-    categoryId?: number | null
-    unitOfMeasureId?: number | null
+    description: string | null
+    barcode: string | null
+    categoryId: number | null
+    unitOfMeasureId: number | null
+    purchasePrice: number | null
+    salePrice: number | null
+    isActive: boolean
+    isService: boolean
+    minStock: number
+    maxStock: number | null
+    reorderPoint: number
+    leadTimeDays: number | null
 }
 
 export interface ProductInput {
     name: string
     sku: string
-    description?: string
-    categoryId?: number
-    unitOfMeasureId?: number
-    [key: string]: unknown
+    description?: string | null
+    barcode?: string | null
+    categoryId?: number | null
+    unitOfMeasureId?: number | null
+    purchasePrice?: number | null
+    salePrice?: number | null
+    isActive?: boolean
+    isService?: boolean
+    minStock?: number
+    maxStock?: number | null
+    reorderPoint?: number
+    leadTimeDays?: number | null
 }
 
-export interface InventoryConfig {
+export interface ProductQueryParams extends PaginationParams {
+    categoryId?: number
+}
+
+export interface ProductServiceConfig {
     host: string
 }
 
-class InventoryService {
-    private config: InventoryConfig = {
+class ProductService {
+    private config: ProductServiceConfig = {
         host: '',
     }
 
@@ -39,17 +60,19 @@ class InventoryService {
             : appConfig.inventoryApiHost || ''
     }
 
-    setConfig(config: Partial<InventoryConfig>) {
+    setConfig(config: Partial<ProductServiceConfig>) {
         this.config = { ...this.config, ...config }
         return this
     }
 
-    async getProducts(params?: PaginationParams) {
+    async getProducts(params?: ProductQueryParams) {
         const queryParams = new URLSearchParams()
         if (params?.limit !== undefined)
             queryParams.append('limit', params.limit.toString())
         if (params?.offset !== undefined)
             queryParams.append('offset', params.offset.toString())
+        if (params?.categoryId !== undefined)
+            queryParams.append('categoryId', params.categoryId.toString())
         const queryString = queryParams.toString()
         const url = queryString
             ? `${this.config.host}/products?${queryString}`
@@ -68,7 +91,7 @@ class InventoryService {
     }
 
     async createProduct(product: ProductInput) {
-        return ApiService.fetchData<DataResponse<Product>>({
+        return ApiService.fetchData<DataResponse<Product>, ProductInput>({
             url: `${this.config.host}/products`,
             method: 'post',
             data: product,
@@ -76,7 +99,10 @@ class InventoryService {
     }
 
     async updateProduct(id: number, product: Partial<ProductInput>) {
-        return ApiService.fetchData<DataResponse<Product>>({
+        return ApiService.fetchData<
+            DataResponse<Product>,
+            Partial<ProductInput>
+        >({
             url: `${this.config.host}/products/${id}`,
             method: 'put',
             data: product,
@@ -91,4 +117,4 @@ class InventoryService {
     }
 }
 
-export default new InventoryService()
+export default new ProductService()

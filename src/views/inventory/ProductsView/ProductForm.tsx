@@ -3,13 +3,14 @@ import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
+import Switcher from '@/components/ui/Switcher'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateProduct, useUpdateProduct } from '@/hooks/useProducts'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCategories } from '@/hooks/useCategories'
 import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
-import type { Product, ProductInput } from '@/services/InventoryService'
+import type { Product, ProductInput } from '@/services/ProductService'
 
 interface ProductFormProps {
     open: boolean
@@ -22,8 +23,17 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
         name: '',
         sku: '',
         description: '',
+        barcode: '',
         categoryId: undefined,
         unitOfMeasureId: undefined,
+        purchasePrice: undefined,
+        salePrice: undefined,
+        isActive: true,
+        isService: false,
+        minStock: 0,
+        maxStock: undefined,
+        reorderPoint: 0,
+        leadTimeDays: undefined,
     })
 
     const createProduct = useCreateProduct()
@@ -61,16 +71,34 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                 name: product.name,
                 sku: product.sku,
                 description: product.description || '',
+                barcode: product.barcode || '',
                 categoryId: product.categoryId || undefined,
                 unitOfMeasureId: product.unitOfMeasureId || undefined,
+                purchasePrice: product.purchasePrice ?? undefined,
+                salePrice: product.salePrice ?? undefined,
+                isActive: product.isActive,
+                isService: product.isService,
+                minStock: product.minStock,
+                maxStock: product.maxStock ?? undefined,
+                reorderPoint: product.reorderPoint,
+                leadTimeDays: product.leadTimeDays ?? undefined,
             })
         } else {
             setFormData({
                 name: '',
                 sku: '',
                 description: '',
+                barcode: '',
                 categoryId: undefined,
                 unitOfMeasureId: undefined,
+                purchasePrice: undefined,
+                salePrice: undefined,
+                isActive: true,
+                isService: false,
+                minStock: 0,
+                maxStock: undefined,
+                reorderPoint: 0,
+                leadTimeDays: undefined,
             })
         }
     }, [product, open])
@@ -131,6 +159,7 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
     return (
         <Dialog
             isOpen={open}
+            width={640}
             onClose={handleClose}
             onRequestClose={handleClose}
         >
@@ -140,7 +169,7 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                 </h5>
 
                 <form className="flex-1" onSubmit={handleSubmit}>
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                         {/* Name */}
                         <div>
                             <label className="block text-sm font-medium mb-2">
@@ -187,12 +216,30 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                             <Input
                                 textArea
                                 placeholder="Descripción del producto"
-                                value={formData.description}
+                                value={formData.description || ''}
                                 style={{ minHeight: '80px' }}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
                                         description: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        {/* Barcode */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Código de barras
+                            </label>
+                            <Input
+                                type="text"
+                                placeholder="Ej: 7501234567890"
+                                value={formData.barcode || ''}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        barcode: e.target.value || null,
                                     })
                                 }
                             />
@@ -252,6 +299,160 @@ const ProductForm = ({ open, onClose, product }: ProductFormProps) => {
                                 Opcional: Seleccione la unidad de medida del
                                 producto
                             </p>
+                        </div>
+
+                        {/* Prices */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Precio de compra
+                                </label>
+                                <Input
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={formData.purchasePrice ?? ''}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            purchasePrice:
+                                                e.target.value !== ''
+                                                    ? Number(e.target.value)
+                                                    : undefined,
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Precio de venta
+                                </label>
+                                <Input
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={formData.salePrice ?? ''}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            salePrice:
+                                                e.target.value !== ''
+                                                    ? Number(e.target.value)
+                                                    : undefined,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </div>
+
+                        {/* Toggles */}
+                        <div className="flex gap-6">
+                            <div className="flex items-center gap-3">
+                                <Switcher
+                                    checked={formData.isActive}
+                                    onChange={(checked) =>
+                                        setFormData({
+                                            ...formData,
+                                            isActive: checked,
+                                        })
+                                    }
+                                />
+                                <label className="text-sm font-medium">
+                                    Activo
+                                </label>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Switcher
+                                    checked={formData.isService}
+                                    onChange={(checked) =>
+                                        setFormData({
+                                            ...formData,
+                                            isService: checked,
+                                        })
+                                    }
+                                />
+                                <label className="text-sm font-medium">
+                                    Es servicio
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Stock */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Stock mínimo
+                                </label>
+                                <Input
+                                    type="number"
+                                    placeholder="0"
+                                    value={formData.minStock ?? ''}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            minStock:
+                                                e.target.value !== ''
+                                                    ? Number(e.target.value)
+                                                    : 0,
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Stock máximo
+                                </label>
+                                <Input
+                                    type="number"
+                                    placeholder="Sin límite"
+                                    value={formData.maxStock ?? ''}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            maxStock:
+                                                e.target.value !== ''
+                                                    ? Number(e.target.value)
+                                                    : undefined,
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Punto de reorden
+                                </label>
+                                <Input
+                                    type="number"
+                                    placeholder="0"
+                                    value={formData.reorderPoint ?? ''}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            reorderPoint:
+                                                e.target.value !== ''
+                                                    ? Number(e.target.value)
+                                                    : 0,
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Tiempo de entrega (días)
+                                </label>
+                                <Input
+                                    type="number"
+                                    placeholder="Sin definir"
+                                    value={formData.leadTimeDays ?? ''}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            leadTimeDays:
+                                                e.target.value !== ''
+                                                    ? Number(e.target.value)
+                                                    : undefined,
+                                        })
+                                    }
+                                />
+                            </div>
                         </div>
                     </div>
 

@@ -144,11 +144,8 @@ const CustomerForm = ({ open, onClose, customer }: CustomerFormProps) => {
                     {isEdit ? 'Editar Cliente' : 'Nuevo Cliente'}
                 </h5>
 
-                <form
-                    className="flex-1 overflow-y-auto"
-                    onSubmit={handleSubmit}
-                >
-                    <div className="space-y-4">
+                <form className="flex-1" onSubmit={handleSubmit}>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                         {/* Basic Information */}
                         <div>
                             <h6 className="mb-3 text-sm font-semibold">

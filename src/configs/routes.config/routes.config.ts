@@ -12,6 +12,24 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'catalog.categories',
+        path: '/catalog/categories',
+        component: lazy(() => import('@/views/inventory/CategoriesView')),
+        authority: [],
+    },
+    {
+        key: 'catalog.products',
+        path: '/catalog/products',
+        component: lazy(() => import('@/views/inventory/ProductsView')),
+        authority: [],
+    },
+    {
+        key: 'catalog.unitsOfMeasure',
+        path: '/catalog/units-of-measure',
+        component: lazy(() => import('@/views/inventory/UnitsOfMeasureView')),
+        authority: [],
+    },
+    {
         key: 'inventory.product',
         path: '/products',
         component: lazy(() => import('@/views/inventory/ProductsView')),

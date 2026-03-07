@@ -1,27 +1,27 @@
 import { BiHome, BiPackage } from 'react-icons/bi'
 import {
-    HiOutlineColorSwatch,
-    HiOutlineFolder,
-    HiOutlineCube,
-    HiOutlineSwitchHorizontal,
-    HiOutlineUserGroup,
-    HiOutlineScale,
-    HiOutlineOfficeBuilding,
-    HiOutlineLocationMarker,
-    HiOutlineTruck,
     HiOutlineCollection,
+    HiOutlineColorSwatch,
+    HiOutlineCube,
+    HiOutlineFolder,
+    HiOutlineLocationMarker,
+    HiOutlineOfficeBuilding,
     HiOutlineQrcode,
+    HiOutlineScale,
+    HiOutlineSwitchHorizontal,
+    HiOutlineTruck,
+    HiOutlineUserGroup,
 } from 'react-icons/hi'
 
 export type NavigationIcons = Record<string, JSX.Element>
 
 const navigationIcon: NavigationIcons = {
     home: <BiHome />,
-    inventoryProducts: <BiPackage />,
-    inventoryCategories: <HiOutlineFolder />,
+    catalogProducts: <BiPackage />,
+    catalogCategories: <HiOutlineFolder />,
     inventoryStock: <HiOutlineCube />,
     inventoryMovements: <HiOutlineSwitchHorizontal />,
-    inventoryUnitsOfMeasure: <HiOutlineScale />,
+    catalogUnitsOfMeasure: <HiOutlineScale />,
     inventoryWarehouses: <HiOutlineOfficeBuilding />,
     inventoryLocations: <HiOutlineLocationMarker />,
     salesCustomers: <HiOutlineUserGroup />,

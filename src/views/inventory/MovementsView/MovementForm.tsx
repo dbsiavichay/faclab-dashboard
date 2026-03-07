@@ -155,7 +155,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 <h5 className="mb-4">Nuevo Movimiento</h5>
 
                 <form className="flex-1" onSubmit={handleSubmit}>
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                         {/* Product ID */}
                         <div>
                             <label className="block text-sm font-medium mb-2">

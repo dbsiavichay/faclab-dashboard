@@ -94,66 +94,68 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
             onClose={onClose}
             onRequestClose={onClose}
         >
-            <h5 className="mb-4">
-                {isEditMode ? 'Editar Categoría' : 'Nueva Categoría'}
-            </h5>
+            <div className="flex flex-col h-full justify-between">
+                <h5 className="mb-4">
+                    {isEditMode ? 'Editar Categoría' : 'Nueva Categoría'}
+                </h5>
 
-            <form onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                    {/* Name */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Nombre <span className="text-red-500">*</span>
-                        </label>
-                        <Input
-                            required
-                            placeholder="Nombre de la categoría"
-                            value={formData.name}
-                            disabled={isPending}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    name: e.target.value,
-                                })
-                            }
-                        />
+                <form className="flex-1" onSubmit={handleSubmit}>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                        {/* Name */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Nombre <span className="text-red-500">*</span>
+                            </label>
+                            <Input
+                                required
+                                placeholder="Nombre de la categoría"
+                                value={formData.name}
+                                disabled={isPending}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        name: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        {/* Description */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Descripción
+                            </label>
+                            <Input
+                                textArea
+                                placeholder="Descripción de la categoría"
+                                value={formData.description}
+                                style={{ minHeight: '80px' }}
+                                disabled={isPending}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        description: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
                     </div>
 
-                    {/* Description */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Descripción
-                        </label>
-                        <Input
-                            textArea
-                            placeholder="Descripción de la categoría"
-                            value={formData.description}
-                            style={{ minHeight: '80px' }}
+                    <div className="flex justify-end gap-2 mt-6">
+                        <Button
+                            type="button"
+                            variant="plain"
                             disabled={isPending}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    description: e.target.value,
-                                })
-                            }
-                        />
+                            onClick={onClose}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button type="submit" variant="solid" loading={isPending}>
+                            {isEditMode ? 'Actualizar' : 'Crear'}
+                        </Button>
                     </div>
-                </div>
-
-                <div className="flex justify-end gap-2 mt-6">
-                    <Button
-                        type="button"
-                        variant="plain"
-                        disabled={isPending}
-                        onClick={onClose}
-                    >
-                        Cancelar
-                    </Button>
-                    <Button type="submit" variant="solid" loading={isPending}>
-                        {isEditMode ? 'Actualizar' : 'Crear'}
-                    </Button>
-                </div>
-            </form>
+                </form>
+            </div>
         </Dialog>
     )
 }

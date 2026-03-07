@@ -9,8 +9,9 @@ import { useProducts, useDeleteProduct } from '@/hooks/useProducts'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCategories } from '@/hooks/useCategories'
 import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
-import type { Product } from '@/services/InventoryService'
+import type { Product } from '@/services/ProductService'
 import ProductForm from './ProductForm'
+import Select from '@/components/ui/Select'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
 const ProductsView = () => {
@@ -23,9 +24,16 @@ const ProductsView = () => {
 
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
+    const [filterCategoryId, setFilterCategoryId] = useState<
+        number | undefined
+    >(undefined)
     const offset = (pageIndex - 1) * pageSize
 
-    const { data, isLoading } = useProducts({ limit: pageSize, offset })
+    const { data, isLoading } = useProducts({
+        limit: pageSize,
+        offset,
+        categoryId: filterCategoryId,
+    })
     const items = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -38,6 +46,14 @@ const ProductsView = () => {
         const map = new Map<number, string>()
         categories.forEach((cat) => map.set(cat.id, cat.name))
         return map
+    }, [categoriesData])
+
+    const categoryFilterOptions = useMemo(() => {
+        const categories = categoriesData?.items ?? []
+        return categories.map((cat) => ({
+            value: cat.id,
+            label: cat.name,
+        }))
     }, [categoriesData])
 
     const unitMap = useMemo(() => {
@@ -125,18 +141,6 @@ const ProductsView = () => {
             },
         },
         {
-            header: 'Descripción',
-            accessorKey: 'description',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.description || '-'}
-                    </span>
-                )
-            },
-        },
-        {
             header: 'Categoría',
             accessorKey: 'categoryId',
             cell: (props) => {
@@ -167,6 +171,36 @@ const ProductsView = () => {
                     </span>
                 ) : (
                     <span className="text-gray-400">-</span>
+                )
+            },
+        },
+        {
+            header: 'Precio venta',
+            accessorKey: 'salePrice',
+            cell: (props) => {
+                const { row } = props
+                return row.original.salePrice != null ? (
+                    <span className="font-mono text-sm">
+                        ${row.original.salePrice.toFixed(2)}
+                    </span>
+                ) : (
+                    <span className="text-gray-400">-</span>
+                )
+            },
+        },
+        {
+            header: 'Estado',
+            accessorKey: 'isActive',
+            cell: (props) => {
+                const { row } = props
+                return row.original.isActive ? (
+                    <span className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200 rounded text-xs font-medium">
+                        Activo
+                    </span>
+                ) : (
+                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 rounded text-xs font-medium">
+                        Inactivo
+                    </span>
                 )
             },
         },
@@ -208,14 +242,35 @@ const ProductsView = () => {
                                 Gestiona el catálogo de productos
                             </p>
                         </div>
-                        <Button
-                            variant="solid"
-                            size="sm"
-                            icon={<HiPlus />}
-                            onClick={handleCreate}
-                        >
-                            Nuevo Producto
-                        </Button>
+                        <div className="flex items-center gap-3">
+                            <Select
+                                size="sm"
+                                className="min-w-[180px]"
+                                placeholder="Todas las categorías"
+                                isClearable
+                                options={categoryFilterOptions}
+                                value={
+                                    categoryFilterOptions.find(
+                                        (opt) =>
+                                            opt.value === filterCategoryId
+                                    ) || null
+                                }
+                                onChange={(option) => {
+                                    setFilterCategoryId(
+                                        option?.value || undefined
+                                    )
+                                    setPageIndex(1)
+                                }}
+                            />
+                            <Button
+                                variant="solid"
+                                size="sm"
+                                icon={<HiPlus />}
+                                onClick={handleCreate}
+                            >
+                                Nuevo Producto
+                            </Button>
+                        </div>
                     </div>
 
                     <DataTable

@@ -180,7 +180,7 @@ const UnitOfMeasureForm = ({
                                 onChange={(checked) =>
                                     setFormData({
                                         ...formData,
-                                        isActive: !checked,
+                                        isActive: checked,
                                     })
                                 }
                             />

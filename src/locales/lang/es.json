@@ -1,12 +1,20 @@
 {
     "nav": {
         "home": "Home",
+        "catalog": {
+            "title": "Catálogo",
+            "categories": "Categorías",
+            "products": "Productos",
+            "unitsOfMeasure": "Unidades de Medida"
+        },
         "inventory": {
             "title": "Inventario",
-            "products": "Productos",
-            "categories": "Categorías",
             "stock": "Stock",
             "movements": "Movimientos",
+            "warehouses": "Almacenes",
+            "locations": "Ubicaciones",
+            "lots": "Lotes",
+            "serials": "Números de Serie",
             "collapse": {
                 "collapse": "Group collapse menu",
                 "item1": "Group collapse menu item 1",

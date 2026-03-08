@@ -10,6 +10,7 @@ import {
     HiOutlineOfficeBuilding,
     HiOutlineQrcode,
     HiOutlineScale,
+    HiOutlineShoppingCart,
     HiOutlineSwitchHorizontal,
     HiOutlineSwitchVertical,
     HiOutlineTruck,
@@ -34,6 +35,7 @@ const navigationIcon: NavigationIcons = {
     purchasesPurchaseOrders: <HiOutlineDocumentText />,
     inventoryAdjustments: <HiOutlineClipboardCheck />,
     inventoryTransfers: <HiOutlineSwitchVertical />,
+    salesSales: <HiOutlineShoppingCart />,
     groupCollapseMenu: <HiOutlineColorSwatch />,
 }
 

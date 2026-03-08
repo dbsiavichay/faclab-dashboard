@@ -25,6 +25,7 @@
 | Números de serie | ✅ | ✅ | ✅ | CRUD con filtros + cambio de estado |
 | Ajustes de inventario | ✅ | ✅ | ✅ | CRUD + confirm/cancel + items CRUD, ciclo DRAFT→CONFIRMED/CANCELLED |
 | Transferencias | ✅ | ✅ | ✅ | CRUD + confirm/receive/cancel + items CRUD, ciclo DRAFT→CONFIRMED→RECEIVED/CANCELLED |
+| Ventas | ✅ | ✅ | ✅ | Solo lectura: listado con filtros (customerId, status, paginación) + detalle con items y pagos en tabs |
 
 ### Módulos pendientes
 
@@ -40,9 +41,9 @@
 | ~~8~~ | ~~Números de serie~~ | ~~Media~~ | ~~Completado en Sesión 5~~ |
 | ~~9~~ | ~~Ajustes de inventario~~ | ~~Alta~~ | ~~Completado en Sesión 6~~ |
 | ~~10~~ | ~~Transferencias~~ | ~~Alta~~ | ~~Completado en Sesión 7~~ |
-| 11 | Órdenes de compra | Alta | Proveedores, Productos |
+| ~~11~~ | ~~Órdenes de compra~~ | ~~Alta~~ | ~~Completado en Sesión 8~~ |
 | 12 | Alertas | Baja | Bodegas |
-| 13 | Ventas (solo lectura) | Media | Clientes |
+| ~~13~~ | ~~Ventas (solo lectura)~~ | ~~Media~~ | ~~Completado en Sesión 9~~ |
 | 14 | Reportes de inventario | Media | Bodegas |
 
 ---

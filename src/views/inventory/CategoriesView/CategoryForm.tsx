@@ -150,7 +150,11 @@ const CategoryForm = ({ open, onClose, category }: CategoryFormProps) => {
                         >
                             Cancelar
                         </Button>
-                        <Button type="submit" variant="solid" loading={isPending}>
+                        <Button
+                            type="submit"
+                            variant="solid"
+                            loading={isPending}
+                        >
                             {isEditMode ? 'Actualizar' : 'Crear'}
                         </Button>
                     </div>

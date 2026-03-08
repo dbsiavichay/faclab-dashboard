@@ -244,15 +244,14 @@ const ProductsView = () => {
                         </div>
                         <div className="flex items-center gap-3">
                             <Select
+                                isClearable
                                 size="sm"
                                 className="min-w-[180px]"
                                 placeholder="Todas las categorías"
-                                isClearable
                                 options={categoryFilterOptions}
                                 value={
                                     categoryFilterOptions.find(
-                                        (opt) =>
-                                            opt.value === filterCategoryId
+                                        (opt) => opt.value === filterCategoryId
                                     ) || null
                                 }
                                 onChange={(option) => {

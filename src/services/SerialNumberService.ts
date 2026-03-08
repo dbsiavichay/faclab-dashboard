@@ -7,20 +7,26 @@ import type {
 } from '@/@types/api'
 
 export type SerialStatus =
-    | 'AVAILABLE'
-    | 'RESERVED'
-    | 'SOLD'
-    | 'IN_TRANSIT'
-    | 'DEFECTIVE'
-    | 'RETURNED'
+    | 'available'
+    | 'reserved'
+    | 'sold'
+    | 'returned'
+    | 'scrapped'
 
 export const SERIAL_STATUS_LABELS: Record<SerialStatus, string> = {
-    AVAILABLE: 'Disponible',
-    RESERVED: 'Reservado',
-    SOLD: 'Vendido',
-    IN_TRANSIT: 'En Tránsito',
-    DEFECTIVE: 'Defectuoso',
-    RETURNED: 'Devuelto',
+    available: 'Disponible',
+    reserved: 'Reservado',
+    sold: 'Vendido',
+    returned: 'Devuelto',
+    scrapped: 'Descartado',
+}
+
+export const VALID_TRANSITIONS: Record<SerialStatus, SerialStatus[]> = {
+    available: ['reserved', 'sold', 'scrapped'],
+    reserved: ['scrapped'],
+    sold: ['returned', 'scrapped'],
+    returned: ['scrapped'],
+    scrapped: [],
 }
 
 export interface SerialNumber {
@@ -30,6 +36,8 @@ export interface SerialNumber {
     status: SerialStatus
     lotId?: number | null
     locationId?: number | null
+    purchaseOrderId?: number | null
+    saleId?: number | null
     notes?: string | null
     createdAt: string
     updatedAt: string
@@ -38,17 +46,13 @@ export interface SerialNumber {
 export interface SerialNumberInput {
     serialNumber: string
     productId: number
-    status?: SerialStatus
     lotId?: number
-    locationId?: number
     notes?: string
 }
 
 export interface SerialNumberQueryParams extends PaginationParams {
     productId?: number
     status?: SerialStatus
-    lotId?: number
-    locationId?: number
 }
 
 class SerialNumberService {
@@ -64,12 +68,6 @@ class SerialNumberService {
         }
         if (params?.status) {
             queryParams.append('status', params.status)
-        }
-        if (params?.lotId) {
-            queryParams.append('lotId', params.lotId.toString())
-        }
-        if (params?.locationId) {
-            queryParams.append('locationId', params.locationId.toString())
         }
         if (params?.limit !== undefined) {
             queryParams.append('limit', params.limit.toString())
@@ -101,21 +99,6 @@ class SerialNumberService {
             url: `${this.config.host}/serials`,
             method: 'post',
             data: serialNumber,
-        })
-    }
-
-    async updateSerialNumber(id: number, serialNumber: SerialNumberInput) {
-        return ApiService.fetchData<DataResponse<SerialNumber>>({
-            url: `${this.config.host}/serials/${id}`,
-            method: 'put',
-            data: serialNumber,
-        })
-    }
-
-    async deleteSerialNumber(id: number) {
-        return ApiService.fetchData<void>({
-            url: `${this.config.host}/serials/${id}`,
-            method: 'delete',
         })
     }
 

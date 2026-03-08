@@ -2,24 +2,16 @@ import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Input from '@/components/ui/Input'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
-import { useLots, useDeleteLot } from '@/hooks/useLots'
-import { getErrorMessage } from '@/utils/getErrorMessage'
+import { useLots } from '@/hooks/useLots'
 import type { Lot, LotQueryParams } from '@/services/LotService'
 import LotForm from './LotForm'
-import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
+import { HiOutlinePencil, HiPlus } from 'react-icons/hi'
 
 const LotsView = () => {
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [selectedLot, setSelectedLot] = useState<Lot | null>(null)
-    const [deleteDialog, setDeleteDialog] = useState<{
-        open: boolean
-        lot: Lot | null
-    }>({ open: false, lot: null })
 
     const [productId, setProductId] = useState<string>('')
     const [expiringInDays, setExpiringInDays] = useState<string>('')
@@ -37,7 +29,6 @@ const LotsView = () => {
     const { data, isLoading } = useLots(queryParams)
     const lots = data?.items ?? []
     const total = data?.pagination?.total ?? 0
-    const deleteLot = useDeleteLot()
 
     const handleCreate = () => {
         setSelectedLot(null)
@@ -47,37 +38,6 @@ const LotsView = () => {
     const handleEdit = (lot: Lot) => {
         setSelectedLot(lot)
         setIsFormOpen(true)
-    }
-
-    const handleDeleteClick = (lot: Lot) => {
-        setDeleteDialog({ open: true, lot })
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (deleteDialog.lot) {
-            try {
-                await deleteLot.mutateAsync(deleteDialog.lot.id)
-                toast.push(
-                    <Notification title="Lote eliminado" type="success">
-                        El lote se eliminó correctamente
-                    </Notification>,
-                    { placement: 'top-center' }
-                )
-                setDeleteDialog({ open: false, lot: null })
-            } catch (error: unknown) {
-                const errorMessage = getErrorMessage(
-                    error,
-                    'Error al eliminar el lote'
-                )
-
-                toast.push(
-                    <Notification title="Error" type="danger">
-                        {errorMessage}
-                    </Notification>,
-                    { placement: 'top-center' }
-                )
-            }
-        }
     }
 
     const handleFormClose = () => {
@@ -223,20 +183,12 @@ const LotsView = () => {
             cell: (props) => {
                 const { row } = props
                 return (
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            icon={<HiOutlinePencil />}
-                            onClick={() => handleEdit(row.original)}
-                        />
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            icon={<HiOutlineTrash />}
-                            onClick={() => handleDeleteClick(row.original)}
-                        />
-                    </div>
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlinePencil />}
+                        onClick={() => handleEdit(row.original)}
+                    />
                 )
             },
         },
@@ -319,39 +271,6 @@ const LotsView = () => {
                 lot={selectedLot}
                 onClose={handleFormClose}
             />
-
-            <Dialog
-                isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, lot: null })}
-                onRequestClose={() =>
-                    setDeleteDialog({ open: false, lot: null })
-                }
-            >
-                <h5 className="mb-4">Confirmar Eliminación</h5>
-                <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar el lote{' '}
-                    <strong>{deleteDialog.lot?.lotNumber}</strong>? Esta acción
-                    no se puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        disabled={deleteLot.isPending}
-                        onClick={() =>
-                            setDeleteDialog({ open: false, lot: null })
-                        }
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteLot.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
         </>
     )
 }

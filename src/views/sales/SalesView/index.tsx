@@ -1,0 +1,235 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import DataTable, { ColumnDef } from '@/components/shared/DataTable'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import Badge from '@/components/ui/Badge'
+import Select from '@/components/ui/Select'
+import { useSales } from '@/hooks/useSales'
+import { useCustomers } from '@/hooks/useCustomers'
+import {
+    SALE_STATUS_LABELS,
+    SALE_STATUS_CLASSES,
+    PAYMENT_STATUS_LABELS,
+    PAYMENT_STATUS_CLASSES,
+    type Sale,
+    type SaleQueryParams,
+    type SaleStatus,
+} from '@/services/SaleService'
+import { HiOutlineEye } from 'react-icons/hi'
+
+const statusOptions = [
+    { value: '', label: 'Todos' },
+    ...Object.entries(SALE_STATUS_LABELS).map(([value, label]) => ({
+        value,
+        label,
+    })),
+]
+
+const SalesView = () => {
+    const navigate = useNavigate()
+
+    const [statusFilter, setStatusFilter] = useState<string>('')
+    const [customerFilter, setCustomerFilter] = useState<string>('')
+    const [pageIndex, setPageIndex] = useState(1)
+    const [pageSize, setPageSize] = useState(10)
+    const offset = (pageIndex - 1) * pageSize
+
+    const { data: customersData } = useCustomers({ limit: 100 })
+    const customers = customersData?.items ?? []
+
+    const customerOptions = [
+        { value: '', label: 'Todos' },
+        ...customers.map((c) => ({
+            value: c.id.toString(),
+            label: c.name,
+        })),
+    ]
+
+    const queryParams: SaleQueryParams = {
+        status: statusFilter ? (statusFilter as SaleStatus) : undefined,
+        customerId: customerFilter ? parseInt(customerFilter) : undefined,
+        limit: pageSize,
+        offset,
+    }
+
+    const { data, isLoading } = useSales(queryParams)
+    const sales = data?.items ?? []
+    const total = data?.pagination?.total ?? 0
+
+    const handleReset = () => {
+        setStatusFilter('')
+        setCustomerFilter('')
+        setPageIndex(1)
+    }
+
+    const getCustomerName = (customerId: number) => {
+        const customer = customers.find((c) => c.id === customerId)
+        return customer ? customer.name : `#${customerId}`
+    }
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('es-EC', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(value)
+    }
+
+    const columns: ColumnDef<Sale>[] = [
+        {
+            header: 'ID',
+            accessorKey: 'id',
+            cell: (props) => (
+                <span className="font-medium">#{props.row.original.id}</span>
+            ),
+        },
+        {
+            header: 'Cliente',
+            accessorKey: 'customerId',
+            cell: (props) => getCustomerName(props.row.original.customerId),
+        },
+        {
+            header: 'Estado',
+            accessorKey: 'status',
+            cell: (props) => {
+                const status = props.row.original.status
+                return (
+                    <Badge
+                        content={SALE_STATUS_LABELS[status]}
+                        className={SALE_STATUS_CLASSES[status]}
+                    />
+                )
+            },
+        },
+        {
+            header: 'Pago',
+            accessorKey: 'paymentStatus',
+            cell: (props) => {
+                const ps = props.row.original.paymentStatus
+                return (
+                    <Badge
+                        content={PAYMENT_STATUS_LABELS[ps]}
+                        className={PAYMENT_STATUS_CLASSES[ps]}
+                    />
+                )
+            },
+        },
+        {
+            header: 'Total',
+            accessorKey: 'total',
+            cell: (props) => (
+                <span className="font-medium">
+                    {formatCurrency(props.row.original.total)}
+                </span>
+            ),
+        },
+        {
+            header: 'Fecha de Venta',
+            accessorKey: 'saleDate',
+            cell: (props) => {
+                const date = props.row.original.saleDate
+                return (
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {date
+                            ? new Date(date).toLocaleDateString('es-EC')
+                            : '-'}
+                    </span>
+                )
+            },
+        },
+        {
+            header: 'Creado por',
+            accessorKey: 'createdBy',
+            cell: (props) => (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {props.row.original.createdBy ?? '-'}
+                </span>
+            ),
+        },
+        {
+            header: 'Acciones',
+            id: 'actions',
+            cell: (props) => (
+                <Button
+                    size="sm"
+                    variant="plain"
+                    icon={<HiOutlineEye />}
+                    onClick={() => navigate(`/sales/${props.row.original.id}`)}
+                />
+            ),
+        },
+    ]
+
+    return (
+        <>
+            <Card className="mb-4">
+                <div className="p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Estado
+                            </label>
+                            <Select
+                                placeholder="Filtrar por estado"
+                                options={statusOptions}
+                                value={statusOptions.find(
+                                    (o) => o.value === statusFilter
+                                )}
+                                onChange={(option) => {
+                                    setStatusFilter(option?.value || '')
+                                    setPageIndex(1)
+                                }}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                Cliente
+                            </label>
+                            <Select
+                                placeholder="Filtrar por cliente"
+                                options={customerOptions}
+                                value={customerOptions.find(
+                                    (o) => o.value === customerFilter
+                                )}
+                                onChange={(option) => {
+                                    setCustomerFilter(option?.value || '')
+                                    setPageIndex(1)
+                                }}
+                            />
+                        </div>
+                        <div className="flex items-end">
+                            <Button variant="plain" onClick={handleReset}>
+                                Limpiar Filtros
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </Card>
+
+            <Card>
+                <div className="p-4">
+                    <div className="mb-4">
+                        <h4 className="text-lg font-semibold">Ventas</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Consulta el historial de ventas
+                        </p>
+                    </div>
+
+                    <DataTable
+                        columns={columns}
+                        data={sales}
+                        loading={isLoading}
+                        pagingData={{ total, pageIndex, pageSize }}
+                        onPaginationChange={setPageIndex}
+                        onSelectChange={(size) => {
+                            setPageSize(size)
+                            setPageIndex(1)
+                        }}
+                    />
+                </div>
+            </Card>
+        </>
+    )
+}
+
+export default SalesView

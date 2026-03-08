@@ -23,6 +23,7 @@
 | Productos de proveedor | ✅ | ✅ | ✅ | CRUD en detalle de proveedor con tabs |
 | Lotes | ✅ | ✅ | ✅ | CRUD con filtros (productId, expiringInDays) |
 | Números de serie | ✅ | ✅ | ✅ | CRUD con filtros + cambio de estado |
+| Ajustes de inventario | ✅ | ✅ | ✅ | CRUD + confirm/cancel + items CRUD, ciclo DRAFT→CONFIRMED/CANCELLED |
 
 ### Módulos pendientes
 
@@ -36,7 +37,7 @@
 | ~~6~~ | ~~Productos de proveedor~~ | ~~Media~~ | ~~Completado en Sesión 4~~ |
 | ~~7~~ | ~~Lotes~~ | ~~Media~~ | ~~Completado en Sesión 5~~ |
 | ~~8~~ | ~~Números de serie~~ | ~~Media~~ | ~~Completado en Sesión 5~~ |
-| 9 | Ajustes de inventario | Alta | Productos, Ubicaciones, Bodegas |
+| ~~9~~ | ~~Ajustes de inventario~~ | ~~Alta~~ | ~~Completado en Sesión 6~~ |
 | 10 | Transferencias | Alta | Productos, Ubicaciones |
 | 11 | Órdenes de compra | Alta | Proveedores, Productos |
 | 12 | Alertas | Baja | Bodegas |

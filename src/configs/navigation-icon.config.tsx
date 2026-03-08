@@ -1,5 +1,6 @@
 import { BiHome, BiPackage } from 'react-icons/bi'
 import {
+    HiOutlineClipboardCheck,
     HiOutlineCollection,
     HiOutlineColorSwatch,
     HiOutlineCube,
@@ -28,6 +29,7 @@ const navigationIcon: NavigationIcons = {
     inventoryLots: <HiOutlineCollection />,
     inventorySerials: <HiOutlineQrcode />,
     purchasesSuppliers: <HiOutlineTruck />,
+    inventoryAdjustments: <HiOutlineClipboardCheck />,
     groupCollapseMenu: <HiOutlineColorSwatch />,
 }
 

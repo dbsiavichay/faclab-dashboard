@@ -108,6 +108,18 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'inventory.adjustments',
+        path: '/adjustments',
+        component: lazy(() => import('@/views/inventory/AdjustmentsView')),
+        authority: [],
+    },
+    {
+        key: 'inventory.adjustmentDetail',
+        path: '/adjustments/:id',
+        component: lazy(() => import('@/views/inventory/AdjustmentDetailView')),
+        authority: [],
+    },
+    {
         key: 'groupMenu.collapse.item1',
         path: '/group-collapse-menu-item-view-1',
         component: lazy(

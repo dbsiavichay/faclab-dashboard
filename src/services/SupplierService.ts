@@ -24,9 +24,7 @@ export interface Supplier {
     phone?: string | null
     address?: string | null
     city?: string | null
-    state?: string | null
     country?: string | null
-    creditLimit?: number | null
     paymentTerms?: number | null
     leadTimeDays?: number | null
     notes?: string | null
@@ -41,9 +39,7 @@ export interface SupplierInput {
     phone?: string
     address?: string
     city?: string
-    state?: string
     country?: string
-    creditLimit?: number
     paymentTerms?: number
     leadTimeDays?: number
     notes?: string
@@ -55,12 +51,14 @@ class SupplierService {
         host: appConfig.inventoryApiHost || 'http://localhost:3000',
     }
 
-    async getSuppliers(params?: PaginationParams) {
+    async getSuppliers(params?: PaginationParams & { isActive?: boolean }) {
         const queryParams = new URLSearchParams()
         if (params?.limit !== undefined)
             queryParams.append('limit', params.limit.toString())
         if (params?.offset !== undefined)
             queryParams.append('offset', params.offset.toString())
+        if (params?.isActive !== undefined)
+            queryParams.append('isActive', params.isActive.toString())
         const queryString = queryParams.toString()
         const url = queryString
             ? `${this.config.host}/suppliers?${queryString}`

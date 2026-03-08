@@ -25,14 +25,12 @@ const SupplierForm = ({ open, onClose, supplier }: SupplierFormProps) => {
     const [formData, setFormData] = useState<SupplierInput>({
         name: '',
         taxId: '',
-        taxType: 2,
+        taxType: 1,
         email: '',
         phone: '',
         address: '',
         city: '',
-        state: '',
         country: '',
-        creditLimit: undefined,
         paymentTerms: undefined,
         leadTimeDays: undefined,
         notes: '',
@@ -61,9 +59,7 @@ const SupplierForm = ({ open, onClose, supplier }: SupplierFormProps) => {
                 phone: supplier.phone || '',
                 address: supplier.address || '',
                 city: supplier.city || '',
-                state: supplier.state || '',
                 country: supplier.country || '',
-                creditLimit: supplier.creditLimit || undefined,
                 paymentTerms: supplier.paymentTerms || undefined,
                 leadTimeDays: supplier.leadTimeDays || undefined,
                 notes: supplier.notes || '',
@@ -73,14 +69,12 @@ const SupplierForm = ({ open, onClose, supplier }: SupplierFormProps) => {
             setFormData({
                 name: '',
                 taxId: '',
-                taxType: 2,
+                taxType: 1,
                 email: '',
                 phone: '',
                 address: '',
                 city: '',
-                state: '',
                 country: '',
-                creditLimit: undefined,
                 paymentTerms: undefined,
                 leadTimeDays: undefined,
                 notes: '',
@@ -290,7 +284,7 @@ const SupplierForm = ({ open, onClose, supplier }: SupplierFormProps) => {
                                         }
                                     />
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {/* City */}
                                     <div>
                                         <label className="block text-sm font-medium mb-2">
@@ -304,24 +298,6 @@ const SupplierForm = ({ open, onClose, supplier }: SupplierFormProps) => {
                                                 setFormData({
                                                     ...formData,
                                                     city: e.target.value,
-                                                })
-                                            }
-                                        />
-                                    </div>
-
-                                    {/* State */}
-                                    <div>
-                                        <label className="block text-sm font-medium mb-2">
-                                            Provincia/Estado
-                                        </label>
-                                        <Input
-                                            type="text"
-                                            placeholder="Pichincha"
-                                            value={formData.state}
-                                            onChange={(e) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    state: e.target.value,
                                                 })
                                             }
                                         />
@@ -353,29 +329,7 @@ const SupplierForm = ({ open, onClose, supplier }: SupplierFormProps) => {
                             <h6 className="mb-3 text-sm font-semibold">
                                 Información Financiera y de Abastecimiento
                             </h6>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {/* Credit Limit */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Límite de Crédito
-                                    </label>
-                                    <Input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={formData.creditLimit || ''}
-                                        min="0"
-                                        step="0.01"
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                creditLimit: e.target.value
-                                                    ? parseFloat(e.target.value)
-                                                    : undefined,
-                                            })
-                                        }
-                                    />
-                                </div>
-
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Payment Terms */}
                                 <div>
                                     <label className="block text-sm font-medium mb-2">
@@ -448,7 +402,7 @@ const SupplierForm = ({ open, onClose, supplier }: SupplierFormProps) => {
                                 onChange={(checked) =>
                                     setFormData({
                                         ...formData,
-                                        isActive: checked,
+                                        isActive: !checked,
                                     })
                                 }
                             />

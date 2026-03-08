@@ -11,12 +11,9 @@ export interface SupplierProduct {
     minOrderQuantity?: number | null
     leadTimeDays?: number | null
     isPreferred: boolean
-    createdAt?: string
-    updatedAt?: string
 }
 
 export interface SupplierProductInput {
-    [key: string]: unknown
     productId: number
     purchasePrice: number
     supplierSku?: string

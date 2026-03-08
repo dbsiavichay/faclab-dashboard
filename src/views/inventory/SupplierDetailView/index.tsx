@@ -239,24 +239,8 @@ const SupplierDetailView = () => {
                         <p className="font-medium">{supplier.city || '-'}</p>
                     </div>
                     <div>
-                        <p className="text-sm text-gray-500">
-                            Provincia/Estado
-                        </p>
-                        <p className="font-medium">{supplier.state || '-'}</p>
-                    </div>
-                    <div>
                         <p className="text-sm text-gray-500">País</p>
                         <p className="font-medium">{supplier.country || '-'}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Límite de Crédito
-                        </p>
-                        <p className="font-medium">
-                            {supplier.creditLimit
-                                ? `$${supplier.creditLimit.toFixed(2)}`
-                                : '-'}
-                        </p>
                     </div>
                     <div>
                         <p className="text-sm text-gray-500">

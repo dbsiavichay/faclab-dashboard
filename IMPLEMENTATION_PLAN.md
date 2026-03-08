@@ -182,17 +182,17 @@
 **Objetivo:** Módulo completo de órdenes de compra con ciclo de vida y recepción de mercadería.
 
 **Tareas:**
-- [ ] Crear `PurchaseOrderService.ts` (CRUD OC + send/cancel/receive + CRUD ítems + recepciones)
-- [ ] Crear hooks en `usePurchaseOrders.ts` y `usePurchaseOrderItems.ts`
-- [ ] Crear vista `PurchaseOrdersView/` con tabla (filtros: status, supplierId)
-- [ ] Crear vista `PurchaseOrderDetailView/` con:
+- [x] Crear `PurchaseOrderService.ts` (CRUD OC + send/cancel/receive + CRUD ítems + recepciones)
+- [x] Crear hooks en `usePurchaseOrders.ts`
+- [x] Crear vista `PurchaseOrdersView/` con tabla (filtros: status, supplierId)
+- [x] Crear vista `PurchaseOrderDetailView/` con:
   - Información (supplierId, orderNumber, status, subtotal, tax, total, notes, expectedDate)
   - Tabla de ítems (productId, quantityOrdered, quantityReceived, unitCost)
   - Tabla de recepciones (receipts)
   - Botones: Enviar (DRAFT→SENT), Cancelar, Recibir mercadería
   - Modal de recepción (items[]: purchaseOrderItemId, quantityReceived, locationId, lotNumber, serialNumbers[])
   - Ítems editables solo en DRAFT
-- [ ] Agregar rutas y navegación
+- [x] Agregar rutas y navegación
 
 **Prompt sugerido:**
 > Implementa órdenes de compra (purchase-orders). Ciclo: DRAFT → SENT → RECEIVED / CANCELLED. OC tiene: supplierId, orderNumber (auto), status, subtotal/tax/total (calculados), notes, expectedDate. Ítems: productId, quantityOrdered, quantityReceived, unitCost. Recepción via POST /purchase-orders/{id}/receive con items (purchaseOrderItemId, quantityReceived, locationId, lotNumber, serialNumbers[]).

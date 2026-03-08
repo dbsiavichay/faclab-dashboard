@@ -132,6 +132,20 @@ export const protectedRoutes = [
         authority: [],
     },
     {
+        key: 'purchases.purchaseOrders',
+        path: '/purchase-orders',
+        component: lazy(() => import('@/views/purchases/PurchaseOrdersView')),
+        authority: [],
+    },
+    {
+        key: 'purchases.purchaseOrderDetail',
+        path: '/purchase-orders/:id',
+        component: lazy(
+            () => import('@/views/purchases/PurchaseOrderDetailView')
+        ),
+        authority: [],
+    },
+    {
         key: 'groupMenu.collapse.item1',
         path: '/group-collapse-menu-item-view-1',
         component: lazy(

@@ -219,6 +219,16 @@ const navigationConfig: NavigationTree[] = [
                 authority: [],
                 subMenu: [],
             },
+            {
+                key: 'purchases.purchaseOrders',
+                path: '/purchase-orders',
+                title: 'Purchase Orders',
+                translateKey: 'nav.purchases.purchaseOrders',
+                icon: 'purchasesPurchaseOrders',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
         ],
     },
 ]

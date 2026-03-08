@@ -49,42 +49,6 @@ export function useCreateSerialNumber() {
     })
 }
 
-export function useUpdateSerialNumber() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
-        mutationFn: async ({
-            id,
-            data,
-        }: {
-            id: number
-            data: SerialNumberInput
-        }) => {
-            const response = await SerialNumberService.updateSerialNumber(
-                id,
-                data
-            )
-            return response.data.data
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['serialNumbers'] })
-        },
-    })
-}
-
-export function useDeleteSerialNumber() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
-        mutationFn: async (id: number) => {
-            await SerialNumberService.deleteSerialNumber(id)
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['serialNumbers'] })
-        },
-    })
-}
-
 export function useChangeSerialNumberStatus() {
     const queryClient = useQueryClient()
 

@@ -30,6 +30,13 @@ export interface LotInput {
     notes?: string
 }
 
+export interface LotUpdateInput {
+    currentQuantity?: number
+    manufactureDate?: string
+    expirationDate?: string
+    notes?: string
+}
+
 export interface LotQueryParams extends PaginationParams {
     productId?: number
     expiringInDays?: number
@@ -85,18 +92,11 @@ class LotService {
         })
     }
 
-    async updateLot(id: number, lot: LotInput) {
+    async updateLot(id: number, lot: LotUpdateInput) {
         return ApiService.fetchData<DataResponse<Lot>>({
             url: `${this.config.host}/lots/${id}`,
             method: 'put',
             data: lot,
-        })
-    }
-
-    async deleteLot(id: number) {
-        return ApiService.fetchData<void>({
-            url: `${this.config.host}/lots/${id}`,
-            method: 'delete',
         })
     }
 }

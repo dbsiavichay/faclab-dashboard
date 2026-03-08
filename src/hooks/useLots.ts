@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query'
 import LotService, {
     type LotInput,
+    type LotUpdateInput,
     type LotQueryParams,
 } from '@/services/LotService'
 
@@ -50,22 +51,15 @@ export function useUpdateLot() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async ({ id, data }: { id: number; data: LotInput }) => {
+        mutationFn: async ({
+            id,
+            data,
+        }: {
+            id: number
+            data: LotUpdateInput
+        }) => {
             const response = await LotService.updateLot(id, data)
             return response.data.data
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['lots'] })
-        },
-    })
-}
-
-export function useDeleteLot() {
-    const queryClient = useQueryClient()
-
-    return useMutation({
-        mutationFn: async (id: number) => {
-            await LotService.deleteLot(id)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['lots'] })

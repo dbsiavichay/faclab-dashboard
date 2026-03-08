@@ -2,105 +2,54 @@ import { useState, useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import Select from '@/components/ui/Select'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import {
-    useCreateSerialNumber,
-    useUpdateSerialNumber,
-} from '@/hooks/useSerialNumbers'
+import { useCreateSerialNumber } from '@/hooks/useSerialNumbers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type {
-    SerialNumber,
-    SerialNumberInput,
-    SerialStatus,
-} from '@/services/SerialNumberService'
-import { SERIAL_STATUS_LABELS } from '@/services/SerialNumberService'
+import type { SerialNumberInput } from '@/services/SerialNumberService'
 
 interface SerialNumberFormProps {
     open: boolean
     onClose: () => void
-    serialNumber: SerialNumber | null
 }
 
-const statusOptions = (Object.keys(SERIAL_STATUS_LABELS) as SerialStatus[]).map(
-    (key) => ({
-        value: key,
-        label: SERIAL_STATUS_LABELS[key],
-    })
-)
-
-const SerialNumberForm = ({
-    open,
-    onClose,
-    serialNumber,
-}: SerialNumberFormProps) => {
+const SerialNumberForm = ({ open, onClose }: SerialNumberFormProps) => {
     const [formData, setFormData] = useState<SerialNumberInput>({
         serialNumber: '',
         productId: 0,
-        status: 'AVAILABLE',
         lotId: undefined,
-        locationId: undefined,
         notes: '',
     })
 
     const createSerialNumber = useCreateSerialNumber()
-    const updateSerialNumber = useUpdateSerialNumber()
-
-    const isEdit = !!serialNumber
 
     useEffect(() => {
-        if (serialNumber) {
-            setFormData({
-                serialNumber: serialNumber.serialNumber,
-                productId: serialNumber.productId,
-                status: serialNumber.status,
-                lotId: serialNumber.lotId || undefined,
-                locationId: serialNumber.locationId || undefined,
-                notes: serialNumber.notes || '',
-            })
-        } else {
+        if (open) {
             setFormData({
                 serialNumber: '',
                 productId: 0,
-                status: 'AVAILABLE',
                 lotId: undefined,
-                locationId: undefined,
                 notes: '',
             })
         }
-    }, [serialNumber, open])
+    }, [open])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         const submitData: SerialNumberInput = {
-            ...formData,
+            serialNumber: formData.serialNumber,
+            productId: formData.productId,
+            lotId: formData.lotId || undefined,
             notes: formData.notes || undefined,
         }
 
         try {
-            if (isEdit && serialNumber) {
-                await updateSerialNumber.mutateAsync({
-                    id: serialNumber.id,
-                    data: submitData,
-                })
-            } else {
-                await createSerialNumber.mutateAsync(submitData)
-            }
+            await createSerialNumber.mutateAsync(submitData)
 
             toast.push(
-                <Notification
-                    title={
-                        isEdit
-                            ? 'Número de serie actualizado'
-                            : 'Número de serie creado'
-                    }
-                    type="success"
-                >
-                    {isEdit
-                        ? 'El número de serie se actualizó correctamente'
-                        : 'El número de serie se creó correctamente'}
+                <Notification title="Número de serie creado" type="success">
+                    El número de serie se creó correctamente
                 </Notification>,
                 { placement: 'top-center' }
             )
@@ -109,7 +58,7 @@ const SerialNumberForm = ({
         } catch (error: unknown) {
             const errorMessage = getErrorMessage(
                 error,
-                'Error al guardar el número de serie'
+                'Error al crear el número de serie'
             )
 
             toast.push(
@@ -121,8 +70,7 @@ const SerialNumberForm = ({
         }
     }
 
-    const isPending =
-        createSerialNumber.isPending || updateSerialNumber.isPending
+    const isPending = createSerialNumber.isPending
 
     const handleClose = () => {
         if (!isPending) {
@@ -138,11 +86,7 @@ const SerialNumberForm = ({
             onRequestClose={handleClose}
         >
             <div className="flex flex-col h-full justify-between">
-                <h5 className="mb-4">
-                    {isEdit
-                        ? 'Editar Número de Serie'
-                        : 'Nuevo Número de Serie'}
-                </h5>
+                <h5 className="mb-4">Nuevo Número de Serie</h5>
 
                 <form className="flex-1" onSubmit={handleSubmit}>
                     <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
@@ -177,7 +121,6 @@ const SerialNumberForm = ({
                                     min={1}
                                     placeholder="ID del producto"
                                     value={formData.productId || ''}
-                                    disabled={isEdit}
                                     onChange={(e) =>
                                         setFormData({
                                             ...formData,
@@ -191,67 +134,22 @@ const SerialNumberForm = ({
 
                         <div>
                             <label className="block text-sm font-medium mb-2">
-                                Estado
+                                ID Lote
                             </label>
-                            <Select
-                                options={statusOptions}
-                                value={statusOptions.find(
-                                    (o) => o.value === formData.status
-                                )}
-                                onChange={(option) =>
+                            <Input
+                                type="number"
+                                min={1}
+                                placeholder="ID del lote (opcional)"
+                                value={formData.lotId || ''}
+                                onChange={(e) =>
                                     setFormData({
                                         ...formData,
-                                        status:
-                                            (
-                                                option as {
-                                                    value: SerialStatus
-                                                }
-                                            )?.value || 'AVAILABLE',
+                                        lotId: e.target.value
+                                            ? parseInt(e.target.value)
+                                            : undefined,
                                     })
                                 }
                             />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    ID Lote
-                                </label>
-                                <Input
-                                    type="number"
-                                    min={1}
-                                    placeholder="ID del lote (opcional)"
-                                    value={formData.lotId || ''}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            lotId: e.target.value
-                                                ? parseInt(e.target.value)
-                                                : undefined,
-                                        })
-                                    }
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    ID Ubicación
-                                </label>
-                                <Input
-                                    type="number"
-                                    min={1}
-                                    placeholder="ID de ubicación (opcional)"
-                                    value={formData.locationId || ''}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            locationId: e.target.value
-                                                ? parseInt(e.target.value)
-                                                : undefined,
-                                        })
-                                    }
-                                />
-                            </div>
                         </div>
 
                         <div>
@@ -286,7 +184,7 @@ const SerialNumberForm = ({
                             variant="solid"
                             loading={isPending}
                         >
-                            {isEdit ? 'Actualizar' : 'Crear'}
+                            Crear
                         </Button>
                     </div>
                 </form>

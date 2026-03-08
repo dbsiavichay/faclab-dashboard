@@ -127,6 +127,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'inventory.adjustments',
+                path: '/adjustments',
+                title: 'Adjustments',
+                translateKey: 'nav.inventory.adjustments',
+                icon: 'inventoryAdjustments',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
                 key: 'groupMenu.collapse',
                 path: '',
                 title: 'Group collapse menu',

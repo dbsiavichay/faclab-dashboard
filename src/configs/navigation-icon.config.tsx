@@ -10,6 +10,7 @@ import {
     HiOutlineQrcode,
     HiOutlineScale,
     HiOutlineSwitchHorizontal,
+    HiOutlineSwitchVertical,
     HiOutlineTruck,
     HiOutlineUserGroup,
 } from 'react-icons/hi'
@@ -30,6 +31,7 @@ const navigationIcon: NavigationIcons = {
     inventorySerials: <HiOutlineQrcode />,
     purchasesSuppliers: <HiOutlineTruck />,
     inventoryAdjustments: <HiOutlineClipboardCheck />,
+    inventoryTransfers: <HiOutlineSwitchVertical />,
     groupCollapseMenu: <HiOutlineColorSwatch />,
 }
 

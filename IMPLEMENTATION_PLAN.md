@@ -24,6 +24,7 @@
 | Lotes | ✅ | ✅ | ✅ | CRUD con filtros (productId, expiringInDays) |
 | Números de serie | ✅ | ✅ | ✅ | CRUD con filtros + cambio de estado |
 | Ajustes de inventario | ✅ | ✅ | ✅ | CRUD + confirm/cancel + items CRUD, ciclo DRAFT→CONFIRMED/CANCELLED |
+| Transferencias | ✅ | ✅ | ✅ | CRUD + confirm/receive/cancel + items CRUD, ciclo DRAFT→CONFIRMED→RECEIVED/CANCELLED |
 
 ### Módulos pendientes
 
@@ -38,7 +39,7 @@
 | ~~7~~ | ~~Lotes~~ | ~~Media~~ | ~~Completado en Sesión 5~~ |
 | ~~8~~ | ~~Números de serie~~ | ~~Media~~ | ~~Completado en Sesión 5~~ |
 | ~~9~~ | ~~Ajustes de inventario~~ | ~~Alta~~ | ~~Completado en Sesión 6~~ |
-| 10 | Transferencias | Alta | Productos, Ubicaciones |
+| ~~10~~ | ~~Transferencias~~ | ~~Alta~~ | ~~Completado en Sesión 7~~ |
 | 11 | Órdenes de compra | Alta | Proveedores, Productos |
 | 12 | Alertas | Baja | Bodegas |
 | 13 | Ventas (solo lectura) | Media | Clientes |

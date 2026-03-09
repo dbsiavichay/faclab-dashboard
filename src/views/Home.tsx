@@ -1,5 +1,7 @@
+import AlertsView from '@/views/inventory/AlertsView'
+
 const Home = () => {
-    return <div>Hola</div>
+    return <AlertsView />
 }
 
 export default Home

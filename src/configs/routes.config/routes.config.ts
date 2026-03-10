@@ -30,18 +30,6 @@ export const protectedRoutes = [
         authority: [],
     },
     {
-        key: 'inventory.product',
-        path: '/products',
-        component: lazy(() => import('@/views/inventory/ProductsView')),
-        authority: [],
-    },
-    {
-        key: 'inventory.category',
-        path: '/categories',
-        component: lazy(() => import('@/views/inventory/CategoriesView')),
-        authority: [],
-    },
-    {
         key: 'inventory.stock',
         path: '/stock',
         component: lazy(() => import('@/views/inventory/StockView')),
@@ -164,19 +152,9 @@ export const protectedRoutes = [
         authority: [],
     },
     {
-        key: 'groupMenu.collapse.item1',
-        path: '/group-collapse-menu-item-view-1',
-        component: lazy(
-            () => import('@/views/demo/GroupCollapseMenuItemView1')
-        ),
-        authority: [],
-    },
-    {
-        key: 'groupMenu.collapse.item2',
-        path: '/group-collapse-menu-item-view-2',
-        component: lazy(
-            () => import('@/views/demo/GroupCollapseMenuItemView2')
-        ),
+        key: 'inventory.alerts',
+        path: '/alerts',
+        component: lazy(() => import('@/views/inventory/AlertsView')),
         authority: [],
     },
 ]

@@ -1,8 +1,9 @@
 import {
-    NAV_ITEM_TYPE_TITLE,
-    NAV_ITEM_TYPE_ITEM,
     NAV_ITEM_TYPE_COLLAPSE,
+    NAV_ITEM_TYPE_ITEM,
+    NAV_ITEM_TYPE_TITLE,
 } from '@/constants/navigation.constant'
+
 import type { NavigationTree } from '@/@types/navigation'
 
 const navigationConfig: NavigationTree[] = [
@@ -142,6 +143,16 @@ const navigationConfig: NavigationTree[] = [
                 title: 'Transfers',
                 translateKey: 'nav.inventory.transfers',
                 icon: 'inventoryTransfers',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'inventory.reports',
+                path: '/reports/inventory',
+                title: 'Reports',
+                translateKey: 'nav.inventory.reports',
+                icon: 'inventoryReports',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: [],
                 subMenu: [],

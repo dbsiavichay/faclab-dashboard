@@ -15,6 +15,9 @@
             "locations": "Ubicaciones",
             "lots": "Lotes",
             "serials": "Números de Serie",
+            "adjustments": "Ajustes",
+            "transfers": "Transferencias",
+            "reports": "Reportes",
             "collapse": {
                 "collapse": "Group collapse menu",
                 "item1": "Group collapse menu item 1",

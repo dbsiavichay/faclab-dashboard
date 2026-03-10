@@ -27,6 +27,7 @@
 | Transferencias | ✅ | ✅ | ✅ | CRUD + confirm/receive/cancel + items CRUD, ciclo DRAFT→CONFIRMED→RECEIVED/CANCELLED |
 | Ventas | ✅ | ✅ | ✅ | Solo lectura: listado con filtros (customerId, status, paginación) + detalle con items y pagos en tabs |
 | Alertas | ✅ | ✅ | ✅ | Solo lectura: 4 tabs (stock bajo, sin stock, punto reorden, lotes por vencer) con contadores y filtros |
+| Reportes de inventario | ✅ | ✅ | ✅ | Solo lectura: 4 tabs (valorización, rotación, movimientos paginados, resumen por almacén) con filtros |
 
 ### Módulos pendientes
 
@@ -45,7 +46,7 @@
 | ~~11~~ | ~~Órdenes de compra~~ | ~~Alta~~ | ~~Completado en Sesión 8~~ |
 | ~~12~~ | ~~Alertas~~ | ~~Baja~~ | ~~Completado en Sesión 10~~ |
 | ~~13~~ | ~~Ventas (solo lectura)~~ | ~~Media~~ | ~~Completado en Sesión 9~~ |
-| 14 | Reportes de inventario | Media | Bodegas |
+| ~~14~~ | ~~Reportes de inventario~~ | ~~Media~~ | ~~Completado en Sesión 11~~ |
 
 ---
 

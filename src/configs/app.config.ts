@@ -6,6 +6,7 @@ export type AppConfig = {
     locale: string
     enableMock: boolean
     inventoryApiHost?: string
+    posApiHost?: string
 }
 
 const appConfig: AppConfig = {
@@ -16,6 +17,7 @@ const appConfig: AppConfig = {
     locale: 'en',
     enableMock: false,
     inventoryApiHost: 'http://localhost:3000/api/admin',
+    posApiHost: 'http://localhost:3000/api/pos',
 }
 
 export default appConfig

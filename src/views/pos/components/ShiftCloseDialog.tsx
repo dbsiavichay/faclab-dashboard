@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -41,12 +42,21 @@ const SummaryRow = ({
 
 const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const shift = useShift()
     const closeShift = useCloseShift()
     const { data: cashSummary, isLoading } = useCashSummary(shift.id)
 
     const [closingBalance, setClosingBalance] = useState<string>('')
     const [notes, setNotes] = useState('')
+
+    useEffect(() => {
+        if (isOpen) {
+            queryClient.invalidateQueries({
+                queryKey: ['pos', 'cashSummary', shift.id],
+            })
+        }
+    }, [isOpen, shift.id, queryClient])
 
     const closingNum = Number(closingBalance) || 0
     const discrepancy = cashSummary

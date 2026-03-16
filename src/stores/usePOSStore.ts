@@ -5,6 +5,7 @@ export interface POSCartItem {
     name: string
     sku: string
     salePrice: number
+    taxRate: number
     quantity: number
     discount: number
 }
@@ -26,9 +27,11 @@ interface POSState {
         name: string
         sku: string
         salePrice: number
+        taxRate: number
     }) => void
     updateItemQuantity: (productId: number, quantity: number) => void
     updateItemDiscount: (productId: number, discount: number) => void
+    updateItemPrice: (productId: number, price: number) => void
     removeItem: (productId: number) => void
     setCustomer: (id: number | null, name: string | null) => void
     setFinalConsumer: (value: boolean) => void
@@ -96,6 +99,15 @@ export const usePOSStore = create<POSState>()((set) => ({
             ),
         })),
 
+    updateItemPrice: (productId, price) =>
+        set((state) => ({
+            cartItems: state.cartItems.map((item) =>
+                item.productId === productId
+                    ? { ...item, salePrice: price }
+                    : item
+            ),
+        })),
+
     removeItem: (productId) =>
         set((state) => ({
             cartItems: state.cartItems.filter(
@@ -133,6 +145,7 @@ export const usePOSStore = create<POSState>()((set) => ({
     setSearchTerm: (term) => set({ searchTerm: term }),
 }))
 
+/** Subtotal de items (precio × cantidad × (1 - descuento_item%)), sin impuesto */
 export function getCartSubtotal(items: POSCartItem[]): number {
     return items.reduce((sum, item) => {
         const lineTotal =
@@ -151,6 +164,34 @@ export function getCartDiscountAmount(
     return discountValue
 }
 
+/** Impuesto calculado por item usando su taxRate, sobre la base después del descuento de venta */
+export function getCartTax(
+    items: POSCartItem[],
+    discountType: 'PERCENTAGE' | 'AMOUNT' | null,
+    discountValue: number
+): number {
+    const subtotal = getCartSubtotal(items)
+    if (subtotal === 0) return 0
+
+    const discountAmount = getCartDiscountAmount(
+        subtotal,
+        discountType,
+        discountValue
+    )
+    // Factor de descuento de venta que se distribuye proporcionalmente a cada item
+    const discountFactor =
+        subtotal > 0 ? Math.max(0, subtotal - discountAmount) / subtotal : 1
+
+    return items.reduce((sum, item) => {
+        const lineSubtotal =
+            item.salePrice * item.quantity * (1 - item.discount / 100)
+        const lineAfterDiscount = lineSubtotal * discountFactor
+        const lineTax = lineAfterDiscount * (item.taxRate / 100)
+        return sum + lineTax
+    }, 0)
+}
+
+/** Total = subtotal - descuento_venta + impuesto */
 export function getCartTotal(
     items: POSCartItem[],
     discountType: 'PERCENTAGE' | 'AMOUNT' | null,
@@ -162,5 +203,6 @@ export function getCartTotal(
         discountType,
         discountValue
     )
-    return Math.max(0, subtotal - discount)
+    const tax = getCartTax(items, discountType, discountValue)
+    return Math.max(0, subtotal - discount + tax)
 }

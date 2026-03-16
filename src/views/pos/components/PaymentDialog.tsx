@@ -27,14 +27,8 @@ const PAYMENT_METHODS: POSPaymentMethod[] = [
 ]
 
 const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
-    const {
-        cartItems,
-        customerId,
-        isFinalConsumer,
-        discountType,
-        discountValue,
-        clearCart,
-    } = usePOSStore()
+    const { cartItems, customerId, discountType, discountValue, clearCart } =
+        usePOSStore()
     const quickSale = useQuickSale()
 
     const total = getCartTotal(cartItems, discountType, discountValue)
@@ -95,6 +89,9 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                     discount: item.discount > 0 ? item.discount : undefined,
                 })),
                 payments: finalPayments,
+                ...(discountType && discountValue > 0
+                    ? { discountType, discountValue }
+                    : {}),
             })
             clearCart()
             resetForm()

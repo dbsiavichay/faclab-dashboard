@@ -3,7 +3,7 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useParkedSales, useResumeSale } from '@/hooks/usePOS'
+import { useParkedSales, useResumeSale, useCancelSale } from '@/hooks/usePOS'
 import { usePOSStore } from '@/stores/usePOSStore'
 import POSService from '@/services/POSService'
 
@@ -15,16 +15,35 @@ interface ParkedSalesDrawerProps {
 const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
     const { data: parkedSales, isLoading } = useParkedSales()
     const resumeSale = useResumeSale()
-    const { clearCart, addItem } = usePOSStore()
+    const cancelSale = useCancelSale()
+    const { clearCart, addItem, setCustomer, applyDiscount } = usePOSStore()
 
     const handleResume = async (saleId: number) => {
         try {
+            const saleResponse = await POSService.getSale(saleId)
+            const saleData = saleResponse.data.data
+
             await resumeSale.mutateAsync(saleId)
 
             const itemsResponse = await POSService.getSaleItems(saleId)
             const saleItems = itemsResponse.data.data
 
             clearCart()
+
+            // Restore customer
+            if (saleData.customerId) {
+                const customerResponse = await POSService.getCustomer(
+                    saleData.customerId
+                )
+                const customer = customerResponse.data.data
+                setCustomer(customer.id, customer.name)
+            }
+
+            // Restore sale-level discount
+            if (saleData.discountType && saleData.discountValue > 0) {
+                applyDiscount(saleData.discountType, saleData.discountValue)
+            }
+
             for (const item of saleItems) {
                 const productResponse = await POSService.getProduct(
                     item.productId
@@ -35,11 +54,17 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                     name: product.name,
                     sku: product.sku,
                     salePrice: item.unitPrice,
+                    taxRate: item.taxRate,
                 })
                 if (item.quantity > 1) {
                     usePOSStore
                         .getState()
                         .updateItemQuantity(product.id, item.quantity)
+                }
+                if (item.discount > 0) {
+                    usePOSStore
+                        .getState()
+                        .updateItemDiscount(product.id, item.discount)
                 }
             }
 
@@ -53,6 +78,27 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                 <Notification
                     type="danger"
                     title="Error al reanudar la venta"
+                />,
+                { placement: 'top-end' }
+            )
+        }
+    }
+
+    const handleCancel = async (saleId: number) => {
+        try {
+            await cancelSale.mutateAsync({
+                saleId,
+                reason: 'Cancelada desde ventas retenidas',
+            })
+            toast.push(
+                <Notification type="success" title="Venta cancelada" />,
+                { placement: 'top-end' }
+            )
+        } catch {
+            toast.push(
+                <Notification
+                    type="danger"
+                    title="Error al cancelar la venta"
                 />,
                 { placement: 'top-end' }
             )
@@ -115,17 +161,28 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                                         <p className="font-bold">
                                             ${sale.total.toFixed(2)}
                                         </p>
-                                        <Button
-                                            size="xs"
-                                            variant="solid"
-                                            className="mt-1"
-                                            loading={resumeSale.isPending}
-                                            onClick={() =>
-                                                handleResume(sale.id)
-                                            }
-                                        >
-                                            Reanudar
-                                        </Button>
+                                        <div className="flex gap-1 mt-1">
+                                            <Button
+                                                size="xs"
+                                                variant="default"
+                                                loading={cancelSale.isPending}
+                                                onClick={() =>
+                                                    handleCancel(sale.id)
+                                                }
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                size="xs"
+                                                variant="solid"
+                                                loading={resumeSale.isPending}
+                                                onClick={() =>
+                                                    handleResume(sale.id)
+                                                }
+                                            >
+                                                Reanudar
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

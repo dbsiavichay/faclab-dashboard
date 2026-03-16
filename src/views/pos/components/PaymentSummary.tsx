@@ -2,6 +2,7 @@ import {
     usePOSStore,
     getCartSubtotal,
     getCartDiscountAmount,
+    getCartTax,
     getCartTotal,
 } from '@/stores/usePOSStore'
 
@@ -14,6 +15,7 @@ const PaymentSummary = () => {
         discountType,
         discountValue
     )
+    const tax = getCartTax(cartItems, discountType, discountValue)
     const total = getCartTotal(cartItems, discountType, discountValue)
 
     return (
@@ -36,6 +38,10 @@ const PaymentSummary = () => {
                     </span>
                 </div>
             )}
+            <div className="flex justify-between text-sm">
+                <span className="text-gray-500 dark:text-gray-400">IVA</span>
+                <span>${tax.toFixed(2)}</span>
+            </div>
             <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-200 dark:border-gray-700">
                 <span>Total</span>
                 <span className="text-primary-600">${total.toFixed(2)}</span>

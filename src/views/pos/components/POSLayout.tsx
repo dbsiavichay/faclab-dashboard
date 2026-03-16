@@ -2,7 +2,12 @@ import { useState } from 'react'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { usePOSStore } from '@/stores/usePOSStore'
-import { useCreateSale, useAddSaleItem, useParkSale } from '@/hooks/usePOS'
+import {
+    useCreateSale,
+    useAddSaleItem,
+    useApplySaleDiscount,
+    useParkSale,
+} from '@/hooks/usePOS'
 import POSHeader from './POSHeader'
 import CategorySidebar from './CategorySidebar'
 import SearchBar from './SearchBar'
@@ -14,9 +19,17 @@ import ParkedSalesDrawer from './ParkedSalesDrawer'
 import ReceiptDialog from './ReceiptDialog'
 import ShiftCloseDialog from './ShiftCloseDialog'
 import CashMovementDialog from './CashMovementDialog'
+import RefundDialog from './RefundDialog'
 
 const POSLayout = () => {
-    const { cartItems, customerId, isFinalConsumer, clearCart } = usePOSStore()
+    const {
+        cartItems,
+        customerId,
+        isFinalConsumer,
+        discountType,
+        discountValue,
+        clearCart,
+    } = usePOSStore()
 
     const [paymentOpen, setPaymentOpen] = useState(false)
     const [discountOpen, setDiscountOpen] = useState(false)
@@ -25,9 +38,11 @@ const POSLayout = () => {
     const [receiptSaleId, setReceiptSaleId] = useState(0)
     const [closeShiftOpen, setCloseShiftOpen] = useState(false)
     const [cashMovementOpen, setCashMovementOpen] = useState(false)
+    const [refundOpen, setRefundOpen] = useState(false)
 
     const createSale = useCreateSale()
     const addSaleItem = useAddSaleItem()
+    const applySaleDiscount = useApplySaleDiscount()
     const parkSale = useParkSale()
 
     const handlePaymentComplete = (saleId: number) => {
@@ -51,7 +66,16 @@ const POSLayout = () => {
                     data: {
                         productId: item.productId,
                         quantity: item.quantity,
+                        unitPrice: item.salePrice,
+                        discount: item.discount > 0 ? item.discount : undefined,
                     },
+                })
+            }
+
+            if (discountType && discountValue > 0) {
+                await applySaleDiscount.mutateAsync({
+                    saleId: sale.id,
+                    data: { discountType, discountValue },
                 })
             }
 
@@ -77,6 +101,7 @@ const POSLayout = () => {
             <POSHeader
                 onOpenCloseShift={() => setCloseShiftOpen(true)}
                 onOpenCashMovement={() => setCashMovementOpen(true)}
+                onOpenRefund={() => setRefundOpen(true)}
             />
             <div className="flex flex-1 min-h-0">
                 <div className="w-16 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
@@ -131,6 +156,11 @@ const POSLayout = () => {
             <CashMovementDialog
                 isOpen={cashMovementOpen}
                 onClose={() => setCashMovementOpen(false)}
+            />
+
+            <RefundDialog
+                isOpen={refundOpen}
+                onClose={() => setRefundOpen(false)}
             />
         </div>
     )

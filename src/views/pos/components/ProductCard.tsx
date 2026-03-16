@@ -15,6 +15,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             name: product.name,
             sku: product.sku,
             salePrice: product.salePrice ?? 0,
+            taxRate: product.taxRate ?? 0,
         })
     }
 
@@ -25,7 +26,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
             onClick={handleClick}
         >
             <div className="aspect-square bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                <HiOutlinePhotograph className="text-4xl text-gray-400" />
+                {product.image ? (
+                    <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <HiOutlinePhotograph className="text-4xl text-gray-400" />
+                )}
             </div>
 
             <div className="p-3">

@@ -170,6 +170,8 @@ export interface QuickSaleInput {
     customerId?: number | null
     items: QuickSaleItemInput[]
     payments: QuickSalePaymentInput[]
+    discountType?: DiscountType
+    discountValue?: number
     notes?: string
     createdBy?: string
 }
@@ -191,10 +193,13 @@ export interface QuickSalePaymentInput {
 export interface AddSaleItemInput {
     productId: number
     quantity: number
+    unitPrice: number
+    discount?: number
 }
 
 export interface UpdateSaleItemInput {
-    quantity: number
+    quantity?: number
+    discount?: number
 }
 
 export interface SaleDiscountInput {
@@ -383,7 +388,9 @@ export interface POSProduct {
     barcode: string | null
     categoryId: number | null
     salePrice: number | null
+    taxRate: number
     isActive: boolean
+    image: string | null
 }
 
 // === POS CUSTOMER ===

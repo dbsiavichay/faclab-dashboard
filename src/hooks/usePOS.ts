@@ -6,6 +6,9 @@ import type {
     QuickSaleInput,
     CreateSaleInput,
     AddSaleItemInput,
+    UpdateSaleItemInput,
+    SaleDiscountInput,
+    PriceOverrideInput,
     PaymentInput,
     CreateRefundInput,
     ProcessRefundInput,
@@ -171,6 +174,77 @@ export function useAddSaleItem() {
     })
 }
 
+export function useUpdateSaleItem() {
+    return useMutation({
+        mutationFn: async ({
+            saleId,
+            itemId,
+            data,
+        }: {
+            saleId: number
+            itemId: number
+            data: UpdateSaleItemInput
+        }) => {
+            const response = await POSService.updateSaleItem(
+                saleId,
+                itemId,
+                data
+            )
+            return response.data.data
+        },
+    })
+}
+
+export function useDeleteSaleItem() {
+    return useMutation({
+        mutationFn: async ({
+            saleId,
+            itemId,
+        }: {
+            saleId: number
+            itemId: number
+        }) => {
+            await POSService.deleteSaleItem(saleId, itemId)
+        },
+    })
+}
+
+export function useApplySaleDiscount() {
+    return useMutation({
+        mutationFn: async ({
+            saleId,
+            data,
+        }: {
+            saleId: number
+            data: SaleDiscountInput
+        }) => {
+            const response = await POSService.applySaleDiscount(saleId, data)
+            return response.data.data
+        },
+    })
+}
+
+export function useOverrideItemPrice() {
+    return useMutation({
+        mutationFn: async ({
+            saleId,
+            itemId,
+            data,
+        }: {
+            saleId: number
+            itemId: number
+            data: PriceOverrideInput
+        }) => {
+            const response = await POSService.overrideItemPrice(
+                saleId,
+                itemId,
+                data
+            )
+            return response.data.data
+        },
+    })
+}
+
 export function useConfirmSale() {
     const queryClient = useQueryClient()
     return useMutation({
@@ -213,6 +287,28 @@ export function useResumeSale() {
             return response.data.data
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ['pos', 'parkedSales'],
+            })
+        },
+    })
+}
+
+export function useCancelSale() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async ({
+            saleId,
+            reason,
+        }: {
+            saleId: number
+            reason?: string
+        }) => {
+            const response = await POSService.cancelSale(saleId, reason)
+            return response.data.data
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pos', 'products'] })
             queryClient.invalidateQueries({
                 queryKey: ['pos', 'parkedSales'],
             })

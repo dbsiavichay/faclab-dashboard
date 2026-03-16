@@ -6,6 +6,7 @@ import {
     usePOSStore,
     getCartSubtotal,
     getCartDiscountAmount,
+    getCartTotal,
 } from '@/stores/usePOSStore'
 import type { DiscountType } from '@/services/POSService'
 
@@ -41,7 +42,7 @@ const DiscountDialog = ({ isOpen, onClose }: DiscountDialogProps) => {
     const subtotal = getCartSubtotal(cartItems)
     const numValue = Number(value) || 0
     const previewAmount = getCartDiscountAmount(subtotal, type, numValue)
-    const newTotal = Math.max(0, subtotal - previewAmount)
+    const newTotal = getCartTotal(cartItems, type, numValue)
 
     const handleApply = () => {
         if (numValue > 0) {

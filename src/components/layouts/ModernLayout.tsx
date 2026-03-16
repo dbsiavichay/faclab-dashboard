@@ -1,10 +1,13 @@
+import { useNavigate } from 'react-router-dom'
 import Header from '@/components/template/Header'
 import SidePanel from '@/components/template/SidePanel'
 import UserDropdown from '@/components/template/UserDropdown'
 import SideNavToggle from '@/components/template/SideNavToggle'
 import MobileNav from '@/components/template/MobileNav'
 import SideNav from '@/components/template/SideNav'
+import Button from '@/components/ui/Button'
 import View from '@/views'
+import { HiOutlineShoppingCart } from 'react-icons/hi'
 
 const HeaderActionsStart = () => {
     return (
@@ -16,8 +19,18 @@ const HeaderActionsStart = () => {
 }
 
 const HeaderActionsEnd = () => {
+    const navigate = useNavigate()
+
     return (
         <>
+            <Button
+                size="sm"
+                variant="solid"
+                icon={<HiOutlineShoppingCart />}
+                onClick={() => navigate('/pos')}
+            >
+                POS
+            </Button>
             <SidePanel />
             <UserDropdown hoverable={false} />
         </>

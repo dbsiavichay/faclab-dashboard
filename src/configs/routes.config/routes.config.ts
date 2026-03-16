@@ -157,4 +157,10 @@ export const protectedRoutes = [
         component: lazy(() => import('@/views/inventory/AlertsView')),
         authority: [],
     },
+    {
+        key: 'pos',
+        path: '/pos',
+        component: lazy(() => import('@/views/pos/POSView')),
+        authority: [],
+    },
 ]

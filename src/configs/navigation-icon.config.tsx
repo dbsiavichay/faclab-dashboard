@@ -7,6 +7,7 @@ import {
     HiOutlineDocumentText,
     HiOutlineFolder,
     HiOutlineLocationMarker,
+    HiOutlineLockClosed,
     HiOutlineOfficeBuilding,
     HiOutlineQrcode,
     HiOutlineScale,
@@ -38,6 +39,8 @@ const navigationIcon: NavigationIcons = {
     inventoryReports: <HiOutlineDocumentText />,
     salesSales: <HiOutlineShoppingCart />,
     inventoryAlerts: <HiOutlineBell />,
+    settingsCompanyConfig: <HiOutlineOfficeBuilding />,
+    settingsCertificates: <HiOutlineLockClosed />,
 }
 
 export default navigationIcon

@@ -230,6 +230,37 @@ const navigationConfig: NavigationTree[] = [
             },
         ],
     },
+    {
+        key: 'settings',
+        path: '',
+        title: 'Settings',
+        translateKey: 'nav.settings.title',
+        icon: '',
+        type: NAV_ITEM_TYPE_TITLE,
+        authority: [],
+        subMenu: [
+            {
+                key: 'settings.companyConfig',
+                path: '/settings/company-config',
+                title: 'Company Configuration',
+                translateKey: 'nav.settings.companyConfig',
+                icon: 'settingsCompanyConfig',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+            {
+                key: 'settings.certificates',
+                path: '/settings/certificates',
+                title: 'Digital Certificates',
+                translateKey: 'nav.settings.certificates',
+                icon: 'settingsCertificates',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: [],
+                subMenu: [],
+            },
+        ],
+    },
 ]
 
 export default navigationConfig

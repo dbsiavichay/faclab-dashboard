@@ -30,7 +30,13 @@
         },
         "purchases": {
             "title": "Compras",
-            "suppliers": "Proveedores"
+            "suppliers": "Proveedores",
+            "purchaseOrders": "Órdenes de Compra"
+        },
+        "settings": {
+            "title": "Configuración",
+            "companyConfig": "Configuración Fiscal",
+            "certificates": "Certificados Digitales"
         }
     }
 }

@@ -163,4 +163,16 @@ export const protectedRoutes = [
         component: lazy(() => import('@/views/pos/POSView')),
         authority: [],
     },
+    {
+        key: 'settings.companyConfig',
+        path: '/settings/company-config',
+        component: lazy(() => import('@/views/settings/CompanyConfigView')),
+        authority: [],
+    },
+    {
+        key: 'settings.certificates',
+        path: '/settings/certificates',
+        component: lazy(() => import('@/views/settings/CertificatesView')),
+        authority: [],
+    },
 ]

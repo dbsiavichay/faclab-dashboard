@@ -7,6 +7,7 @@ export type AppConfig = {
     enableMock: boolean
     inventoryApiHost?: string
     posApiHost?: string
+    invoicingApiHost?: string
 }
 
 const appConfig: AppConfig = {
@@ -18,6 +19,7 @@ const appConfig: AppConfig = {
     enableMock: false,
     inventoryApiHost: 'http://localhost:3000/api/admin',
     posApiHost: 'http://localhost:3000/api/pos',
+    invoicingApiHost: 'http://localhost:3173',
 }
 
 export default appConfig

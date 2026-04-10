@@ -1,5 +1,5 @@
 import Button from '@/components/ui/Button'
-import { usePOSStore } from '@/stores/usePOSStore'
+import { usePOSStore, getCartTotal } from '@/stores/usePOSStore'
 
 interface ActionButtonsProps {
     onPayment: () => void
@@ -14,8 +14,19 @@ const ActionButtons = ({
     onHold,
     onViewOrders,
 }: ActionButtonsProps) => {
-    const { cartItems } = usePOSStore()
+    const {
+        cartItems,
+        customerId,
+        isFinalConsumer,
+        discountType,
+        discountValue,
+    } = usePOSStore()
     const cartEmpty = cartItems.length === 0
+    const total = getCartTotal(cartItems, discountType, discountValue)
+    const requiresCustomer = total > 50
+    const canPay =
+        !cartEmpty &&
+        (customerId !== null || (isFinalConsumer && !requiresCustomer))
 
     return (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 grid grid-cols-2 gap-2">
@@ -38,7 +49,7 @@ const ActionButtons = ({
             <Button
                 block
                 variant="solid"
-                disabled={cartEmpty}
+                disabled={!canPay}
                 onClick={onPayment}
             >
                 Cobrar

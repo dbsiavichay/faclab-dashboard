@@ -17,16 +17,13 @@
             "serials": "Números de Serie",
             "adjustments": "Ajustes",
             "transfers": "Transferencias",
-            "reports": "Reportes",
-            "collapse": {
-                "collapse": "Group collapse menu",
-                "item1": "Group collapse menu item 1",
-                "item2": "Group collapse menu item 2"
-            }
+            "alerts": "Alertas",
+            "reports": "Reportes"
         },
         "sales": {
             "title": "Ventas",
-            "customers": "Clientes"
+            "customers": "Clientes",
+            "sales": "Ventas"
         },
         "purchases": {
             "title": "Compras",

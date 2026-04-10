@@ -3,13 +3,27 @@ import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Notification from '@/components/ui/Notification'
+import Switcher from '@/components/ui/Switcher'
 import toast from '@/components/ui/toast'
-import { usePOSStore } from '@/stores/usePOSStore'
+import { usePOSStore, getCartTotal } from '@/stores/usePOSStore'
 import { usePOSCustomerSearch, useQuickCreateCustomer } from '@/hooks/usePOS'
 import { HiOutlineUser } from 'react-icons/hi'
 
+const FINAL_CONSUMER_MAX = 50
+
 const CustomerSelector = () => {
-    const { customerId, customerName, setCustomer } = usePOSStore()
+    const {
+        customerId,
+        customerName,
+        isFinalConsumer,
+        setCustomer,
+        setFinalConsumer,
+        cartItems,
+        discountType,
+        discountValue,
+    } = usePOSStore()
+    const total = getCartTotal(cartItems, discountType, discountValue)
+    const finalConsumerBlocked = total > FINAL_CONSUMER_MAX
     const [dialogOpen, setDialogOpen] = useState(false)
     const [taxId, setTaxId] = useState('')
     const [showCreateForm, setShowCreateForm] = useState(false)
@@ -21,14 +35,19 @@ const CustomerSelector = () => {
         usePOSCustomerSearch(taxId)
     const quickCreate = useQuickCreateCustomer()
 
+    const handleToggleFinalConsumer = (checked: boolean) => {
+        if (checked) {
+            setCustomer(null, null)
+            setFinalConsumer(true)
+        } else {
+            setFinalConsumer(false)
+        }
+    }
+
     const handleSelectCustomer = (id: number, name: string) => {
         setCustomer(id, name)
         setDialogOpen(false)
         resetForm()
-    }
-
-    const handleClearCustomer = () => {
-        setCustomer(null, null)
     }
 
     const handleCreateCustomer = async () => {
@@ -65,34 +84,79 @@ const CustomerSelector = () => {
 
     return (
         <>
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                            <HiOutlineUser className="text-gray-500" />
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium">
-                                {customerName || 'Consumidor Final'}
+            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 space-y-3">
+                {/* Toggle consumidor final */}
+                <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                        <label
+                            className={`text-sm select-none ${
+                                finalConsumerBlocked
+                                    ? 'text-gray-400 dark:text-gray-600'
+                                    : 'text-gray-600 dark:text-gray-400 cursor-pointer'
+                            }`}
+                        >
+                            Consumidor Final
+                        </label>
+                        {finalConsumerBlocked && (
+                            <p className="text-xs text-amber-500">
+                                Requerido para montos {'>'} $
+                                {FINAL_CONSUMER_MAX}
                             </p>
-                            {customerId && (
-                                <button
-                                    className="text-xs text-red-500 hover:underline"
-                                    onClick={handleClearCustomer}
-                                >
-                                    Quitar
-                                </button>
+                        )}
+                    </div>
+                    <Switcher
+                        checked={isFinalConsumer && !finalConsumerBlocked}
+                        disabled={finalConsumerBlocked}
+                        onChange={handleToggleFinalConsumer}
+                    />
+                </div>
+
+                {/* Cliente seleccionado o botón de búsqueda */}
+                {(!isFinalConsumer || finalConsumerBlocked) && (
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <div
+                                className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center ${
+                                    customerId
+                                        ? 'bg-primary-100 dark:bg-primary-500/20'
+                                        : 'bg-gray-100 dark:bg-gray-700'
+                                }`}
+                            >
+                                <HiOutlineUser
+                                    className={`text-sm ${
+                                        customerId
+                                            ? 'text-primary-600'
+                                            : 'text-gray-400'
+                                    }`}
+                                />
+                            </div>
+                            {customerId ? (
+                                <div className="min-w-0">
+                                    <p className="text-sm font-medium truncate">
+                                        {customerName}
+                                    </p>
+                                    <button
+                                        className="text-xs text-red-500 hover:underline"
+                                        onClick={() => setCustomer(null, null)}
+                                    >
+                                        Quitar
+                                    </button>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-400 italic">
+                                    Sin cliente
+                                </p>
                             )}
                         </div>
+                        <Button
+                            size="xs"
+                            variant={customerId ? 'default' : 'solid'}
+                            onClick={() => setDialogOpen(true)}
+                        >
+                            {customerId ? 'Cambiar' : 'Buscar'}
+                        </Button>
                     </div>
-                    <Button
-                        size="xs"
-                        variant="twoTone"
-                        onClick={() => setDialogOpen(true)}
-                    >
-                        {customerId ? 'Cambiar' : 'Buscar'}
-                    </Button>
-                </div>
+                )}
             </div>
 
             <Dialog

@@ -3,6 +3,19 @@ import InvoicingService, {
     CompanyConfigInput,
 } from '@/services/InvoicingService'
 
+export function useInvoicesBySale(saleId: string | number | undefined) {
+    return useQuery({
+        queryKey: ['invoicing', 'invoices', 'by-sale', saleId],
+        queryFn: async () => {
+            const response = await InvoicingService.getInvoicesBySale(
+                saleId as string | number
+            )
+            return response.data.data
+        },
+        enabled: saleId != null,
+    })
+}
+
 export function useCertificates() {
     return useQuery({
         queryKey: ['invoicing', 'certificates'],

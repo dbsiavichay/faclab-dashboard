@@ -49,8 +49,35 @@ export interface CompanyConfigInput {
     signingCertId?: string
 }
 
+export interface InvoiceStatusHistoryEntry {
+    name: string
+    statusDate: string
+    description?: string
+}
+
+export type InvoiceStatus =
+    | 'created'
+    | 'signed'
+    | 'sent'
+    | 'authorized'
+    | 'rejected'
+
+export interface Invoice {
+    id: string
+    saleId: string
+    accessCode: string
+    status: InvoiceStatus
+    signatureId: string
+    statusHistory: InvoiceStatusHistoryEntry[]
+}
+
 interface CertificatesResponse {
     data: Certificate[]
+    meta: { requestId: string; timestamp: string }
+}
+
+interface InvoicesResponse {
+    data: Invoice[]
     meta: { requestId: string; timestamp: string }
 }
 
@@ -99,6 +126,13 @@ class InvoicingService {
             url: `${this.host}/api/company-config`,
             method: 'put',
             data,
+        })
+    }
+
+    async getInvoicesBySale(saleId: string | number) {
+        return ApiService.fetchData<InvoicesResponse>({
+            url: `${this.host}/api/invoices/by-sale/${saleId}`,
+            method: 'get',
         })
     }
 }

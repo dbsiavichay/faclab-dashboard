@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useSale, useSaleItems, useSalePayments } from '@/hooks/useSales'
 import { useProducts } from '@/hooks/useProducts'
 import { useCustomers } from '@/hooks/useCustomers'
+import { useInvoicesBySale } from '@/hooks/useInvoicing'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Table from '@/components/ui/Table'
 import Tabs from '@/components/ui/Tabs'
+import Dialog from '@/components/ui/Dialog'
 import {
     SALE_STATUS_LABELS,
     SALE_STATUS_CLASSES,
@@ -15,7 +17,24 @@ import {
     PAYMENT_STATUS_CLASSES,
     PAYMENT_METHOD_LABELS,
 } from '@/services/SaleService'
+import type { Invoice, InvoiceStatus } from '@/services/InvoicingService'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
+
+const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
+    created: 'Creada',
+    signed: 'Firmada',
+    sent: 'Enviada',
+    authorized: 'Autorizada',
+    rejected: 'Rechazada',
+}
+
+const INVOICE_STATUS_CLASSES: Record<InvoiceStatus, string> = {
+    created: 'bg-gray-100 text-gray-600',
+    signed: 'bg-blue-100 text-blue-600',
+    sent: 'bg-yellow-100 text-yellow-600',
+    authorized: 'bg-emerald-100 text-emerald-600',
+    rejected: 'bg-red-100 text-red-600',
+}
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 const { TabList, TabNav, TabContent } = Tabs
@@ -26,11 +45,14 @@ const SaleDetailView = () => {
     const saleId = parseInt(id || '0')
 
     const [activeTab, setActiveTab] = useState('items')
+    const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
 
     const { data: sale, isLoading: saleLoading } = useSale(saleId)
     const { data: items = [], isLoading: itemsLoading } = useSaleItems(saleId)
     const { data: payments = [], isLoading: paymentsLoading } =
         useSalePayments(saleId)
+    const { data: invoices = [], isLoading: invoicesLoading } =
+        useInvoicesBySale(saleId)
 
     const { data: productsData } = useProducts()
     const products = productsData?.items ?? []
@@ -190,6 +212,9 @@ const SaleDetailView = () => {
                         <TabNav value="payments">
                             Pagos ({payments.length})
                         </TabNav>
+                        <TabNav value="invoices">
+                            Facturas ({invoices.length})
+                        </TabNav>
                     </TabList>
                     <div className="mt-4">
                         <TabContent value="items">
@@ -334,9 +359,170 @@ const SaleDetailView = () => {
                                 </>
                             )}
                         </TabContent>
+                        <TabContent value="invoices">
+                            {invoicesLoading ? (
+                                <div className="flex justify-center items-center h-32">
+                                    <div>Cargando facturas...</div>
+                                </div>
+                            ) : invoices.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    No hay facturas asociadas a esta venta
+                                </div>
+                            ) : (
+                                <Table>
+                                    <THead>
+                                        <Tr>
+                                            <Th>Código de Acceso</Th>
+                                            <Th>Estado</Th>
+                                            <Th>Último Cambio</Th>
+                                        </Tr>
+                                    </THead>
+                                    <TBody>
+                                        {invoices.map((invoice) => {
+                                            const lastEntry =
+                                                invoice.statusHistory[
+                                                    invoice.statusHistory
+                                                        .length - 1
+                                                ]
+                                            return (
+                                                <Tr
+                                                    key={invoice.id}
+                                                    className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+                                                    onClick={() =>
+                                                        setSelectedInvoice(
+                                                            invoice
+                                                        )
+                                                    }
+                                                >
+                                                    <Td className="font-mono text-xs break-all">
+                                                        {invoice.accessCode}
+                                                    </Td>
+                                                    <Td>
+                                                        <Badge
+                                                            content={
+                                                                INVOICE_STATUS_LABELS[
+                                                                    invoice
+                                                                        .status
+                                                                ]
+                                                            }
+                                                            className={
+                                                                INVOICE_STATUS_CLASSES[
+                                                                    invoice
+                                                                        .status
+                                                                ]
+                                                            }
+                                                        />
+                                                    </Td>
+                                                    <Td>
+                                                        {lastEntry
+                                                            ? formatDateTime(
+                                                                  lastEntry.statusDate
+                                                              )
+                                                            : '-'}
+                                                    </Td>
+                                                </Tr>
+                                            )
+                                        })}
+                                    </TBody>
+                                </Table>
+                            )}
+                        </TabContent>
                     </div>
                 </Tabs>
             </Card>
+            {/* Invoice Detail Dialog */}
+            <Dialog
+                isOpen={selectedInvoice !== null}
+                width={640}
+                onClose={() => setSelectedInvoice(null)}
+            >
+                {selectedInvoice && (
+                    <div>
+                        <h5 className="mb-4">Detalle de Factura</h5>
+                        <div className="grid grid-cols-1 gap-3 mb-6">
+                            <div>
+                                <p className="text-sm text-gray-500">
+                                    Código de Acceso
+                                </p>
+                                <p className="font-mono text-xs break-all mt-1">
+                                    {selectedInvoice.accessCode}
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p className="text-sm text-gray-500">
+                                        Estado
+                                    </p>
+                                    <Badge
+                                        content={
+                                            INVOICE_STATUS_LABELS[
+                                                selectedInvoice.status
+                                            ]
+                                        }
+                                        className={
+                                            INVOICE_STATUS_CLASSES[
+                                                selectedInvoice.status
+                                            ]
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-500">
+                                        ID Certificado
+                                    </p>
+                                    <p className="font-mono text-xs break-all mt-1">
+                                        {selectedInvoice.signatureId ?? '-'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 className="mb-3">Historial de Estados</h6>
+                        {selectedInvoice.statusHistory.length === 0 ? (
+                            <p className="text-sm text-gray-500">
+                                Sin historial
+                            </p>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                {selectedInvoice.statusHistory.map(
+                                    (entry, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700"
+                                        >
+                                            <Badge
+                                                content={
+                                                    INVOICE_STATUS_LABELS[
+                                                        entry.name as InvoiceStatus
+                                                    ] ?? entry.name
+                                                }
+                                                className={
+                                                    INVOICE_STATUS_CLASSES[
+                                                        entry.name as InvoiceStatus
+                                                    ] ??
+                                                    'bg-gray-100 text-gray-600'
+                                                }
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs text-gray-500">
+                                                    {formatDateTime(
+                                                        entry.statusDate
+                                                    )}
+                                                </p>
+                                                {entry.description && (
+                                                    <p className="text-sm mt-1">
+                                                        {entry.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </Dialog>
         </div>
     )
 }

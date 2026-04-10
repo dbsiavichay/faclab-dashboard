@@ -46,7 +46,7 @@ export const usePOSStore = create<POSState>()((set) => ({
     cartItems: [],
     customerId: null,
     customerName: null,
-    isFinalConsumer: true,
+    isFinalConsumer: false,
 
     discountType: null,
     discountValue: 0,
@@ -119,7 +119,7 @@ export const usePOSStore = create<POSState>()((set) => ({
         set({
             customerId: id,
             customerName: name,
-            isFinalConsumer: id === null,
+            isFinalConsumer: false,
         }),
 
     setFinalConsumer: (value) => set({ isFinalConsumer: value }),
@@ -134,7 +134,7 @@ export const usePOSStore = create<POSState>()((set) => ({
             cartItems: [],
             customerId: null,
             customerName: null,
-            isFinalConsumer: true,
+            isFinalConsumer: false,
             discountType: null,
             discountValue: 0,
         }),

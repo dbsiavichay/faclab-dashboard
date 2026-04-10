@@ -87,7 +87,7 @@ const Switcher = forwardRef<HTMLInputElement, SwitcherProps>((props, ref) => {
             setSwitcherChecked(nextChecked)
             onChange?.(nextChecked, e)
         } else {
-            onChange?.(switcherChecked as boolean, e)
+            onChange?.(nextChecked, e)
         }
     }
 

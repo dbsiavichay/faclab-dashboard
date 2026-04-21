@@ -9,17 +9,20 @@ Contrato backend: ver `auth-api-spec.md` (raíz del repo). Este documento traduc
 ## Estado actual
 
 - Branch: `feat/auth-real-api`
-- Última etapa completada: **Etapa 3 — Store de sesión + bootstrap `/me`** ✅
-- Próximo paso: **Etapa 4 — Login real + pantalla obligatoria `mustChangePassword`**. Migrar `SignInForm` a `username` (1..64 / password 1..128), mapear errores por `code` (`INVALID_CREDENTIALS`, `PASSWORD_CHANGE_REQUIRED`, etc.), navegar CASHIER → `/pos`, resto → `/home`, si `session.mustChangePassword` → `/change-password`. Montar `MustChangePasswordGuard` en `Layouts.tsx`. Borrar SignUp/ForgotPassword (views + rutas en `authRoute.tsx`); eliminar los shims `@deprecated` en `AuthService.ts`.
+- Última etapa completada: **Etapa 5 — Pantalla de cambio de contraseña** ✅
+- Próximo paso: **Etapa 6 — Gating de rutas y navegación por permiso**.
 
-Notas de sesión anterior:
-- Los tipos legacy (`SignInCredential`, `SignUpCredential`, `ForgotPassword`, `ResetPassword`, `SignInResponse`, `SignUpResponse`) se dejaron marcados `@deprecated` en `src/@types/auth.ts`; se eliminan en Etapa 4 al borrar SignUp/ForgotPassword.
-- Los errores preexistentes de `tsc` en Customer/POS/Purchase/Adjustment services NO son de auth; no tocar en este plan.
-- Etapa 2 se implementó con **cliente auth aislado** (no se reescribió `BaseService`) para no romper los 23 hooks existentes que leen `response.data.data`. Envelope/ApiError/refresh se aplican solo al nuevo `AuthApiClient`. La migración cross-module del envelope queda diferida.
-- Tokens persisten en `src/services/tokenStorage.ts` (`fc.access`, `fc.refresh`, `fc.accessExpiresAt`). Etapa 3 hizo que `useAuthStore` consuma este módulo como única fuente de verdad (sin `persist` middleware) — `session` es runtime-only y se rehidrata vía `/me` en `AuthBootstrap`.
-- Navegación desde interceptor vía `src/services/navigationRef.ts` + `<NavigationBinder/>` montado en `App.tsx`.
-- Etapa 3 conservó un **adaptador legacy** en `src/utils/hooks/useAuth.ts` (firma `{ authenticated, signIn, signUp, signOut }`) para no romper `SignInForm`/`ProtectedRoute`/`Layouts`/`UserDropdown`/`AuthorityGuard`/`PublicRoute`/`AuthorityCheck`/`SignUpForm` en esta etapa. `signUp` es stub (`Sign up deshabilitado`). `BaseService` legacy sigue sirviendo a los 23 hooks no-auth, ahora apuntando a `accessToken`/`clear()` del store nuevo. Etapa 4 eliminará el adaptador al borrar SignUp/ForgotPassword y migrar `SignInForm` al hook RQ `useLogin` directo.
-- `tsc --noEmit` deja exactamente los mismos errores preexistentes que master (no introduce nuevos). `npm run lint` pasa con 0 errores.
+Notas de sesión anterior (S4):
+- Etapas 4 y 5 completadas en una sola sesión.
+- Eliminadas: carpetas `SignUp/`, `ForgotPassword/`, `ResetPassword/` y sus rutas en `authRoute.tsx`.
+- Eliminados: tipos deprecated (`SignInCredential`, etc.) de `@types/auth.ts` y stubs de `AuthService.ts`.
+- `SignInForm.tsx` migrado a `username` (max 64), labels en español, sin "Remember Me", sin links de signup/forgot.
+- Adaptador legacy `src/utils/hooks/useAuth.ts` actualizado: routing por rol (`CASHIER→/pos`, otros→/home) y por `mustChangePassword→/change-password`; `signUp` eliminado.
+- `MustChangePasswordGuard` creado en `src/components/route/` y montado en `Layouts.tsx`.
+- `ChangePassword/` creada en `src/views/auth/`: container + form con modo obligatorio (oculta "Volver", muestra "Cerrar sesión") y modo self-service; `INVALID_CREDENTIALS` → error inline en `currentPassword`.
+- `useChangePassword` en `src/hooks/useAuth.ts` hace rotación de tokens vía `apiRefresh` + re-fetch de `/me` en `onSuccess`.
+- Ruta `/change-password` agregada a `protectedRoutes` en `routes.config.ts`.
+- `npm run lint` 0 errores. `tsc --noEmit` mismos errores preexistentes que master.
 
 Actualiza estas líneas al final de cada sesión.
 
@@ -163,7 +166,7 @@ Archivos entregados:
 
 ---
 
-### ☐ Etapa 4 — Login + pantalla obligatoria `mustChangePassword`
+### ✅ Etapa 4 — Login + pantalla obligatoria `mustChangePassword`
 
 - `SignInForm.tsx`: campo `username`, validación 1..64 / 1..128, mapeo por código.
 - Post-login: CASHIER → `/pos`, resto → `/home`. Si `mustChangePassword` → `/change-password`.
@@ -172,7 +175,7 @@ Archivos entregados:
 
 ---
 
-### ☐ Etapa 5 — Pantalla de cambio de contraseña
+### ✅ Etapa 5 — Pantalla de cambio de contraseña
 
 - `src/views/auth/ChangePasswordView.tsx`: modo self-service + modo obligatorio.
 - Tras 204 → **siempre** `/refresh` → `/me` → navegar.

@@ -12,6 +12,7 @@ import {
 import useAuth from '@/utils/hooks/useAuth'
 import useDirection from '@/utils/hooks/useDirection'
 import useLocale from '@/utils/hooks/useLocale'
+import MustChangePasswordGuard from '@/components/route/MustChangePasswordGuard'
 
 const layouts = {
     [LAYOUT_TYPE_CLASSIC]: lazy(() => import('./ClassicLayout')),
@@ -46,6 +47,7 @@ const Layout = () => {
                 </div>
             }
         >
+            <MustChangePasswordGuard />
             <AppLayout />
         </Suspense>
     )

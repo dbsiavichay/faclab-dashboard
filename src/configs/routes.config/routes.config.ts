@@ -175,4 +175,10 @@ export const protectedRoutes = [
         component: lazy(() => import('@/views/settings/CertificatesView')),
         authority: [],
     },
+    {
+        key: 'changePassword',
+        path: '/change-password',
+        component: lazy(() => import('@/views/auth/ChangePassword')),
+        authority: [],
+    },
 ]

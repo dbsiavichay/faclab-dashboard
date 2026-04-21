@@ -12,7 +12,7 @@ const BaseService = axios.create({
 
 BaseService.interceptors.request.use(
     (config) => {
-        const token = useAuthStore.getState().token
+        const token = useAuthStore.getState().accessToken
 
         if (token) {
             config.headers[REQUEST_HEADER_AUTH_KEY] = `${TOKEN_TYPE}${token}`
@@ -31,7 +31,7 @@ BaseService.interceptors.response.use(
         const { response } = error
 
         if (response && unauthorizedCode.includes(response.status)) {
-            useAuthStore.getState().signOutSuccess()
+            useAuthStore.getState().clear()
         }
 
         return Promise.reject(error)

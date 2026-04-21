@@ -4,7 +4,7 @@ import { protectedRoutes, publicRoutes } from '@/configs/routes.config'
 import appConfig from '@/configs/app.config'
 import PageContainer from '@/components/template/PageContainer'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/stores'
+import { useSession } from '@/stores'
 import ProtectedRoute from '@/components/route/ProtectedRoute'
 import PublicRoute from '@/components/route/PublicRoute'
 import AuthorityGuard from '@/components/route/AuthorityGuard'
@@ -21,7 +21,7 @@ type AllRoutesProps = ViewsProps
 const { authenticatedEntryPath } = appConfig
 
 const AllRoutes = (props: AllRoutesProps) => {
-    const userAuthority = useAuthStore((state) => state.user?.authority)
+    const userAuthority = useSession()?.permissions ?? []
 
     return (
         <Routes>

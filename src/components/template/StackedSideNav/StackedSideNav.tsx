@@ -11,7 +11,7 @@ import StackedSideNavMini, { SelectedMenuItem } from './StackedSideNavMini'
 import StackedSideNavSecondary from './StackedSideNavSecondary'
 import useResponsive from '@/utils/hooks/useResponsive'
 import isEmpty from 'lodash/isEmpty'
-import { useThemeStore, useAuthStore, useBaseStore } from '@/stores'
+import { useThemeStore, useSession, useBaseStore } from '@/stores'
 import { useTranslation } from 'react-i18next'
 
 const stackedSideNavDefaultStyle = {
@@ -30,7 +30,7 @@ const StackedSideNav = () => {
     const mode = useThemeStore((state) => state.mode)
     const direction = useThemeStore((state) => state.direction)
     const currentRouteKey = useBaseStore((state) => state.currentRouteKey)
-    const userAuthority = useAuthStore((state) => state.user?.authority)
+    const userAuthority = useSession()?.permissions ?? []
 
     const { larger } = useResponsive()
 

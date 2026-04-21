@@ -1,48 +1,62 @@
-import ApiService from './ApiService'
+import { authRequest } from './AuthApiClient'
+import appConfig from '@/configs/app.config'
 import type {
-    SignInCredential,
-    SignUpCredential,
-    ForgotPassword,
-    ResetPassword,
-    SignInResponse,
-    SignUpResponse,
+    ChangePasswordRequest,
+    LoginRequest,
+    LoginResponse,
+    MeResponse,
+    RefreshRequest,
+    RefreshResponse,
 } from '@/@types/auth'
 
-export async function apiSignIn(data: SignInCredential) {
-    return ApiService.fetchData<SignInResponse>({
-        url: '/sign-in',
-        method: 'post',
-        data,
+const AUTH = appConfig.authApiHost
+
+export const apiLogin = (body: LoginRequest): Promise<LoginResponse> =>
+    authRequest<LoginResponse>({
+        url: `${AUTH}/login`,
+        method: 'POST',
+        data: body,
     })
+
+export const apiRefresh = (body: RefreshRequest): Promise<RefreshResponse> =>
+    authRequest<RefreshResponse>({
+        url: `${AUTH}/refresh`,
+        method: 'POST',
+        data: body,
+    })
+
+export const apiMe = (): Promise<MeResponse> =>
+    authRequest<MeResponse>({
+        url: `${AUTH}/me`,
+        method: 'GET',
+    })
+
+export const apiChangePassword = (body: ChangePasswordRequest): Promise<void> =>
+    authRequest<void>({
+        url: `${AUTH}/change-password`,
+        method: 'POST',
+        data: body,
+    })
+
+type DeprecatedAuthResponse = { data: { token: string; user: unknown } | null }
+
+/** @deprecated Removed in Etapa 4. Only kept so legacy forms still compile. */
+export const apiSignUp = async (
+    _payload?: unknown
+): Promise<DeprecatedAuthResponse> => {
+    throw new Error('Sign up deshabilitado')
 }
 
-export async function apiSignUp(data: SignUpCredential) {
-    return ApiService.fetchData<SignUpResponse>({
-        url: '/sign-up',
-        method: 'post',
-        data,
-    })
+/** @deprecated Removed in Etapa 4. */
+export const apiForgotPassword = async (
+    _payload?: unknown
+): Promise<DeprecatedAuthResponse> => {
+    throw new Error('Recuperación de contraseña deshabilitada')
 }
 
-export async function apiSignOut() {
-    return ApiService.fetchData({
-        url: '/sign-out',
-        method: 'post',
-    })
-}
-
-export async function apiForgotPassword(data: ForgotPassword) {
-    return ApiService.fetchData({
-        url: '/forgot-password',
-        method: 'post',
-        data,
-    })
-}
-
-export async function apiResetPassword(data: ResetPassword) {
-    return ApiService.fetchData({
-        url: '/reset-password',
-        method: 'post',
-        data,
-    })
+/** @deprecated Removed in Etapa 4. */
+export const apiResetPassword = async (
+    _payload?: unknown
+): Promise<DeprecatedAuthResponse> => {
+    throw new Error('Reset de contraseña deshabilitado')
 }

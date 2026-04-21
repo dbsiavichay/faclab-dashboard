@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { useOpenShift } from '@/hooks/usePOS'
-import { useAuthStore } from '@/stores/useAuthStore'
+import { useSession } from '@/stores/useAuthStore'
 
 const ShiftOpenDialog = () => {
     const navigate = useNavigate()
-    const { user } = useAuthStore()
+    const session = useSession()
     const openShift = useOpenShift()
 
-    const [cashierName, setCashierName] = useState(user?.userName || '')
+    const [cashierName, setCashierName] = useState(session?.username || '')
     const [openingBalance, setOpeningBalance] = useState<string>('0')
     const [notes, setNotes] = useState('')
 

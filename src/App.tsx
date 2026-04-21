@@ -4,6 +4,7 @@ import { queryClient } from '@/lib/react-query'
 import Theme from '@/components/template/Theme'
 import Layout from '@/components/layouts'
 import NavigationBinder from '@/components/route/NavigationBinder'
+import AuthBootstrap from '@/components/AuthBootstrap'
 import mockServer from './mock'
 import appConfig from '@/configs/app.config'
 import './locales'
@@ -24,7 +25,9 @@ function App() {
             <BrowserRouter>
                 <NavigationBinder />
                 <Theme>
-                    <Layout />
+                    <AuthBootstrap>
+                        <Layout />
+                    </AuthBootstrap>
                 </Theme>
             </BrowserRouter>
         </QueryClientProvider>

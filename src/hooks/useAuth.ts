@@ -1,69 +1,76 @@
-import { useMutation } from '@tanstack/react-query'
-import { useAuthStore } from '@/stores'
-import {
-    apiSignIn,
-    apiSignUp,
-    apiSignOut,
-    apiForgotPassword,
-    apiResetPassword,
-} from '@/services/AuthService'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useAuthStore } from '@/stores/useAuthStore'
+import { apiChangePassword, apiLogin, apiMe } from '@/services/AuthService'
+import { navigateTo } from '@/services/navigationRef'
+import appConfig from '@/configs/app.config'
 import type {
-    SignInCredential,
-    SignUpCredential,
-    ForgotPassword,
-    ResetPassword,
+    ChangePasswordRequest,
+    LoginRequest,
+    LoginResponse,
+    MeResponse,
 } from '@/@types/auth'
 
-// Hook para Sign In
-export function useSignIn() {
-    const { signInSuccess } = useAuthStore()
+export const ME_QUERY_KEY = ['auth', 'me'] as const
 
-    return useMutation({
-        mutationFn: (credentials: SignInCredential) => apiSignIn(credentials),
-        onSuccess: (response) => {
-            if (response.data.token && response.data.user) {
-                signInSuccess(response.data.token, response.data.user)
+export function useMe() {
+    const accessToken = useAuthStore((s) => s.accessToken)
+    const setSession = useAuthStore((s) => s.setSession)
+    const clear = useAuthStore((s) => s.clear)
+
+    return useQuery<MeResponse>({
+        queryKey: ME_QUERY_KEY,
+        queryFn: async () => {
+            try {
+                const session = await apiMe()
+                setSession(session)
+                return session
+            } catch (err) {
+                clear()
+                throw err
             }
+        },
+        enabled: !!accessToken,
+        staleTime: 5 * 60 * 1000,
+        retry: false,
+    })
+}
+
+export function useLogin() {
+    const qc = useQueryClient()
+    const setTokens = useAuthStore((s) => s.setTokens)
+    const setSession = useAuthStore((s) => s.setSession)
+
+    return useMutation<LoginResponse, unknown, LoginRequest>({
+        mutationFn: (body) => apiLogin(body),
+        onSuccess: async (tokens) => {
+            setTokens(tokens)
+            const session = await qc.fetchQuery({
+                queryKey: ME_QUERY_KEY,
+                queryFn: apiMe,
+            })
+            setSession(session)
         },
     })
 }
 
-// Hook para Sign Up
-export function useSignUp() {
-    const { signInSuccess } = useAuthStore()
-
-    return useMutation({
-        mutationFn: (credentials: SignUpCredential) => apiSignUp(credentials),
-        onSuccess: (response) => {
-            if (response.data.token && response.data.user) {
-                signInSuccess(response.data.token, response.data.user)
-            }
-        },
+export function useChangePassword() {
+    return useMutation<void, unknown, ChangePasswordRequest>({
+        mutationFn: (body) => apiChangePassword(body),
     })
 }
 
-// Hook para Sign Out
-export function useSignOut() {
-    const { signOutSuccess } = useAuthStore()
+export function useLogout() {
+    const qc = useQueryClient()
+    const clear = useAuthStore((s) => s.clear)
 
-    return useMutation({
-        mutationFn: () => apiSignOut(),
+    return useMutation<void, unknown, void>({
+        mutationFn: async () => {
+            /* El backend real no define logout server-side. */
+        },
         onSuccess: () => {
-            signOutSuccess()
+            clear()
+            qc.clear()
+            navigateTo(appConfig.unAuthenticatedEntryPath, { replace: true })
         },
-    })
-}
-
-// Hook para Forgot Password
-export function useForgotPassword() {
-    return useMutation({
-        mutationFn: (data: ForgotPassword) => apiForgotPassword(data),
-    })
-}
-
-// Hook para Reset Password
-export function useResetPassword() {
-    return useMutation({
-        mutationFn: (data: ResetPassword) => apiResetPassword(data),
     })
 }

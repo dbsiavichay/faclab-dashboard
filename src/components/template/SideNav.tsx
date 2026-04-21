@@ -13,7 +13,7 @@ import Logo from '@/components/template/Logo'
 import navigationConfig from '@/configs/navigation.config'
 import VerticalMenuContent from '@/components/template/VerticalMenuContent'
 import useResponsive from '@/utils/hooks/useResponsive'
-import { useThemeStore, useAuthStore, useBaseStore } from '@/stores'
+import { useThemeStore, useSession, useBaseStore } from '@/stores'
 
 const sideNavStyle = {
     width: SIDE_NAV_WIDTH,
@@ -35,7 +35,7 @@ const SideNav = () => {
     const sideNavCollapse = useThemeStore(
         (state) => state.layout.sideNavCollapse
     )
-    const userAuthority = useAuthStore((state) => state.user?.authority)
+    const userAuthority = useSession()?.permissions ?? []
 
     const { larger } = useResponsive()
 

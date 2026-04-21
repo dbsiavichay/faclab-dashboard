@@ -9,15 +9,17 @@ Contrato backend: ver `auth-api-spec.md` (raíz del repo). Este documento traduc
 ## Estado actual
 
 - Branch: `feat/auth-real-api`
-- Última etapa completada: **Etapa 2 — HTTP client auth aislado** ✅
-- Próximo paso: **Etapa 3 — Store de sesión + bootstrap `/me`**. Refactor `useAuthStore` (`accessToken`/`refreshToken`/`accessExpiresAt`/`session`, v2 de persist) consumiendo el `tokenStorage` ya existente; reescribir `AuthService` con `apiLogin`/`apiRefresh`/`apiMe`/`apiChangePassword` sobre `AuthApiClient`; crear hooks RQ `useLogin`/`useMe`/`useChangePassword`/`useLogout`; montar `AuthBootstrap` que llama `/me` al arrancar.
+- Última etapa completada: **Etapa 3 — Store de sesión + bootstrap `/me`** ✅
+- Próximo paso: **Etapa 4 — Login real + pantalla obligatoria `mustChangePassword`**. Migrar `SignInForm` a `username` (1..64 / password 1..128), mapear errores por `code` (`INVALID_CREDENTIALS`, `PASSWORD_CHANGE_REQUIRED`, etc.), navegar CASHIER → `/pos`, resto → `/home`, si `session.mustChangePassword` → `/change-password`. Montar `MustChangePasswordGuard` en `Layouts.tsx`. Borrar SignUp/ForgotPassword (views + rutas en `authRoute.tsx`); eliminar los shims `@deprecated` en `AuthService.ts`.
 
 Notas de sesión anterior:
 - Los tipos legacy (`SignInCredential`, `SignUpCredential`, `ForgotPassword`, `ResetPassword`, `SignInResponse`, `SignUpResponse`) se dejaron marcados `@deprecated` en `src/@types/auth.ts`; se eliminan en Etapa 4 al borrar SignUp/ForgotPassword.
 - Los errores preexistentes de `tsc` en Customer/POS/Purchase/Adjustment services NO son de auth; no tocar en este plan.
 - Etapa 2 se implementó con **cliente auth aislado** (no se reescribió `BaseService`) para no romper los 23 hooks existentes que leen `response.data.data`. Envelope/ApiError/refresh se aplican solo al nuevo `AuthApiClient`. La migración cross-module del envelope queda diferida.
-- Tokens persisten por ahora en `src/services/tokenStorage.ts` (`fc.access`, `fc.refresh`, `fc.accessExpiresAt`). Etapa 3 debe hacer que `useAuthStore` consuma este módulo en vez de duplicar persistencia.
+- Tokens persisten en `src/services/tokenStorage.ts` (`fc.access`, `fc.refresh`, `fc.accessExpiresAt`). Etapa 3 hizo que `useAuthStore` consuma este módulo como única fuente de verdad (sin `persist` middleware) — `session` es runtime-only y se rehidrata vía `/me` en `AuthBootstrap`.
 - Navegación desde interceptor vía `src/services/navigationRef.ts` + `<NavigationBinder/>` montado en `App.tsx`.
+- Etapa 3 conservó un **adaptador legacy** en `src/utils/hooks/useAuth.ts` (firma `{ authenticated, signIn, signUp, signOut }`) para no romper `SignInForm`/`ProtectedRoute`/`Layouts`/`UserDropdown`/`AuthorityGuard`/`PublicRoute`/`AuthorityCheck`/`SignUpForm` en esta etapa. `signUp` es stub (`Sign up deshabilitado`). `BaseService` legacy sigue sirviendo a los 23 hooks no-auth, ahora apuntando a `accessToken`/`clear()` del store nuevo. Etapa 4 eliminará el adaptador al borrar SignUp/ForgotPassword y migrar `SignInForm` al hook RQ `useLogin` directo.
+- `tsc --noEmit` deja exactamente los mismos errores preexistentes que master (no introduce nuevos). `npm run lint` pasa con 0 errores.
 
 Actualiza estas líneas al final de cada sesión.
 
@@ -140,14 +142,24 @@ Archivos entregados:
 
 ---
 
-### ☐ Etapa 3 — Store de sesión + bootstrap `/me`
+### ✅ Etapa 3 — Store de sesión + bootstrap `/me`
 
-- Refactor `useAuthStore`: `{ accessToken, refreshToken, accessExpiresAt, session }`.
-- Acciones: `setTokens`, `setSession`, `clear`. Zustand `version: 2` para invalidar storage v1.
-- Selectors: `useSession()`, `useCan(perm)`, `useHasRole(...roles)`.
-- `AuthService` reescrito: `apiLogin`, `apiRefresh`, `apiMe`, `apiChangePassword`.
-- Hooks RQ: `useLogin`, `useMe` (enabled si hay token), `useChangePassword`, `useLogout`.
-- Componente `AuthBootstrap` en `App.tsx` → llama `/me` al montar.
+**Alcance ajustado**: store SIN `persist` middleware (consume `tokenStorage` como única fuente); adaptador legacy en `src/utils/hooks/useAuth.ts`; migración quirúrgica de 7 consumidores directos del store; `BaseService` legacy actualizado a `accessToken`/`clear()`.
+
+Archivos entregados:
+- `src/stores/useAuthStore.ts` reescrito: `{ accessToken, refreshToken, accessExpiresAt, session }` + `setTokens`/`setSession`/`clear`. Tokens hidratados al crear desde `tokenStorage`; `clear` también llama `resetRefreshManager()`.
+- Selectores: `useAccessToken`, `useSession`, `useIsAuthenticated`, `useCan(permission)`, `useHasRole(...roles)`. Re-exportados desde `src/stores/index.ts`.
+- `src/services/AuthService.ts` reescrito: `apiLogin`/`apiRefresh`/`apiMe`/`apiChangePassword` sobre `authRequest<T>` de `AuthApiClient`. Shims `@deprecated` (`apiSignUp`/`apiForgotPassword`/`apiResetPassword`) que rechazan con error claro — solo para que los forms legacy compilen hasta Etapa 4. `apiSignIn`/`apiSignOut` legacy removidos.
+- `src/hooks/useAuth.ts` reescrito: `useLogin` (setTokens + `qc.fetchQuery(['auth','me'])` + setSession), `useMe` (enabled si hay accessToken; en catch llama `clear()`), `useChangePassword`, `useLogout` (no hace request; `clear()` + `qc.clear()` + navega a `unAuthenticatedEntryPath`). Exporta `ME_QUERY_KEY`.
+- `src/utils/hooks/useAuth.ts` reescrito como **adaptador legacy** sobre los hooks RQ — firma preservada para no tocar `SignInForm`/`ProtectedRoute`/`Layouts`/`UserDropdown`/`PublicRoute`/`AuthorityGuard`/`AuthorityCheck`/`SignUpForm`.
+- `src/components/AuthBootstrap.tsx` nuevo: llama `useMe()` al montar; si `accessToken && !session && isLoading` muestra `<Loading>`. Migra una vez la clave localStorage legacy `auth-storage` (flag `fc.migratedV2`).
+- `src/App.tsx`: monta `<AuthBootstrap>` dentro de `<Theme>` envolviendo `<Layout />`.
+- Consumidores migrados a `useSession()?.permissions ?? []` (authority) o `useSession()?.username`: `src/views/Views.tsx`, `src/views/pos/components/ShiftOpenDialog.tsx`, `src/components/template/{SideNav,HorizontalNav,MobileNav,SecondaryHeader}.tsx`, `src/components/template/StackedSideNav/StackedSideNav.tsx`.
+- `src/services/BaseService.ts` (legacy) actualizado al nuevo shape: `state.token` → `state.accessToken`; `signOutSuccess()` → `clear()`.
+
+**NO tocado** (explícito, reservado para Etapas 4–6): `SignInForm` (sigue usando el adaptador; migra a username/códigos en Etapa 4), `ProtectedRoute`/`PublicRoute`/`Layouts`/`UserDropdown`, `AuthorityGuard`, navegación por rol post-login, pantalla `/change-password`, Admin Users, mocks.
+
+**Verificación**: `npm run lint` 0 errores. `tsc --noEmit` deja exactamente los mismos errores preexistentes que master en Customer/POS/Purchase/Adjustment services (no se introducen nuevos).
 
 ---
 

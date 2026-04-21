@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import HorizontalMenuContent from '@/components/template/HorizontalMenuContent'
 import { NAV_MODE_THEMED } from '@/constants/theme.constant'
 import useResponsive from '@/utils/hooks/useResponsive'
-import { useThemeStore, useAuthStore } from '@/stores'
+import { useThemeStore, useSession } from '@/stores'
 import type { CommonProps } from '@/@types/common'
 
 interface SecondaryHeaderProps extends CommonProps {
@@ -15,7 +15,7 @@ const SecondaryHeader = (props: SecondaryHeaderProps) => {
     const navMode = useThemeStore((state) => state.navMode)
     const themeColor = useThemeStore((state) => state.themeColor)
     const primaryColorLevel = useThemeStore((state) => state.primaryColorLevel)
-    const userAuthority = useAuthStore((state) => state.user?.authority)
+    const userAuthority = useSession()?.permissions ?? []
 
     const { larger } = useResponsive()
 

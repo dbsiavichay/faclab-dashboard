@@ -10,7 +10,7 @@ import withHeaderItem, { WithHeaderItemProps } from '@/utils/hoc/withHeaderItem'
 import NavToggle from '@/components/shared/NavToggle'
 import navigationConfig from '@/configs/navigation.config'
 import useResponsive from '@/utils/hooks/useResponsive'
-import { useThemeStore, useAuthStore, useBaseStore } from '@/stores'
+import { useThemeStore, useSession, useBaseStore } from '@/stores'
 
 const VerticalMenuContent = lazy(
     () => import('@/components/template/VerticalMenuContent')
@@ -44,7 +44,7 @@ const MobileNav = () => {
     const sideNavCollapse = useThemeStore(
         (state) => state.layout.sideNavCollapse
     )
-    const userAuthority = useAuthStore((state) => state.user?.authority)
+    const userAuthority = useSession()?.permissions ?? []
 
     const { smaller } = useResponsive()
 

@@ -1,102 +1,54 @@
-import { apiSignIn, apiSignOut, apiSignUp } from '@/services/AuthService'
-import { useAuthStore } from '@/stores'
+import { useNavigate } from 'react-router-dom'
 import appConfig from '@/configs/app.config'
 import { REDIRECT_URL_KEY } from '@/constants/app.constant'
-import { useNavigate } from 'react-router-dom'
+import { useIsAuthenticated } from '@/stores/useAuthStore'
+import { useLogin, useLogout } from '@/hooks/useAuth'
+import { isApiError } from '@/utils/errors/ApiError'
 import useQuery from './useQuery'
-import type { SignInCredential, SignUpCredential } from '@/@types/auth'
+import type { SignInCredential } from '@/@types/auth'
 
 type Status = 'success' | 'failed'
+type SignInResult = { status: Status; message: string }
 
 function useAuth() {
     const navigate = useNavigate()
     const query = useQuery()
+    const authenticated = useIsAuthenticated()
+    const loginMutation = useLogin()
+    const logoutMutation = useLogout()
 
-    const token = useAuthStore((state) => state.token)
-    const signedIn = useAuthStore((state) => state.signedIn)
-    const signInSuccess = useAuthStore((state) => state.signInSuccess)
-    const signOutSuccess = useAuthStore((state) => state.signOutSuccess)
-
-    const signIn = async (
-        values: SignInCredential
-    ): Promise<
-        | {
-              status: Status
-              message: string
-          }
-        | undefined
-    > => {
+    const signIn = async ({
+        userName,
+        password,
+    }: SignInCredential): Promise<SignInResult> => {
         try {
-            const resp = await apiSignIn(values)
-            if (resp.data) {
-                const { token } = resp.data
-                const user = resp.data.user || {
-                    avatar: '',
-                    userName: 'Anonymous',
-                    authority: ['USER'],
-                    email: '',
-                }
-                signInSuccess(token, user)
-                const redirectUrl = query.get(REDIRECT_URL_KEY)
-                navigate(
-                    redirectUrl ? redirectUrl : appConfig.authenticatedEntryPath
-                )
-                return {
-                    status: 'success',
-                    message: '',
-                }
-            }
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-        } catch (errors: any) {
+            await loginMutation.mutateAsync({ username: userName, password })
+            const redirect = query.get(REDIRECT_URL_KEY)
+            navigate(redirect ?? appConfig.authenticatedEntryPath)
+            return { status: 'success', message: '' }
+        } catch (err) {
             return {
                 status: 'failed',
-                message: errors?.response?.data?.message || errors.toString(),
+                message: isApiError(err)
+                    ? err.message
+                    : err instanceof Error
+                    ? err.message
+                    : String(err),
             }
         }
     }
 
-    const signUp = async (values: SignUpCredential) => {
-        try {
-            const resp = await apiSignUp(values)
-            if (resp.data) {
-                const { token } = resp.data
-                const user = resp.data.user || {
-                    avatar: '',
-                    userName: 'Anonymous',
-                    authority: ['USER'],
-                    email: '',
-                }
-                signInSuccess(token, user)
-                const redirectUrl = query.get(REDIRECT_URL_KEY)
-                navigate(
-                    redirectUrl ? redirectUrl : appConfig.authenticatedEntryPath
-                )
-                return {
-                    status: 'success',
-                    message: '',
-                }
-            }
-            // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-        } catch (errors: any) {
-            return {
-                status: 'failed',
-                message: errors?.response?.data?.message || errors.toString(),
-            }
-        }
-    }
+    const signUp = async (_credentials?: unknown): Promise<SignInResult> => ({
+        status: 'failed',
+        message: 'Sign up deshabilitado',
+    })
 
-    const handleSignOut = () => {
-        signOutSuccess()
-        navigate(appConfig.unAuthenticatedEntryPath)
-    }
-
-    const signOut = async () => {
-        await apiSignOut()
-        handleSignOut()
+    const signOut = async (): Promise<void> => {
+        await logoutMutation.mutateAsync()
     }
 
     return {
-        authenticated: token && signedIn,
+        authenticated,
         signIn,
         signUp,
         signOut,

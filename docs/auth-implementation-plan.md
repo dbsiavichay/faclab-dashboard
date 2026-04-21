@@ -9,12 +9,15 @@ Contrato backend: ver `auth-api-spec.md` (raíz del repo). Este documento traduc
 ## Estado actual
 
 - Branch: `feat/auth-real-api`
-- Última etapa completada: **Etapa 1 — tipos, enums, matriz de permisos** ✅
-- Próximo paso: **Etapa 2 — HTTP client con refresh rotatorio**. Empezar por añadir `VITE_API_BASE_URL` a `.env`, leerla desde `src/configs/app.config.ts`, reescribir `BaseService.ts` para el envelope nuevo y crear `src/services/refreshManager.ts`.
+- Última etapa completada: **Etapa 2 — HTTP client auth aislado** ✅
+- Próximo paso: **Etapa 3 — Store de sesión + bootstrap `/me`**. Refactor `useAuthStore` (`accessToken`/`refreshToken`/`accessExpiresAt`/`session`, v2 de persist) consumiendo el `tokenStorage` ya existente; reescribir `AuthService` con `apiLogin`/`apiRefresh`/`apiMe`/`apiChangePassword` sobre `AuthApiClient`; crear hooks RQ `useLogin`/`useMe`/`useChangePassword`/`useLogout`; montar `AuthBootstrap` que llama `/me` al arrancar.
 
 Notas de sesión anterior:
 - Los tipos legacy (`SignInCredential`, `SignUpCredential`, `ForgotPassword`, `ResetPassword`, `SignInResponse`, `SignUpResponse`) se dejaron marcados `@deprecated` en `src/@types/auth.ts`; se eliminan en Etapa 4 al borrar SignUp/ForgotPassword.
 - Los errores preexistentes de `tsc` en Customer/POS/Purchase/Adjustment services NO son de auth; no tocar en este plan.
+- Etapa 2 se implementó con **cliente auth aislado** (no se reescribió `BaseService`) para no romper los 23 hooks existentes que leen `response.data.data`. Envelope/ApiError/refresh se aplican solo al nuevo `AuthApiClient`. La migración cross-module del envelope queda diferida.
+- Tokens persisten por ahora en `src/services/tokenStorage.ts` (`fc.access`, `fc.refresh`, `fc.accessExpiresAt`). Etapa 3 debe hacer que `useAuthStore` consuma este módulo en vez de duplicar persistencia.
+- Navegación desde interceptor vía `src/services/navigationRef.ts` + `<NavigationBinder/>` montado en `App.tsx`.
 
 Actualiza estas líneas al final de cada sesión.
 
@@ -119,16 +122,21 @@ Archivos:
 
 ---
 
-### ☐ Etapa 2 — HTTP client con refresh rotatorio
+### ✅ Etapa 2 — HTTP client con refresh rotatorio
 
-- Añadir `VITE_API_BASE_URL` a `.env`; leer en `app.config.ts` → nuevo `authApiHost`, `adminUsersApiHost`.
-- Reescribir `src/services/BaseService.ts`: desempaquetar `{ data }`, lanzar `ApiError` tipado.
-- Nuevo `src/services/refreshManager.ts`: promise compartida deduplicada.
-- Interceptor response:
-  - `TOKEN_EXPIRED` → refresh + retry once
-  - `INVALID_TOKEN` / refresh fail → logout
-  - `PERMISSION_DENIED` sin header → login
-  - `PASSWORD_CHANGE_REQUIRED` → redirect `/change-password`
+**Alcance ajustado**: cliente auth aislado en vez de reescribir `BaseService` (para no romper los 23 hooks existentes).
+
+Archivos entregados:
+- `.env` + `.env.example` con `VITE_API_BASE_URL=http://localhost:3000`.
+- `src/configs/app.config.ts` → `apiBaseUrl`, `authApiHost`, `adminUsersApiHost`.
+- `src/services/tokenStorage.ts` → localStorage `fc.access`, `fc.refresh`, `fc.accessExpiresAt` (lo consumirá el store en Etapa 3).
+- `src/utils/errors/ApiError.ts` → clase `ApiError` + `fromAxiosError` + `isApiError`.
+- `src/services/navigationRef.ts` → singleton `setNavigator` / `navigateTo` (fallback `window.location`).
+- `src/services/refreshManager.ts` → `refreshOnce()` con promesa in-flight deduplicada; usa axios crudo contra `/api/auth/refresh` para evitar recursión.
+- `src/services/AuthApiClient.ts` → instancia axios dedicada, desempaqueta envelope, mapea códigos (`TOKEN_EXPIRED` refresh+retry once, `INVALID_TOKEN`→logout, `PERMISSION_DENIED` sin token→logout, `PASSWORD_CHANGE_REQUIRED`→`/change-password`).
+- `src/components/route/NavigationBinder.tsx` montado en `src/App.tsx` dentro de `<BrowserRouter>`.
+
+**NO tocado** (explícito): `BaseService`, `ApiService`, hooks existentes, `useAuthStore`, `AuthService`. Todo eso sigue funcionando con el envelope legacy.
 
 ---
 

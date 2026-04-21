@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/react-query'
 import Theme from '@/components/template/Theme'
 import Layout from '@/components/layouts'
+import NavigationBinder from '@/components/route/NavigationBinder'
 import mockServer from './mock'
 import appConfig from '@/configs/app.config'
 import './locales'
@@ -21,6 +22,7 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
+                <NavigationBinder />
                 <Theme>
                     <Layout />
                 </Theme>

@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/useAuthStore'
-import { apiChangePassword, apiLogin, apiMe } from '@/services/AuthService'
+import {
+    apiChangePassword,
+    apiLogin,
+    apiMe,
+    apiRefresh,
+} from '@/services/AuthService'
 import { navigateTo } from '@/services/navigationRef'
 import appConfig from '@/configs/app.config'
 import type {
@@ -54,8 +59,24 @@ export function useLogin() {
 }
 
 export function useChangePassword() {
+    const qc = useQueryClient()
+    const setTokens = useAuthStore((s) => s.setTokens)
+    const setSession = useAuthStore((s) => s.setSession)
+
     return useMutation<void, unknown, ChangePasswordRequest>({
         mutationFn: (body) => apiChangePassword(body),
+        onSuccess: async () => {
+            const rt = useAuthStore.getState().refreshToken
+            if (rt) {
+                const newTokens = await apiRefresh({ refreshToken: rt })
+                setTokens(newTokens)
+            }
+            const session = await qc.fetchQuery({
+                queryKey: ME_QUERY_KEY,
+                queryFn: apiMe,
+            })
+            setSession(session)
+        },
     })
 }
 

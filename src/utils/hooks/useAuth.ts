@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import appConfig from '@/configs/app.config'
 import { REDIRECT_URL_KEY } from '@/constants/app.constant'
-import { useIsAuthenticated } from '@/stores/useAuthStore'
+import { useAuthStore, useIsAuthenticated } from '@/stores/useAuthStore'
 import { useLogin, useLogout } from '@/hooks/useAuth'
 import { isApiError } from '@/utils/errors/ApiError'
+import { ROLE } from '@/constants/roles.constant'
 import useQuery from './useQuery'
-import type { SignInCredential } from '@/@types/auth'
 
 type Status = 'success' | 'failed'
 type SignInResult = { status: Status; message: string }
@@ -20,11 +20,21 @@ function useAuth() {
     const signIn = async ({
         userName,
         password,
-    }: SignInCredential): Promise<SignInResult> => {
+    }: {
+        userName: string
+        password: string
+    }): Promise<SignInResult> => {
         try {
             await loginMutation.mutateAsync({ username: userName, password })
-            const redirect = query.get(REDIRECT_URL_KEY)
-            navigate(redirect ?? appConfig.authenticatedEntryPath)
+            const session = useAuthStore.getState().session
+            if (session?.mustChangePassword) {
+                navigate('/change-password', { replace: true })
+            } else if (session?.role === ROLE.CASHIER) {
+                navigate('/pos', { replace: true })
+            } else {
+                const redirect = query.get(REDIRECT_URL_KEY)
+                navigate(redirect ?? appConfig.authenticatedEntryPath)
+            }
             return { status: 'success', message: '' }
         } catch (err) {
             return {
@@ -38,11 +48,6 @@ function useAuth() {
         }
     }
 
-    const signUp = async (_credentials?: unknown): Promise<SignInResult> => ({
-        status: 'failed',
-        message: 'Sign up deshabilitado',
-    })
-
     const signOut = async (): Promise<void> => {
         await logoutMutation.mutateAsync()
     }
@@ -50,7 +55,6 @@ function useAuth() {
     return {
         authenticated,
         signIn,
-        signUp,
         signOut,
     }
 }

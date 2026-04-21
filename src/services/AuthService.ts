@@ -37,26 +37,3 @@ export const apiChangePassword = (body: ChangePasswordRequest): Promise<void> =>
         method: 'POST',
         data: body,
     })
-
-type DeprecatedAuthResponse = { data: { token: string; user: unknown } | null }
-
-/** @deprecated Removed in Etapa 4. Only kept so legacy forms still compile. */
-export const apiSignUp = async (
-    _payload?: unknown
-): Promise<DeprecatedAuthResponse> => {
-    throw new Error('Sign up deshabilitado')
-}
-
-/** @deprecated Removed in Etapa 4. */
-export const apiForgotPassword = async (
-    _payload?: unknown
-): Promise<DeprecatedAuthResponse> => {
-    throw new Error('Recuperación de contraseña deshabilitada')
-}
-
-/** @deprecated Removed in Etapa 4. */
-export const apiResetPassword = async (
-    _payload?: unknown
-): Promise<DeprecatedAuthResponse> => {
-    throw new Error('Reset de contraseña deshabilitado')
-}

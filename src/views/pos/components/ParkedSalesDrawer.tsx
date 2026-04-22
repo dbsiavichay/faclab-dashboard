@@ -6,6 +6,7 @@ import toast from '@/components/ui/toast'
 import { useParkedSales, useResumeSale, useCancelSale } from '@/hooks/usePOS'
 import { usePOSStore } from '@/stores/usePOSStore'
 import POSService from '@/services/POSService'
+import { useCan } from '@/stores'
 
 interface ParkedSalesDrawerProps {
     isOpen: boolean
@@ -17,6 +18,7 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
     const resumeSale = useResumeSale()
     const cancelSale = useCancelSale()
     const { clearCart, addItem, setCustomer, applyDiscount } = usePOSStore()
+    const canCancelSale = useCan('sale:cancel')
 
     const handleResume = async (saleId: number) => {
         try {
@@ -162,16 +164,20 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                                             ${sale.total.toFixed(2)}
                                         </p>
                                         <div className="flex gap-1 mt-1">
-                                            <Button
-                                                size="xs"
-                                                variant="default"
-                                                loading={cancelSale.isPending}
-                                                onClick={() =>
-                                                    handleCancel(sale.id)
-                                                }
-                                            >
-                                                Cancelar
-                                            </Button>
+                                            {canCancelSale && (
+                                                <Button
+                                                    size="xs"
+                                                    variant="default"
+                                                    loading={
+                                                        cancelSale.isPending
+                                                    }
+                                                    onClick={() =>
+                                                        handleCancel(sale.id)
+                                                    }
+                                                >
+                                                    Cancelar
+                                                </Button>
+                                            )}
                                             <Button
                                                 size="xs"
                                                 variant="solid"

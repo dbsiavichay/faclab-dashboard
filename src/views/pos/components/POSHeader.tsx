@@ -8,6 +8,8 @@ import {
     HiOutlineHome,
     HiOutlineReceiptRefund,
 } from 'react-icons/hi'
+import { useCan, useHasRole } from '@/stores'
+import { ROLE } from '@/constants/roles.constant'
 
 interface POSHeaderProps {
     onOpenCloseShift?: () => void
@@ -23,6 +25,8 @@ const POSHeader = ({
     const navigate = useNavigate()
     const shift = useShift()
     const [currentTime, setCurrentTime] = useState(new Date())
+    const canRefund = useCan('refund:approve')
+    const isCashier = useHasRole(ROLE.CASHIER)
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 60000)
@@ -62,14 +66,16 @@ const POSHeader = ({
             </span>
 
             <div className="flex items-center gap-2">
-                <Button
-                    size="sm"
-                    variant="plain"
-                    icon={<HiOutlineReceiptRefund />}
-                    onClick={onOpenRefund}
-                >
-                    Devolución
-                </Button>
+                {canRefund && (
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlineReceiptRefund />}
+                        onClick={onOpenRefund}
+                    >
+                        Devolución
+                    </Button>
+                )}
                 <Button
                     size="sm"
                     variant="plain"
@@ -86,14 +92,16 @@ const POSHeader = ({
                 >
                     Cerrar Turno
                 </Button>
-                <Button
-                    size="sm"
-                    variant="solid"
-                    icon={<HiOutlineHome />}
-                    onClick={() => navigate('/home')}
-                >
-                    Dashboard
-                </Button>
+                {!isCashier && (
+                    <Button
+                        size="sm"
+                        variant="solid"
+                        icon={<HiOutlineHome />}
+                        onClick={() => navigate('/home')}
+                    >
+                        Administración
+                    </Button>
+                )}
             </div>
         </div>
     )

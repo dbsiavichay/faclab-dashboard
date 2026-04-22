@@ -9,8 +9,8 @@ Contrato backend: ver `auth-api-spec.md` (raíz del repo). Este documento traduc
 ## Estado actual
 
 - Branch: `feat/auth-real-api`
-- Última etapa completada: **Etapa 6 — Gating de rutas y navegación por permiso** ✅
-- Próximo paso: **Etapa 7 — Ruteo por rol + enlaces cruzados POS↔Admin**.
+- Última etapa completada: **Etapa 8 — Admin Users CRUD** ✅
+- Próximo paso: **Etapa 9 — Actualizar Mock (MirageJS)**.
 
 Notas de sesión anterior (S5):
 - Etapa 6 completada.
@@ -18,6 +18,26 @@ Notas de sesión anterior (S5):
 - `navigation.config/index.ts`: `authority[]` rellenados en ítems y section titles (OR-match en section titles para ocultar sección si usuario no tiene ningún ítem accesible).
 - `src/views/auth/AccessDenied.tsx` creado (minimal: "Sin acceso" + botón volver al inicio). `AuthorityGuard` ya redirigía allí pero la ruta no existía.
 - Sin cambios a `AuthorityGuard`, `AuthorityCheck`, `useAuthority`, `Views.tsx` — infraestructura ya estaba cableada.
+- `npm run lint` 0 errores. `tsc --noEmit` mismos errores preexistentes que master.
+
+Notas de sesión S7:
+- Etapa 8 completada.
+- `src/services/AuthApiClient.ts`: interceptor de respuesta ahora preserva `meta.pagination` en `response._pagination` antes de unwrap; nuevo helper `authRequestPaginated<T>()` exportado.
+- `src/services/AdminUsersService.ts`: nuevo, cubre list/get/create/updateRole/activate/deactivate/resetPassword usando `authRequest` / `authRequestPaginated`.
+- `src/hooks/useAdminUsers.ts`: nuevo, hooks RQ con invalidación por `['admin-users']`: `useAdminUsers`, `useCreateAdminUser`, `useUpdateUserRole`, `useActivateUser`, `useDeactivateUser`, `useResetUserPassword`.
+- `src/views/settings/UsersView/index.tsx`: tabla paginada con filtros (rol, estado); inline role Select; toggle activar/desactivar con confirm dialog; botón "Resetear" por fila.
+- `src/views/settings/UsersView/CreateUserModal.tsx`: modal Formik+Yup; maneja `USERNAME_ALREADY_EXISTS` y `EMAIL_ALREADY_EXISTS` como field errors.
+- `src/views/settings/UsersView/ResetPasswordModal.tsx`: genera 12-char password, 2 fases (antes/después de reset); copia al portapapeles + banner de aviso.
+- `routes.config.ts`: ruta `/settings/users` gateada con `['user:manage']`.
+- `navigation.config/index.ts`: ítem "Usuarios" bajo Settings, authority `['user:manage']`.
+- `navigation-icon.config.tsx`: `settingsUsers: <HiOutlineUsers />`.
+- `npm run lint` 0 errores. `tsc --noEmit` sin errores nuevos.
+
+Notas de sesión S6:
+- Post-login/post-change-password routing ya estaba implementado en sesiones anteriores (CASHIER→/pos, resto→/home).
+- `ModernLayout.tsx`: botón "POS" gateado con `useCan('pos:operate')` — solo visible para ADMIN y CASHIER.
+- `POSHeader.tsx`: botón "Devolución" gateado con `useCan('refund:approve')`; botón "Dashboard" renombrado a "Administración" y visible solo si `!useHasRole(ROLE.CASHIER)`.
+- `ParkedSalesDrawer.tsx`: botón "Cancelar" gateado con `useCan('sale:cancel')` — oculto para CASHIER.
 - `npm run lint` 0 errores. `tsc --noEmit` mismos errores preexistentes que master.
 
 Actualiza estas líneas al final de cada sesión.
@@ -188,7 +208,7 @@ Archivos entregados:
 
 ---
 
-### ☐ Etapa 7 — Ruteo por rol + enlaces cruzados POS↔Admin
+### ✅ Etapa 7 — Ruteo por rol + enlaces cruzados POS↔Admin
 
 - Post-login/post-`/me`: CASHIER → `/pos`; else → `/home`.
 - Gating interno POS: `sale:cancel`, `refund:approve`.
@@ -197,7 +217,7 @@ Archivos entregados:
 
 ---
 
-### ☐ Etapa 8 — Admin Users CRUD
+### ✅ Etapa 8 — Admin Users CRUD
 
 - `src/services/UserService.ts`: list/get/create/updateRole/activate/deactivate/resetPassword.
 - `src/hooks/useUsers.ts` RQ con invalidations.

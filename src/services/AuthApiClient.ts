@@ -46,6 +46,12 @@ AuthApiClient.interceptors.response.use(
 
         const body = response.data
         if (body && typeof body === 'object' && 'data' in body) {
+            const meta = (body as { meta?: { pagination?: unknown } }).meta
+            if (meta?.pagination) {
+                ;(
+                    response as AxiosResponse & { _pagination?: unknown }
+                )._pagination = meta.pagination
+            }
             response.data = (body as { data: unknown }).data
         }
         return response
@@ -102,6 +108,19 @@ export const authRequest = async <T>(
 ): Promise<T> => {
     const response = await AuthApiClient.request<T>(config)
     return response.data as T
+}
+
+export const authRequestPaginated = async <T>(
+    config: AxiosRequestConfig
+): Promise<{ data: T[]; total: number }> => {
+    type WithPagination = AxiosResponse & { _pagination?: { total: number } }
+    const response = (await AuthApiClient.request<T[]>(
+        config
+    )) as WithPagination
+    return {
+        data: response.data as T[],
+        total: response._pagination?.total ?? 0,
+    }
 }
 
 export { ApiError, isApiError }

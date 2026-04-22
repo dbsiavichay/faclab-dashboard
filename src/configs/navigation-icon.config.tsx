@@ -16,6 +16,7 @@ import {
     HiOutlineSwitchVertical,
     HiOutlineTruck,
     HiOutlineUserGroup,
+    HiOutlineUsers,
 } from 'react-icons/hi'
 
 export type NavigationIcons = Record<string, JSX.Element>
@@ -39,6 +40,7 @@ const navigationIcon: NavigationIcons = {
     inventoryReports: <HiOutlineDocumentText />,
     salesSales: <HiOutlineShoppingCart />,
     inventoryAlerts: <HiOutlineBell />,
+    settingsUsers: <HiOutlineUsers />,
     settingsCompanyConfig: <HiOutlineOfficeBuilding />,
     settingsCertificates: <HiOutlineLockClosed />,
 }

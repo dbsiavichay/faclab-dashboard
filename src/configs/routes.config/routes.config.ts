@@ -164,6 +164,12 @@ export const protectedRoutes = [
         authority: ['pos:operate'],
     },
     {
+        key: 'settings.users',
+        path: '/settings/users',
+        component: lazy(() => import('@/views/settings/UsersView')),
+        authority: ['user:manage'],
+    },
+    {
         key: 'settings.companyConfig',
         path: '/settings/company-config',
         component: lazy(() => import('@/views/settings/CompanyConfigView')),

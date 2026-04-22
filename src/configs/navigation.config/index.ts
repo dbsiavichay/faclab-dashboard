@@ -251,6 +251,16 @@ const navigationConfig: NavigationTree[] = [
         authority: [],
         subMenu: [
             {
+                key: 'settings.users',
+                path: '/settings/users',
+                title: 'Usuarios',
+                translateKey: 'nav.settings.users',
+                icon: 'settingsUsers',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['user:manage'],
+                subMenu: [],
+            },
+            {
                 key: 'settings.companyConfig',
                 path: '/settings/company-config',
                 title: 'Company Configuration',

@@ -8,6 +8,7 @@ import SideNav from '@/components/template/SideNav'
 import Button from '@/components/ui/Button'
 import View from '@/views'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
+import { useCan } from '@/stores'
 
 const HeaderActionsStart = () => {
     return (
@@ -20,17 +21,20 @@ const HeaderActionsStart = () => {
 
 const HeaderActionsEnd = () => {
     const navigate = useNavigate()
+    const canOperatePOS = useCan('pos:operate')
 
     return (
         <>
-            <Button
-                size="sm"
-                variant="solid"
-                icon={<HiOutlineShoppingCart />}
-                onClick={() => navigate('/pos')}
-            >
-                POS
-            </Button>
+            {canOperatePOS && (
+                <Button
+                    size="sm"
+                    variant="solid"
+                    icon={<HiOutlineShoppingCart />}
+                    onClick={() => navigate('/pos')}
+                >
+                    POS
+                </Button>
+            )}
             <SidePanel />
             <UserDropdown hoverable={false} />
         </>

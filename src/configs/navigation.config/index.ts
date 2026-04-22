@@ -23,7 +23,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.catalog.title',
         icon: '',
         type: NAV_ITEM_TYPE_TITLE,
-        authority: [],
+        authority: ['product:read'],
         subMenu: [
             {
                 key: 'catalog.categories',
@@ -32,7 +32,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalog.categories',
                 icon: 'catalogCategories',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['product:read'],
                 subMenu: [],
             },
             {
@@ -42,7 +42,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalog.products',
                 icon: 'catalogProducts',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['product:read'],
                 subMenu: [],
             },
             {
@@ -52,7 +52,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.catalog.unitsOfMeasure',
                 icon: 'catalogUnitsOfMeasure',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['product:read'],
                 subMenu: [],
             },
         ],
@@ -64,7 +64,18 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.inventory.title',
         icon: '',
         type: NAV_ITEM_TYPE_TITLE,
-        authority: [],
+        authority: [
+            'stock:read',
+            'movement:write',
+            'warehouse:write',
+            'location:write',
+            'lot:write',
+            'serial:write',
+            'adjustment:write',
+            'transfer:write',
+            'alert:read',
+            'report:inventory:read',
+        ],
         subMenu: [
             {
                 key: 'inventory.stock',
@@ -73,7 +84,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.stock',
                 icon: 'inventoryStock',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['stock:read'],
                 subMenu: [],
             },
             {
@@ -83,7 +94,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.movements',
                 icon: 'inventoryMovements',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['movement:write'],
                 subMenu: [],
             },
             {
@@ -93,7 +104,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.warehouses',
                 icon: 'inventoryWarehouses',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['warehouse:write'],
                 subMenu: [],
             },
             {
@@ -103,7 +114,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.locations',
                 icon: 'inventoryLocations',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['location:write'],
                 subMenu: [],
             },
             {
@@ -113,7 +124,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.lots',
                 icon: 'inventoryLots',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['lot:write'],
                 subMenu: [],
             },
             {
@@ -123,7 +134,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.serials',
                 icon: 'inventorySerials',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['serial:write'],
                 subMenu: [],
             },
             {
@@ -133,7 +144,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.adjustments',
                 icon: 'inventoryAdjustments',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['adjustment:write'],
                 subMenu: [],
             },
             {
@@ -143,7 +154,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.transfers',
                 icon: 'inventoryTransfers',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['transfer:write'],
                 subMenu: [],
             },
             {
@@ -153,7 +164,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.alerts',
                 icon: 'inventoryAlerts',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['alert:read'],
                 subMenu: [],
             },
             {
@@ -163,7 +174,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.inventory.reports',
                 icon: 'inventoryReports',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['report:inventory:read'],
                 subMenu: [],
             },
         ],
@@ -175,7 +186,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.sales.title',
         icon: '',
         type: NAV_ITEM_TYPE_TITLE,
-        authority: [],
+        authority: ['sale:read', 'customer:read'],
         subMenu: [
             {
                 key: 'sales.customers',
@@ -184,7 +195,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.sales.customers',
                 icon: 'salesCustomers',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['customer:read'],
                 subMenu: [],
             },
             {
@@ -194,7 +205,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.sales.sales',
                 icon: 'salesSales',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['sale:read'],
                 subMenu: [],
             },
         ],
@@ -206,7 +217,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.purchases.title',
         icon: '',
         type: NAV_ITEM_TYPE_TITLE,
-        authority: [],
+        authority: ['purchase:read', 'supplier:read'],
         subMenu: [
             {
                 key: 'purchases.suppliers',
@@ -215,7 +226,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.purchases.suppliers',
                 icon: 'purchasesSuppliers',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['supplier:read'],
                 subMenu: [],
             },
             {
@@ -225,7 +236,7 @@ const navigationConfig: NavigationTree[] = [
                 translateKey: 'nav.purchases.purchaseOrders',
                 icon: 'purchasesPurchaseOrders',
                 type: NAV_ITEM_TYPE_ITEM,
-                authority: [],
+                authority: ['purchase:read'],
                 subMenu: [],
             },
         ],

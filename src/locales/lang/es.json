@@ -1,4 +1,40 @@
 {
+    "auth": {
+        "errors": {
+            "INVALID_CREDENTIALS": "Usuario o contraseña inválidos",
+            "TOKEN_EXPIRED": "La sesión expiró, inicia sesión de nuevo",
+            "INVALID_TOKEN": "Token inválido, inicia sesión de nuevo",
+            "PERMISSION_DENIED": "Sin permiso para esta acción",
+            "PASSWORD_CHANGE_REQUIRED": "Debes cambiar tu contraseña para continuar",
+            "USERNAME_ALREADY_EXISTS": "El nombre de usuario ya existe",
+            "EMAIL_ALREADY_EXISTS": "El correo electrónico ya está registrado",
+            "NOT_FOUND": "No encontrado",
+            "VALIDATION_ERROR": "Error de validación",
+            "INTERNAL_ERROR": "Error interno del servidor. Intenta de nuevo."
+        },
+        "signIn": {
+            "username": "Usuario",
+            "password": "Contraseña",
+            "submit": "Iniciar sesión"
+        },
+        "changePassword": {
+            "currentPassword": "Contraseña actual",
+            "newPassword": "Nueva contraseña",
+            "confirmPassword": "Confirmar contraseña",
+            "submit": "Cambiar contraseña",
+            "successToast": "Contraseña actualizada",
+            "mandatoryTitle": "Debes cambiar tu contraseña",
+            "mandatoryDesc": "Por seguridad establece una nueva contraseña antes de continuar"
+        },
+        "accessDenied": {
+            "title": "Sin acceso",
+            "description": "No tienes permiso para ver esta página.",
+            "backToHome": "Volver al inicio"
+        },
+        "users": {
+            "resetPasswordBanner": "Comparte esta contraseña con el usuario por un canal seguro. No la podrás ver de nuevo."
+        }
+    },
     "nav": {
         "home": "Home",
         "catalog": {

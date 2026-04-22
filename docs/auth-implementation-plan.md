@@ -9,19 +9,15 @@ Contrato backend: ver `auth-api-spec.md` (raíz del repo). Este documento traduc
 ## Estado actual
 
 - Branch: `feat/auth-real-api`
-- Última etapa completada: **Etapa 5 — Pantalla de cambio de contraseña** ✅
-- Próximo paso: **Etapa 6 — Gating de rutas y navegación por permiso**.
+- Última etapa completada: **Etapa 6 — Gating de rutas y navegación por permiso** ✅
+- Próximo paso: **Etapa 7 — Ruteo por rol + enlaces cruzados POS↔Admin**.
 
-Notas de sesión anterior (S4):
-- Etapas 4 y 5 completadas en una sola sesión.
-- Eliminadas: carpetas `SignUp/`, `ForgotPassword/`, `ResetPassword/` y sus rutas en `authRoute.tsx`.
-- Eliminados: tipos deprecated (`SignInCredential`, etc.) de `@types/auth.ts` y stubs de `AuthService.ts`.
-- `SignInForm.tsx` migrado a `username` (max 64), labels en español, sin "Remember Me", sin links de signup/forgot.
-- Adaptador legacy `src/utils/hooks/useAuth.ts` actualizado: routing por rol (`CASHIER→/pos`, otros→/home) y por `mustChangePassword→/change-password`; `signUp` eliminado.
-- `MustChangePasswordGuard` creado en `src/components/route/` y montado en `Layouts.tsx`.
-- `ChangePassword/` creada en `src/views/auth/`: container + form con modo obligatorio (oculta "Volver", muestra "Cerrar sesión") y modo self-service; `INVALID_CREDENTIALS` → error inline en `currentPassword`.
-- `useChangePassword` en `src/hooks/useAuth.ts` hace rotación de tokens vía `apiRefresh` + re-fetch de `/me` en `onSuccess`.
-- Ruta `/change-password` agregada a `protectedRoutes` en `routes.config.ts`.
+Notas de sesión anterior (S5):
+- Etapa 6 completada.
+- `routes.config.ts`: todos los `authority[]` rellenados según la matriz §2.3 del spec. `/access-denied` agregado como ruta protegida sin permiso.
+- `navigation.config/index.ts`: `authority[]` rellenados en ítems y section titles (OR-match en section titles para ocultar sección si usuario no tiene ningún ítem accesible).
+- `src/views/auth/AccessDenied.tsx` creado (minimal: "Sin acceso" + botón volver al inicio). `AuthorityGuard` ya redirigía allí pero la ruta no existía.
+- Sin cambios a `AuthorityGuard`, `AuthorityCheck`, `useAuthority`, `Views.tsx` — infraestructura ya estaba cableada.
 - `npm run lint` 0 errores. `tsc --noEmit` mismos errores preexistentes que master.
 
 Actualiza estas líneas al final de cada sesión.
@@ -183,7 +179,7 @@ Archivos entregados:
 
 ---
 
-### ☐ Etapa 6 — Gating de rutas y navegación por permiso
+### ✅ Etapa 6 — Gating de rutas y navegación por permiso
 
 - Extender `Route` type con `meta.requiresPermission` / `meta.requiresRole`.
 - Renombrar lógica de `AuthorityGuard` → usar `can(perm)`/`hasRole(...)`.

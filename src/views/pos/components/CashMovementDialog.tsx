@@ -5,7 +5,7 @@ import Input from '@/components/ui/Input'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useAddCashMovement } from '@/hooks/usePOS'
-import { useShift } from './ShiftGuard'
+import { useShift } from './useShift'
 import type { CashMovementType } from '@/services/POSService'
 
 interface CashMovementDialogProps {

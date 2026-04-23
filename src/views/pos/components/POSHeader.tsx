@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '@/components/ui/Button'
-import { useShift } from './ShiftGuard'
+import { useShift } from './useShift'
 import {
     HiOutlineCash,
     HiOutlineLockClosed,

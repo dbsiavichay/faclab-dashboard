@@ -8,7 +8,7 @@ import Spinner from '@/components/ui/Spinner'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCloseShift, useCashSummary } from '@/hooks/usePOS'
-import { useShift } from './ShiftGuard'
+import { useShift } from './useShift'
 
 interface ShiftCloseDialogProps {
     isOpen: boolean

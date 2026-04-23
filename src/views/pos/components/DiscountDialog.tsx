@@ -30,14 +30,14 @@ const DiscountDialog = ({ isOpen, onClose }: DiscountDialogProps) => {
     const hasExistingDiscount = currentType !== null && currentValue > 0
 
     useEffect(() => {
-        if (isOpen && hasExistingDiscount) {
-            setType(currentType!)
+        if (isOpen && currentType !== null && currentValue > 0) {
+            setType(currentType)
             setValue(currentValue.toString())
         } else if (isOpen) {
             setType('PERCENTAGE')
             setValue('')
         }
-    }, [isOpen])
+    }, [isOpen, currentType, currentValue])
 
     const subtotal = getCartSubtotal(cartItems)
     const numValue = Number(value) || 0

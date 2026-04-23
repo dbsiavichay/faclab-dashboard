@@ -3,81 +3,97 @@ import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 import {
     useDeleteUnitOfMeasure,
     useUnitsOfMeasure,
+    useCreateUnitOfMeasure,
+    useUpdateUnitOfMeasure,
 } from '@/hooks/useUnitsOfMeasure'
-
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
-import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
-import type { UnitOfMeasure } from '@/services/UnitOfMeasureService'
+import type {
+    UnitOfMeasure,
+    UnitOfMeasureInput,
+} from '@/services/UnitOfMeasureService'
 import UnitOfMeasureForm from './UnitOfMeasureForm'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import toast from '@/components/ui/toast'
-import { useState } from 'react'
+import { useCrudOperations } from '@/hooks'
+import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 
 const UnitsOfMeasureView = () => {
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedUnit, setSelectedUnit] = useState<UnitOfMeasure | null>(null)
-    const [deleteDialog, setDeleteDialog] = useState<{
-        open: boolean
-        unit: UnitOfMeasure | null
-    }>({ open: false, unit: null })
+    const crud = useCrudOperations<UnitOfMeasure>()
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
-
-    const { data, isLoading } = useUnitsOfMeasure({ limit: pageSize, offset })
+    const { data, isLoading } = useUnitsOfMeasure({
+        limit: crud.pageSize,
+        offset,
+    })
     const units = data?.items ?? []
     const total = data?.pagination?.total ?? 0
+
     const deleteUnit = useDeleteUnitOfMeasure()
+    const createUnit = useCreateUnitOfMeasure()
+    const updateUnit = useUpdateUnitOfMeasure()
+    const isPending = createUnit.isPending || updateUnit.isPending
 
-    const handleCreate = () => {
-        setSelectedUnit(null)
-        setIsFormOpen(true)
-    }
-
-    const handleEdit = (unit: UnitOfMeasure) => {
-        setSelectedUnit(unit)
-        setIsFormOpen(true)
-    }
-
-    const handleDeleteClick = (unit: UnitOfMeasure) => {
-        setDeleteDialog({ open: true, unit })
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (deleteDialog.unit) {
-            try {
-                await deleteUnit.mutateAsync(deleteDialog.unit.id)
+    const handleFormSubmit = async (formData: UnitOfMeasureInput) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateUnit.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: formData,
+                })
                 toast.push(
-                    <Notification title="Unidad eliminada" type="success">
-                        La unidad de medida se eliminó correctamente
+                    <Notification title="Unidad actualizada" type="success">
+                        La unidad de medida se actualizó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, unit: null })
-            } catch (error: unknown) {
-                console.log('Error deleting unit of measure:', error)
-                const errorMessage = getErrorMessage(
-                    error,
-                    'Error al eliminar la unidad de medida'
-                )
-
+            } else {
+                await createUnit.mutateAsync(formData)
                 toast.push(
-                    <Notification title="Error" type="danger">
-                        {errorMessage}
+                    <Notification title="Unidad creada" type="success">
+                        La unidad de medida se creó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
             }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(
+                        error,
+                        'Error al guardar la unidad de medida'
+                    )}
+                </Notification>,
+                { placement: 'top-center' }
+            )
         }
     }
 
-    const handleFormClose = () => {
-        setIsFormOpen(false)
-        setSelectedUnit(null)
+    const handleDeleteConfirm = async () => {
+        if (!crud.selectedItem) return
+        try {
+            await deleteUnit.mutateAsync(crud.selectedItem.id)
+            toast.push(
+                <Notification title="Unidad eliminada" type="success">
+                    La unidad de medida se eliminó correctamente
+                </Notification>,
+                { placement: 'top-center' }
+            )
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(
+                        error,
+                        'Error al eliminar la unidad de medida'
+                    )}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const columns: ColumnDef<UnitOfMeasure>[] = [
@@ -151,13 +167,13 @@ const UnitsOfMeasureView = () => {
                             size="sm"
                             variant="plain"
                             icon={<HiOutlinePencil />}
-                            onClick={() => handleEdit(row.original)}
+                            onClick={() => crud.openEdit(row.original)}
                         />
                         <Button
                             size="sm"
                             variant="plain"
                             icon={<HiOutlineTrash />}
-                            onClick={() => handleDeleteClick(row.original)}
+                            onClick={() => crud.openDelete(row.original)}
                         />
                     </div>
                 )
@@ -182,7 +198,7 @@ const UnitsOfMeasureView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiPlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nueva Unidad
                         </Button>
@@ -192,56 +208,51 @@ const UnitsOfMeasureView = () => {
                         columns={columns}
                         data={units}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <UnitOfMeasureForm
-                open={isFormOpen}
-                unitOfMeasure={selectedUnit}
-                onClose={handleFormClose}
-            />
-
-            <Dialog
-                isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, unit: null })}
-                onRequestClose={() =>
-                    setDeleteDialog({ open: false, unit: null })
+            <FormModal
+                formId="unit-of-measure-form"
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={
+                    crud.isEditOpen
+                        ? 'Editar Unidad de Medida'
+                        : 'Nueva Unidad de Medida'
                 }
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
             >
-                <h5 className="mb-4">Confirmar Eliminación</h5>
-                <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar la unidad{' '}
-                    <strong>
-                        {deleteDialog.unit?.name} ({deleteDialog.unit?.symbol})
-                    </strong>
-                    ? Esta acción no se puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        disabled={deleteUnit.isPending}
-                        onClick={() =>
-                            setDeleteDialog({ open: false, unit: null })
-                        }
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteUnit.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
+                <UnitOfMeasureForm
+                    formId="unit-of-measure-form"
+                    unitOfMeasure={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
+
+            <DeleteConfirmDialog
+                isOpen={crud.isDeleteOpen}
+                itemName={
+                    crud.selectedItem
+                        ? `${crud.selectedItem.name} (${crud.selectedItem.symbol})`
+                        : undefined
+                }
+                isDeleting={deleteUnit.isPending}
+                onClose={crud.closeAll}
+                onConfirm={handleDeleteConfirm}
+            />
         </>
     )
 }

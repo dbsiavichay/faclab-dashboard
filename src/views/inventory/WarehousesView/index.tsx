@@ -1,79 +1,87 @@
-import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useWarehouses, useDeleteWarehouse } from '@/hooks/useWarehouses'
+import {
+    useWarehouses,
+    useDeleteWarehouse,
+    useCreateWarehouse,
+    useUpdateWarehouse,
+} from '@/hooks/useWarehouses'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type { Warehouse } from '@/services/WarehouseService'
+import { useCrudOperations } from '@/hooks'
+import { FormModal, DeleteConfirmDialog } from '@/components/shared'
+import type { Warehouse, WarehouseInput } from '@/services/WarehouseService'
 import WarehouseForm from './WarehouseForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
 const WarehousesView = () => {
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedWarehouse, setSelectedWarehouse] =
-        useState<Warehouse | null>(null)
-    const [deleteDialog, setDeleteDialog] = useState<{
-        open: boolean
-        warehouse: Warehouse | null
-    }>({ open: false, warehouse: null })
+    const crud = useCrudOperations<Warehouse>()
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
-
-    const { data, isLoading } = useWarehouses({ limit: pageSize, offset })
+    const { data, isLoading } = useWarehouses({ limit: crud.pageSize, offset })
     const warehouses = data?.items ?? []
     const total = data?.pagination?.total ?? 0
+
     const deleteWarehouse = useDeleteWarehouse()
+    const createWarehouse = useCreateWarehouse()
+    const updateWarehouse = useUpdateWarehouse()
+    const isPending = createWarehouse.isPending || updateWarehouse.isPending
 
-    const handleCreate = () => {
-        setSelectedWarehouse(null)
-        setIsFormOpen(true)
-    }
-
-    const handleEdit = (warehouse: Warehouse) => {
-        setSelectedWarehouse(warehouse)
-        setIsFormOpen(true)
-    }
-
-    const handleDeleteClick = (warehouse: Warehouse) => {
-        setDeleteDialog({ open: true, warehouse })
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (deleteDialog.warehouse) {
-            try {
-                await deleteWarehouse.mutateAsync(deleteDialog.warehouse.id)
+    const handleFormSubmit = async (formData: WarehouseInput) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateWarehouse.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: formData,
+                })
                 toast.push(
-                    <Notification title="Bodega eliminada" type="success">
-                        La bodega se eliminó correctamente
+                    <Notification title="Bodega actualizada" type="success">
+                        La bodega se actualizó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, warehouse: null })
-            } catch (error: unknown) {
-                const errorMessage = getErrorMessage(
-                    error,
-                    'Error al eliminar la bodega'
-                )
-
+            } else {
+                await createWarehouse.mutateAsync(formData)
                 toast.push(
-                    <Notification title="Error" type="danger">
-                        {errorMessage}
+                    <Notification title="Bodega creada" type="success">
+                        La bodega se creó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
             }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al guardar la bodega')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
         }
     }
 
-    const handleFormClose = () => {
-        setIsFormOpen(false)
-        setSelectedWarehouse(null)
+    const handleDeleteConfirm = async () => {
+        if (!crud.selectedItem) return
+        try {
+            await deleteWarehouse.mutateAsync(crud.selectedItem.id)
+            toast.push(
+                <Notification title="Bodega eliminada" type="success">
+                    La bodega se eliminó correctamente
+                </Notification>,
+                { placement: 'top-center' }
+            )
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al eliminar la bodega')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const columns: ColumnDef<Warehouse>[] = [
@@ -172,13 +180,13 @@ const WarehousesView = () => {
                             size="sm"
                             variant="plain"
                             icon={<HiOutlinePencil />}
-                            onClick={() => handleEdit(row.original)}
+                            onClick={() => crud.openEdit(row.original)}
                         />
                         <Button
                             size="sm"
                             variant="plain"
                             icon={<HiOutlineTrash />}
-                            onClick={() => handleDeleteClick(row.original)}
+                            onClick={() => crud.openDelete(row.original)}
                         />
                     </div>
                 )
@@ -201,7 +209,7 @@ const WarehousesView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiPlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nueva Bodega
                         </Button>
@@ -211,59 +219,47 @@ const WarehousesView = () => {
                         columns={columns}
                         data={warehouses}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <WarehouseForm
-                open={isFormOpen}
-                warehouse={selectedWarehouse}
-                onClose={handleFormClose}
-            />
-
-            <Dialog
-                isOpen={deleteDialog.open}
-                onClose={() =>
-                    setDeleteDialog({ open: false, warehouse: null })
-                }
-                onRequestClose={() =>
-                    setDeleteDialog({ open: false, warehouse: null })
-                }
+            <FormModal
+                formId="warehouse-form"
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={crud.isEditOpen ? 'Editar Bodega' : 'Nueva Bodega'}
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
             >
-                <h5 className="mb-4">Confirmar Eliminación</h5>
-                <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar la bodega{' '}
-                    <strong>
-                        {deleteDialog.warehouse?.name} (
-                        {deleteDialog.warehouse?.code})
-                    </strong>
-                    ? Esta acción no se puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        disabled={deleteWarehouse.isPending}
-                        onClick={() =>
-                            setDeleteDialog({ open: false, warehouse: null })
-                        }
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteWarehouse.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
+                <WarehouseForm
+                    formId="warehouse-form"
+                    warehouse={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
+
+            <DeleteConfirmDialog
+                isOpen={crud.isDeleteOpen}
+                itemName={
+                    crud.selectedItem
+                        ? `${crud.selectedItem.name} (${crud.selectedItem.code})`
+                        : undefined
+                }
+                isDeleting={deleteWarehouse.isPending}
+                onClose={crud.closeAll}
+                onConfirm={handleDeleteConfirm}
+            />
         </>
     )
 }

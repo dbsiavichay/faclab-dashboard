@@ -1,79 +1,89 @@
-import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useCategories, useDeleteCategory } from '@/hooks/useCategories'
+import {
+    useCategories,
+    useDeleteCategory,
+    useCreateCategory,
+    useUpdateCategory,
+} from '@/hooks/useCategories'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { useCrudOperations } from '@/hooks'
+import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import type { Category } from '@/services/CategoryService'
 import CategoryForm from './CategoryForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
 const CategoriesView = () => {
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-        null
-    )
-    const [deleteDialog, setDeleteDialog] = useState<{
-        open: boolean
-        category: Category | null
-    }>({ open: false, category: null })
+    const crud = useCrudOperations<Category>()
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
-
-    const { data, isLoading } = useCategories({ limit: pageSize, offset })
+    const { data, isLoading } = useCategories({ limit: crud.pageSize, offset })
     const categories = data?.items ?? []
     const total = data?.pagination?.total ?? 0
+
     const deleteCategory = useDeleteCategory()
+    const createCategory = useCreateCategory()
+    const updateCategory = useUpdateCategory()
+    const isPending = createCategory.isPending || updateCategory.isPending
 
-    const handleCreate = () => {
-        setSelectedCategory(null)
-        setIsFormOpen(true)
-    }
-
-    const handleEdit = (category: Category) => {
-        setSelectedCategory(category)
-        setIsFormOpen(true)
-    }
-
-    const handleDeleteClick = (category: Category) => {
-        setDeleteDialog({ open: true, category })
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (deleteDialog.category) {
-            try {
-                await deleteCategory.mutateAsync(deleteDialog.category.id)
+    const handleFormSubmit = async (formData: {
+        name: string
+        description: string
+    }) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateCategory.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: formData,
+                })
                 toast.push(
-                    <Notification title="Categoría eliminada" type="success">
-                        La categoría se eliminó correctamente
+                    <Notification title="Categoría actualizada" type="success">
+                        La categoría se actualizó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, category: null })
-            } catch (error: unknown) {
-                const errorMessage = getErrorMessage(
-                    error,
-                    'Error al eliminar la categoría'
-                )
-
+            } else {
+                await createCategory.mutateAsync(formData)
                 toast.push(
-                    <Notification title="Error" type="danger">
-                        {errorMessage}
+                    <Notification title="Categoría creada" type="success">
+                        La categoría se creó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
             }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al guardar la categoría')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
         }
     }
 
-    const handleFormClose = () => {
-        setIsFormOpen(false)
-        setSelectedCategory(null)
+    const handleDeleteConfirm = async () => {
+        if (!crud.selectedItem) return
+        try {
+            await deleteCategory.mutateAsync(crud.selectedItem.id)
+            toast.push(
+                <Notification title="Categoría eliminada" type="success">
+                    La categoría se eliminó correctamente
+                </Notification>,
+                { placement: 'top-center' }
+            )
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al eliminar la categoría')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const columns: ColumnDef<Category>[] = [
@@ -118,13 +128,13 @@ const CategoriesView = () => {
                             size="sm"
                             variant="plain"
                             icon={<HiOutlinePencil />}
-                            onClick={() => handleEdit(row.original)}
+                            onClick={() => crud.openEdit(row.original)}
                         />
                         <Button
                             size="sm"
                             variant="plain"
                             icon={<HiOutlineTrash />}
-                            onClick={() => handleDeleteClick(row.original)}
+                            onClick={() => crud.openDelete(row.original)}
                         />
                     </div>
                 )
@@ -149,7 +159,7 @@ const CategoriesView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiPlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nueva Categoría
                         </Button>
@@ -159,56 +169,43 @@ const CategoriesView = () => {
                         columns={columns}
                         data={categories}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            {/* Form Modal */}
-            <CategoryForm
-                open={isFormOpen}
-                category={selectedCategory}
-                onClose={handleFormClose}
-            />
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog
-                isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, category: null })}
-                onRequestClose={() =>
-                    setDeleteDialog({ open: false, category: null })
-                }
+            <FormModal
+                formId="category-form"
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={crud.isEditOpen ? 'Editar Categoría' : 'Nueva Categoría'}
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
             >
-                <h5 className="mb-4">Confirmar Eliminación</h5>
-                <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar la categoría{' '}
-                    <strong>{deleteDialog.category?.name}</strong>? Esta acción
-                    no se puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        disabled={deleteCategory.isPending}
-                        onClick={() =>
-                            setDeleteDialog({ open: false, category: null })
-                        }
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteCategory.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
+                <CategoryForm
+                    formId="category-form"
+                    category={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
+
+            <DeleteConfirmDialog
+                isOpen={crud.isDeleteOpen}
+                itemName={crud.selectedItem?.name}
+                isDeleting={deleteCategory.isPending}
+                onClose={crud.closeAll}
+                onConfirm={handleDeleteConfirm}
+            />
         </>
     )
 }

@@ -1,15 +1,20 @@
-import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useLocations, useDeleteLocation } from '@/hooks/useLocations'
+import {
+    useLocations,
+    useDeleteLocation,
+    useCreateLocation,
+    useUpdateLocation,
+} from '@/hooks/useLocations'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useWarehouses } from '@/hooks/useWarehouses'
-import type { Location } from '@/services/LocationService'
+import { useCrudOperations } from '@/hooks'
+import { FormModal, DeleteConfirmDialog } from '@/components/shared'
+import type { Location, LocationInput } from '@/services/LocationService'
 import LocationForm from './LocationForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
@@ -21,73 +26,74 @@ const LOCATION_TYPE_LABELS: Record<string, string> = {
 }
 
 const LocationsView = () => {
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-        null
-    )
-    const [deleteDialog, setDeleteDialog] = useState<{
-        open: boolean
-        location: Location | null
-    }>({ open: false, location: null })
+    const crud = useCrudOperations<Location>()
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
-
-    const { data, isLoading } = useLocations({ limit: pageSize, offset })
+    const { data, isLoading } = useLocations({ limit: crud.pageSize, offset })
     const locations = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
     const { data: warehousesData } = useWarehouses()
     const warehouses = warehousesData?.items ?? []
-    const deleteLocation = useDeleteLocation()
-
     const warehouseMap = new Map(warehouses.map((w) => [w.id, w.name]))
 
-    const handleCreate = () => {
-        setSelectedLocation(null)
-        setIsFormOpen(true)
-    }
+    const deleteLocation = useDeleteLocation()
+    const createLocation = useCreateLocation()
+    const updateLocation = useUpdateLocation()
+    const isPending = createLocation.isPending || updateLocation.isPending
 
-    const handleEdit = (location: Location) => {
-        setSelectedLocation(location)
-        setIsFormOpen(true)
-    }
-
-    const handleDeleteClick = (location: Location) => {
-        setDeleteDialog({ open: true, location })
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (deleteDialog.location) {
-            try {
-                await deleteLocation.mutateAsync(deleteDialog.location.id)
+    const handleFormSubmit = async (formData: LocationInput) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateLocation.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: formData,
+                })
                 toast.push(
-                    <Notification title="Ubicación eliminada" type="success">
-                        La ubicación se eliminó correctamente
+                    <Notification title="Ubicación actualizada" type="success">
+                        La ubicación se actualizó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, location: null })
-            } catch (error: unknown) {
-                const errorMessage = getErrorMessage(
-                    error,
-                    'Error al eliminar la ubicación'
-                )
-
+            } else {
+                await createLocation.mutateAsync(formData)
                 toast.push(
-                    <Notification title="Error" type="danger">
-                        {errorMessage}
+                    <Notification title="Ubicación creada" type="success">
+                        La ubicación se creó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
             }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al guardar la ubicación')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
         }
     }
 
-    const handleFormClose = () => {
-        setIsFormOpen(false)
-        setSelectedLocation(null)
+    const handleDeleteConfirm = async () => {
+        if (!crud.selectedItem) return
+        try {
+            await deleteLocation.mutateAsync(crud.selectedItem.id)
+            toast.push(
+                <Notification title="Ubicación eliminada" type="success">
+                    La ubicación se eliminó correctamente
+                </Notification>,
+                { placement: 'top-center' }
+            )
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al eliminar la ubicación')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const columns: ColumnDef<Location>[] = [
@@ -191,13 +197,13 @@ const LocationsView = () => {
                             size="sm"
                             variant="plain"
                             icon={<HiOutlinePencil />}
-                            onClick={() => handleEdit(row.original)}
+                            onClick={() => crud.openEdit(row.original)}
                         />
                         <Button
                             size="sm"
                             variant="plain"
                             icon={<HiOutlineTrash />}
-                            onClick={() => handleDeleteClick(row.original)}
+                            onClick={() => crud.openDelete(row.original)}
                         />
                     </div>
                 )
@@ -222,7 +228,7 @@ const LocationsView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiPlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nueva Ubicación
                         </Button>
@@ -232,57 +238,47 @@ const LocationsView = () => {
                         columns={columns}
                         data={locations}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <LocationForm
-                open={isFormOpen}
-                location={selectedLocation}
-                onClose={handleFormClose}
-            />
-
-            <Dialog
-                isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, location: null })}
-                onRequestClose={() =>
-                    setDeleteDialog({ open: false, location: null })
-                }
+            <FormModal
+                formId="location-form"
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={crud.isEditOpen ? 'Editar Ubicación' : 'Nueva Ubicación'}
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
             >
-                <h5 className="mb-4">Confirmar Eliminación</h5>
-                <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar la ubicación{' '}
-                    <strong>
-                        {deleteDialog.location?.name} (
-                        {deleteDialog.location?.code})
-                    </strong>
-                    ? Esta acción no se puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        disabled={deleteLocation.isPending}
-                        onClick={() =>
-                            setDeleteDialog({ open: false, location: null })
-                        }
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteLocation.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
+                <LocationForm
+                    formId="location-form"
+                    location={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
+
+            <DeleteConfirmDialog
+                isOpen={crud.isDeleteOpen}
+                itemName={
+                    crud.selectedItem
+                        ? `${crud.selectedItem.name} (${crud.selectedItem.code})`
+                        : undefined
+                }
+                isDeleting={deleteLocation.isPending}
+                onClose={crud.closeAll}
+                onConfirm={handleDeleteConfirm}
+            />
         </>
     )
 }

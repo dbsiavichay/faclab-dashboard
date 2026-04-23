@@ -1,21 +1,23 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     useSuppliers,
     useDeleteSupplier,
+    useCreateSupplier,
+    useUpdateSupplier,
     useActivateSupplier,
     useDeactivateSupplier,
+    useCrudOperations,
 } from '@/hooks'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import type { Supplier } from '@/services/SupplierService'
+import type { Supplier, SupplierInput } from '@/services/SupplierService'
 import { TAX_TYPE_LABELS } from '@/services/SupplierService'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import SupplierForm from './SupplierForm'
 import {
     HiOutlinePlus,
@@ -28,60 +30,64 @@ import {
 
 const SuppliersView = () => {
     const navigate = useNavigate()
-    const deleteSupplier = useDeleteSupplier()
-    const activateSupplier = useActivateSupplier()
-    const deactivateSupplier = useDeactivateSupplier()
+    const crud = useCrudOperations<Supplier>()
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const [formOpen, setFormOpen] = useState(false)
-    const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
-        null
-    )
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const [supplierToDelete, setSupplierToDelete] = useState<Supplier | null>(
-        null
-    )
-
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
-
-    const { data, isLoading } = useSuppliers({ limit: pageSize, offset })
+    const { data, isLoading } = useSuppliers({ limit: crud.pageSize, offset })
     const suppliers = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const handleEdit = (supplier: Supplier) => {
-        setSelectedSupplier(supplier)
-        setFormOpen(true)
-    }
+    const deleteSupplier = useDeleteSupplier()
+    const createSupplier = useCreateSupplier()
+    const updateSupplier = useUpdateSupplier()
+    const activateSupplier = useActivateSupplier()
+    const deactivateSupplier = useDeactivateSupplier()
+    const isPending = createSupplier.isPending || updateSupplier.isPending
 
-    const handleCreate = () => {
-        setSelectedSupplier(null)
-        setFormOpen(true)
-    }
-
-    const handleCloseForm = () => {
-        setFormOpen(false)
-        setSelectedSupplier(null)
-    }
-
-    const handleDeleteClick = (supplier: Supplier) => {
-        setSupplierToDelete(supplier)
-        setDeleteDialogOpen(true)
+    const handleFormSubmit = async (formData: SupplierInput) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateSupplier.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: formData,
+                })
+                toast.push(
+                    <Notification title="Proveedor actualizado" type="success">
+                        El proveedor se actualizó correctamente
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
+            } else {
+                await createSupplier.mutateAsync(formData)
+                toast.push(
+                    <Notification title="Proveedor creado" type="success">
+                        El proveedor se creó correctamente
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
+            }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al guardar el proveedor')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const handleDeleteConfirm = async () => {
-        if (!supplierToDelete) return
-
+        if (!crud.selectedItem) return
         try {
-            await deleteSupplier.mutateAsync(supplierToDelete.id)
+            await deleteSupplier.mutateAsync(crud.selectedItem.id)
             toast.push(
                 <Notification title="Proveedor eliminado" type="success">
                     El proveedor se eliminó correctamente
                 </Notification>,
                 { placement: 'top-center' }
             )
-            setDeleteDialogOpen(false)
-            setSupplierToDelete(null)
+            crud.closeAll()
         } catch (error: unknown) {
             toast.push(
                 <Notification title="Error" type="danger">
@@ -198,7 +204,7 @@ const SuppliersView = () => {
                         size="sm"
                         variant="plain"
                         icon={<HiOutlinePencil />}
-                        onClick={() => handleEdit(row.original)}
+                        onClick={() => crud.openEdit(row.original)}
                     />
                     <Button
                         size="sm"
@@ -216,7 +222,7 @@ const SuppliersView = () => {
                         size="sm"
                         variant="plain"
                         icon={<HiOutlineTrash />}
-                        onClick={() => handleDeleteClick(row.original)}
+                        onClick={() => crud.openDelete(row.original)}
                     />
                 </div>
             ),
@@ -240,7 +246,7 @@ const SuppliersView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiOutlinePlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nuevo Proveedor
                         </Button>
@@ -250,49 +256,44 @@ const SuppliersView = () => {
                         columns={columns}
                         data={suppliers}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <SupplierForm
-                open={formOpen}
-                supplier={selectedSupplier}
-                onClose={handleCloseForm}
-            />
-
-            <Dialog
-                isOpen={deleteDialogOpen}
-                onClose={() => setDeleteDialogOpen(false)}
-                onRequestClose={() => setDeleteDialogOpen(false)}
+            <FormModal
+                formId="supplier-form"
+                width={800}
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={crud.isEditOpen ? 'Editar Proveedor' : 'Nuevo Proveedor'}
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
             >
-                <h5 className="mb-4">Confirmar eliminación</h5>
-                <p className="mb-6">
-                    ¿Está seguro que desea eliminar el proveedor{' '}
-                    <strong>{supplierToDelete?.name}</strong>? Esta acción no se
-                    puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        onClick={() => setDeleteDialogOpen(false)}
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteSupplier.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
+                <SupplierForm
+                    formId="supplier-form"
+                    supplier={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
+
+            <DeleteConfirmDialog
+                isOpen={crud.isDeleteOpen}
+                itemName={crud.selectedItem?.name}
+                isDeleting={deleteSupplier.isPending}
+                onClose={crud.closeAll}
+                onConfirm={handleDeleteConfirm}
+            />
         </>
     )
 }

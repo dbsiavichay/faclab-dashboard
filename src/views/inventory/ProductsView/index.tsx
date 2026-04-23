@@ -2,35 +2,33 @@ import { useState, useMemo } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useProducts, useDeleteProduct } from '@/hooks/useProducts'
+import {
+    useProducts,
+    useDeleteProduct,
+    useCreateProduct,
+    useUpdateProduct,
+} from '@/hooks/useProducts'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCategories } from '@/hooks/useCategories'
 import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
-import type { Product } from '@/services/ProductService'
+import { useCrudOperations } from '@/hooks'
+import { FormModal, DeleteConfirmDialog } from '@/components/shared'
+import type { Product, ProductInput } from '@/services/ProductService'
 import ProductForm from './ProductForm'
 import Select from '@/components/ui/Select'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
 const ProductsView = () => {
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-    const [deleteDialog, setDeleteDialog] = useState<{
-        open: boolean
-        product: Product | null
-    }>({ open: false, product: null })
-
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
+    const crud = useCrudOperations<Product>()
     const [filterCategoryId, setFilterCategoryId] = useState<
         number | undefined
     >(undefined)
-    const offset = (pageIndex - 1) * pageSize
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
     const { data, isLoading } = useProducts({
-        limit: pageSize,
+        limit: crud.pageSize,
         offset,
         categoryId: filterCategoryId,
     })
@@ -40,6 +38,9 @@ const ProductsView = () => {
     const { data: categoriesData } = useCategories()
     const { data: unitsData } = useUnitsOfMeasure()
     const deleteProduct = useDeleteProduct()
+    const createProduct = useCreateProduct()
+    const updateProduct = useUpdateProduct()
+    const isPending = createProduct.isPending || updateProduct.isPending
 
     const categoryMap = useMemo(() => {
         const categories = categoriesData?.items ?? []
@@ -63,50 +64,58 @@ const ProductsView = () => {
         return map
     }, [unitsData])
 
-    const handleCreate = () => {
-        setSelectedProduct(null)
-        setIsFormOpen(true)
-    }
-
-    const handleEdit = (product: Product) => {
-        setSelectedProduct(product)
-        setIsFormOpen(true)
-    }
-
-    const handleDeleteClick = (product: Product) => {
-        setDeleteDialog({ open: true, product })
-    }
-
-    const handleDeleteConfirm = async () => {
-        if (deleteDialog.product) {
-            try {
-                await deleteProduct.mutateAsync(deleteDialog.product.id)
+    const handleFormSubmit = async (formData: ProductInput) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateProduct.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: formData,
+                })
                 toast.push(
-                    <Notification title="Producto eliminado" type="success">
-                        El producto se eliminó correctamente
+                    <Notification title="Producto actualizado" type="success">
+                        El producto se actualizó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
-                setDeleteDialog({ open: false, product: null })
-            } catch (error: unknown) {
-                const errorMessage = getErrorMessage(
-                    error,
-                    'Error al eliminar el producto'
-                )
-
+            } else {
+                await createProduct.mutateAsync(formData)
                 toast.push(
-                    <Notification title="Error" type="danger">
-                        {errorMessage}
+                    <Notification title="Producto creado" type="success">
+                        El producto se creó correctamente
                     </Notification>,
                     { placement: 'top-center' }
                 )
             }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al guardar el producto')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
         }
     }
 
-    const handleFormClose = () => {
-        setIsFormOpen(false)
-        setSelectedProduct(null)
+    const handleDeleteConfirm = async () => {
+        if (!crud.selectedItem) return
+        try {
+            await deleteProduct.mutateAsync(crud.selectedItem.id)
+            toast.push(
+                <Notification title="Producto eliminado" type="success">
+                    El producto se eliminó correctamente
+                </Notification>,
+                { placement: 'top-center' }
+            )
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al eliminar el producto')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const columns: ColumnDef<Product>[] = [
@@ -215,13 +224,13 @@ const ProductsView = () => {
                             size="sm"
                             variant="plain"
                             icon={<HiOutlinePencil />}
-                            onClick={() => handleEdit(row.original)}
+                            onClick={() => crud.openEdit(row.original)}
                         />
                         <Button
                             size="sm"
                             variant="plain"
                             icon={<HiOutlineTrash />}
-                            onClick={() => handleDeleteClick(row.original)}
+                            onClick={() => crud.openDelete(row.original)}
                         />
                     </div>
                 )
@@ -258,14 +267,14 @@ const ProductsView = () => {
                                     setFilterCategoryId(
                                         option?.value || undefined
                                     )
-                                    setPageIndex(1)
+                                    crud.onPaginationChange(1, crud.pageSize)
                                 }}
                             />
                             <Button
                                 variant="solid"
                                 size="sm"
                                 icon={<HiPlus />}
-                                onClick={handleCreate}
+                                onClick={crud.openCreate}
                             >
                                 Nuevo Producto
                             </Button>
@@ -276,54 +285,44 @@ const ProductsView = () => {
                         columns={columns}
                         data={items}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <ProductForm
-                open={isFormOpen}
-                product={selectedProduct}
-                onClose={handleFormClose}
-            />
-
-            <Dialog
-                isOpen={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, product: null })}
-                onRequestClose={() =>
-                    setDeleteDialog({ open: false, product: null })
-                }
+            <FormModal
+                formId="product-form"
+                width={640}
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={crud.isEditOpen ? 'Editar Producto' : 'Nuevo Producto'}
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
             >
-                <h5 className="mb-4">Confirmar Eliminación</h5>
-                <p className="mb-6">
-                    ¿Estás seguro de que deseas eliminar el producto{' '}
-                    <strong>{deleteDialog.product?.name}</strong>? Esta acción
-                    no se puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        disabled={deleteProduct.isPending}
-                        onClick={() =>
-                            setDeleteDialog({ open: false, product: null })
-                        }
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteProduct.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
+                <ProductForm
+                    formId="product-form"
+                    product={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
+
+            <DeleteConfirmDialog
+                isOpen={crud.isDeleteOpen}
+                itemName={crud.selectedItem?.name}
+                isDeleting={deleteProduct.isPending}
+                onClose={crud.closeAll}
+                onConfirm={handleDeleteConfirm}
+            />
         </>
     )
 }

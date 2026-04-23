@@ -5,7 +5,8 @@ import Button from '@/components/ui/Button'
 interface FormModalProps {
     isOpen: boolean
     onClose: () => void
-    onSubmit: () => void
+    onSubmit?: () => void
+    formId?: string
     title: string
     isSubmitting?: boolean
     children: ReactNode
@@ -15,6 +16,7 @@ const FormModal = ({
     isOpen,
     onClose,
     onSubmit,
+    formId,
     title,
     isSubmitting = false,
     children,
@@ -40,14 +42,25 @@ const FormModal = ({
                 >
                     Cancelar
                 </Button>
-                <Button
-                    type="button"
-                    variant="solid"
-                    loading={isSubmitting}
-                    onClick={onSubmit}
-                >
-                    Guardar
-                </Button>
+                {formId ? (
+                    <Button
+                        type="submit"
+                        form={formId}
+                        variant="solid"
+                        loading={isSubmitting}
+                    >
+                        Guardar
+                    </Button>
+                ) : (
+                    <Button
+                        type="button"
+                        variant="solid"
+                        loading={isSubmitting}
+                        onClick={onSubmit}
+                    >
+                        Guardar
+                    </Button>
+                )}
             </div>
         </div>
     </Dialog>

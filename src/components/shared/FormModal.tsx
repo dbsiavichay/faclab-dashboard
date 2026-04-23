@@ -9,6 +9,7 @@ interface FormModalProps {
     formId?: string
     title: string
     isSubmitting?: boolean
+    width?: number
     children: ReactNode
 }
 
@@ -19,10 +20,12 @@ const FormModal = ({
     formId,
     title,
     isSubmitting = false,
+    width,
     children,
 }: FormModalProps) => (
     <Dialog
         isOpen={isOpen}
+        width={width}
         shouldCloseOnEsc={!isSubmitting}
         shouldCloseOnOverlayClick={!isSubmitting}
         onClose={onClose}

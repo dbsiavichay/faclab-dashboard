@@ -1,21 +1,23 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     useCustomers,
     useDeleteCustomer,
+    useCreateCustomer,
+    useUpdateCustomer,
     useActivateCustomer,
     useDeactivateCustomer,
+    useCrudOperations,
 } from '@/hooks'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import type { Customer } from '@/services/CustomerService'
+import type { Customer, CustomerInput } from '@/services/CustomerService'
 import { TAX_TYPE_LABELS } from '@/services/CustomerService'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import CustomerForm from './CustomerForm'
 import {
     HiOutlinePlus,
@@ -28,60 +30,64 @@ import {
 
 const CustomersView = () => {
     const navigate = useNavigate()
-    const deleteCustomer = useDeleteCustomer()
-    const activateCustomer = useActivateCustomer()
-    const deactivateCustomer = useDeactivateCustomer()
+    const crud = useCrudOperations<Customer>()
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const [formOpen, setFormOpen] = useState(false)
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-        null
-    )
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-    const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(
-        null
-    )
-
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
-
-    const { data, isLoading } = useCustomers({ limit: pageSize, offset })
+    const { data, isLoading } = useCustomers({ limit: crud.pageSize, offset })
     const customers = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const handleEdit = (customer: Customer) => {
-        setSelectedCustomer(customer)
-        setFormOpen(true)
-    }
+    const deleteCustomer = useDeleteCustomer()
+    const createCustomer = useCreateCustomer()
+    const updateCustomer = useUpdateCustomer()
+    const activateCustomer = useActivateCustomer()
+    const deactivateCustomer = useDeactivateCustomer()
+    const isPending = createCustomer.isPending || updateCustomer.isPending
 
-    const handleCreate = () => {
-        setSelectedCustomer(null)
-        setFormOpen(true)
-    }
-
-    const handleCloseForm = () => {
-        setFormOpen(false)
-        setSelectedCustomer(null)
-    }
-
-    const handleDeleteClick = (customer: Customer) => {
-        setCustomerToDelete(customer)
-        setDeleteDialogOpen(true)
+    const handleFormSubmit = async (formData: CustomerInput) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateCustomer.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: formData,
+                })
+                toast.push(
+                    <Notification title="Cliente actualizado" type="success">
+                        El cliente se actualizó correctamente
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
+            } else {
+                await createCustomer.mutateAsync(formData)
+                toast.push(
+                    <Notification title="Cliente creado" type="success">
+                        El cliente se creó correctamente
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
+            }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al guardar el cliente')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const handleDeleteConfirm = async () => {
-        if (!customerToDelete) return
-
+        if (!crud.selectedItem) return
         try {
-            await deleteCustomer.mutateAsync(customerToDelete.id)
+            await deleteCustomer.mutateAsync(crud.selectedItem.id)
             toast.push(
                 <Notification title="Cliente eliminado" type="success">
                     El cliente se eliminó correctamente
                 </Notification>,
                 { placement: 'top-center' }
             )
-            setDeleteDialogOpen(false)
-            setCustomerToDelete(null)
+            crud.closeAll()
         } catch (error: unknown) {
             toast.push(
                 <Notification title="Error" type="danger">
@@ -198,7 +204,7 @@ const CustomersView = () => {
                         size="sm"
                         variant="plain"
                         icon={<HiOutlinePencil />}
-                        onClick={() => handleEdit(row.original)}
+                        onClick={() => crud.openEdit(row.original)}
                     />
                     <Button
                         size="sm"
@@ -216,7 +222,7 @@ const CustomersView = () => {
                         size="sm"
                         variant="plain"
                         icon={<HiOutlineTrash />}
-                        onClick={() => handleDeleteClick(row.original)}
+                        onClick={() => crud.openDelete(row.original)}
                     />
                 </div>
             ),
@@ -238,7 +244,7 @@ const CustomersView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiOutlinePlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nuevo Cliente
                         </Button>
@@ -248,49 +254,44 @@ const CustomersView = () => {
                         columns={columns}
                         data={customers}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <CustomerForm
-                open={formOpen}
-                customer={selectedCustomer}
-                onClose={handleCloseForm}
-            />
-
-            <Dialog
-                isOpen={deleteDialogOpen}
-                onClose={() => setDeleteDialogOpen(false)}
-                onRequestClose={() => setDeleteDialogOpen(false)}
+            <FormModal
+                formId="customer-form"
+                width={800}
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={crud.isEditOpen ? 'Editar Cliente' : 'Nuevo Cliente'}
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
             >
-                <h5 className="mb-4">Confirmar eliminación</h5>
-                <p className="mb-6">
-                    ¿Está seguro que desea eliminar el cliente{' '}
-                    <strong>{customerToDelete?.name}</strong>? Esta acción no se
-                    puede deshacer.
-                </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        onClick={() => setDeleteDialogOpen(false)}
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        variant="solid"
-                        loading={deleteCustomer.isPending}
-                        onClick={handleDeleteConfirm}
-                    >
-                        Eliminar
-                    </Button>
-                </div>
-            </Dialog>
+                <CustomerForm
+                    formId="customer-form"
+                    customer={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
+
+            <DeleteConfirmDialog
+                isOpen={crud.isDeleteOpen}
+                itemName={crud.selectedItem?.name}
+                isDeleting={deleteCustomer.isPending}
+                onClose={crud.closeAll}
+                onConfirm={handleDeleteConfirm}
+            />
         </>
     )
 }

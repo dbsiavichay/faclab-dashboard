@@ -1,19 +1,8 @@
-import { createContext, useContext } from 'react'
 import { useActiveShift } from '@/hooks/usePOS'
 import Spinner from '@/components/ui/Spinner'
 import ShiftOpenDialog from './ShiftOpenDialog'
-import type { Shift } from '@/services/POSService'
+import { ShiftContext } from './useShift'
 import type { ReactNode } from 'react'
-
-const ShiftContext = createContext<Shift | null>(null)
-
-export const useShift = () => {
-    const shift = useContext(ShiftContext)
-    if (!shift) {
-        throw new Error('useShift must be used within ShiftGuard')
-    }
-    return shift
-}
 
 interface ShiftGuardProps {
     children: ReactNode

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { Shift } from '@/services/POSService'
+import type { Shift } from '@/services/pos/POSTypes'
 
 export const ShiftContext = createContext<Shift | null>(null)
 

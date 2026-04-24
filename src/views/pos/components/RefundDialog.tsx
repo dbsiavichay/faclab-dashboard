@@ -6,13 +6,14 @@ import Spinner from '@/components/ui/Spinner'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateRefund, useProcessRefund } from '@/hooks/usePOS'
-import POSService from '@/services/POSService'
+import POSSaleService from '@/services/pos/POSSaleService'
+import POSProductService from '@/services/pos/POSProductService'
 import {
     POS_PAYMENT_METHOD_LABELS,
     type POSSale,
     type POSSaleItem,
     type POSPaymentMethod,
-} from '@/services/POSService'
+} from '@/services/pos/POSTypes'
 import { HiOutlineSearch, HiMinus, HiPlus } from 'react-icons/hi'
 
 interface RefundDialogProps {
@@ -53,7 +54,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
 
         setLoading(true)
         try {
-            const saleResponse = await POSService.getSale(id)
+            const saleResponse = await POSSaleService.getSale(id)
             const saleData = saleResponse.data.data
 
             if (saleData.status !== 'CONFIRMED') {
@@ -68,12 +69,12 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                 return
             }
 
-            const itemsResponse = await POSService.getSaleItems(id)
+            const itemsResponse = await POSSaleService.getSaleItems(id)
             const saleItems = itemsResponse.data.data
 
             const selections: RefundItemSelection[] = []
             for (const item of saleItems) {
-                const productResponse = await POSService.getProduct(
+                const productResponse = await POSProductService.getProduct(
                     item.productId
                 )
                 const product = productResponse.data.data

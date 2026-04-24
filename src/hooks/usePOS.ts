@@ -1,5 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import POSService from '@/services/POSService'
+import ShiftService from '@/services/pos/ShiftService'
+import POSSaleService from '@/services/pos/POSSaleService'
+import POSRefundService from '@/services/pos/POSRefundService'
+import POSReportService from '@/services/pos/POSReportService'
+import POSProductService from '@/services/pos/POSProductService'
+import POSCustomerService from '@/services/pos/POSCustomerService'
 import type {
     OpenShiftInput,
     CloseShiftInput,
@@ -14,7 +19,7 @@ import type {
     ProcessRefundInput,
     CashMovementInput,
     QuickCustomerInput,
-} from '@/services/POSService'
+} from '@/services/pos/POSTypes'
 
 // === QUERIES ===
 
@@ -22,7 +27,7 @@ export function useActiveShift() {
     return useQuery({
         queryKey: ['pos', 'activeShift'],
         queryFn: async () => {
-            const response = await POSService.getActiveShift()
+            const response = await ShiftService.getActiveShift()
             return response.data.data
         },
     })
@@ -32,7 +37,7 @@ export function usePOSProducts() {
     return useQuery({
         queryKey: ['pos', 'products'],
         queryFn: async () => {
-            const response = await POSService.getProducts()
+            const response = await POSProductService.getProducts()
             return response.data.data
         },
     })
@@ -42,7 +47,7 @@ export function usePOSSearchProducts(term: string) {
     return useQuery({
         queryKey: ['pos', 'products', 'search', term],
         queryFn: async () => {
-            const response = await POSService.searchProducts(term)
+            const response = await POSProductService.searchProducts(term)
             return response.data.data
         },
         enabled: term.length >= 2,
@@ -53,7 +58,7 @@ export function useParkedSales() {
     return useQuery({
         queryKey: ['pos', 'parkedSales'],
         queryFn: async () => {
-            const response = await POSService.getParkedSales()
+            const response = await POSSaleService.getParkedSales()
             return response.data.data
         },
     })
@@ -63,7 +68,7 @@ export function useReceipt(saleId: number) {
     return useQuery({
         queryKey: ['pos', 'receipt', saleId],
         queryFn: async () => {
-            const response = await POSService.getReceipt(saleId)
+            const response = await POSSaleService.getReceipt(saleId)
             return response.data.data
         },
         enabled: saleId > 0,
@@ -74,7 +79,7 @@ export function useCashSummary(shiftId: number) {
     return useQuery({
         queryKey: ['pos', 'cashSummary', shiftId],
         queryFn: async () => {
-            const response = await POSService.getCashSummary(shiftId)
+            const response = await POSReportService.getCashSummary(shiftId)
             return response.data.data
         },
         enabled: shiftId > 0,
@@ -85,7 +90,7 @@ export function useXReport(shiftId: number) {
     return useQuery({
         queryKey: ['pos', 'xReport', shiftId],
         queryFn: async () => {
-            const response = await POSService.getXReport(shiftId)
+            const response = await POSReportService.getXReport(shiftId)
             return response.data.data
         },
         enabled: shiftId > 0,
@@ -96,7 +101,9 @@ export function usePOSCustomerSearch(taxId: string) {
     return useQuery({
         queryKey: ['pos', 'customers', 'search', taxId],
         queryFn: async () => {
-            const response = await POSService.searchCustomerByTaxId(taxId)
+            const response = await POSCustomerService.searchCustomerByTaxId(
+                taxId
+            )
             return response.data.data
         },
         enabled: taxId.length >= 5,
@@ -109,7 +116,7 @@ export function useOpenShift() {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async (data: OpenShiftInput) => {
-            const response = await POSService.openShift(data)
+            const response = await ShiftService.openShift(data)
             return response.data.data
         },
         onSuccess: () => {
@@ -128,7 +135,7 @@ export function useCloseShift() {
             shiftId: number
             data: CloseShiftInput
         }) => {
-            const response = await POSService.closeShift(shiftId, data)
+            const response = await ShiftService.closeShift(shiftId, data)
             return response.data.data
         },
         onSuccess: () => {
@@ -141,7 +148,7 @@ export function useQuickSale() {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async (data: QuickSaleInput) => {
-            const response = await POSService.quickSale(data)
+            const response = await POSSaleService.quickSale(data)
             return response.data.data
         },
         onSuccess: () => {
@@ -153,7 +160,7 @@ export function useQuickSale() {
 export function useCreateSale() {
     return useMutation({
         mutationFn: async (data: CreateSaleInput) => {
-            const response = await POSService.createSale(data)
+            const response = await POSSaleService.createSale(data)
             return response.data.data
         },
     })
@@ -168,7 +175,7 @@ export function useAddSaleItem() {
             saleId: number
             data: AddSaleItemInput
         }) => {
-            const response = await POSService.addSaleItem(saleId, data)
+            const response = await POSSaleService.addSaleItem(saleId, data)
             return response.data.data
         },
     })
@@ -185,7 +192,7 @@ export function useUpdateSaleItem() {
             itemId: number
             data: UpdateSaleItemInput
         }) => {
-            const response = await POSService.updateSaleItem(
+            const response = await POSSaleService.updateSaleItem(
                 saleId,
                 itemId,
                 data
@@ -204,7 +211,7 @@ export function useDeleteSaleItem() {
             saleId: number
             itemId: number
         }) => {
-            await POSService.deleteSaleItem(saleId, itemId)
+            await POSSaleService.deleteSaleItem(saleId, itemId)
         },
     })
 }
@@ -218,7 +225,10 @@ export function useApplySaleDiscount() {
             saleId: number
             data: SaleDiscountInput
         }) => {
-            const response = await POSService.applySaleDiscount(saleId, data)
+            const response = await POSSaleService.applySaleDiscount(
+                saleId,
+                data
+            )
             return response.data.data
         },
     })
@@ -235,7 +245,7 @@ export function useOverrideItemPrice() {
             itemId: number
             data: PriceOverrideInput
         }) => {
-            const response = await POSService.overrideItemPrice(
+            const response = await POSSaleService.overrideItemPrice(
                 saleId,
                 itemId,
                 data
@@ -249,7 +259,7 @@ export function useConfirmSale() {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async (saleId: number) => {
-            const response = await POSService.confirmSale(saleId)
+            const response = await POSSaleService.confirmSale(saleId)
             return response.data.data
         },
         onSuccess: () => {
@@ -268,7 +278,7 @@ export function useParkSale() {
             saleId: number
             reason?: string
         }) => {
-            const response = await POSService.parkSale(saleId, reason)
+            const response = await POSSaleService.parkSale(saleId, reason)
             return response.data.data
         },
         onSuccess: () => {
@@ -283,7 +293,7 @@ export function useResumeSale() {
     const queryClient = useQueryClient()
     return useMutation({
         mutationFn: async (saleId: number) => {
-            const response = await POSService.resumeSale(saleId)
+            const response = await POSSaleService.resumeSale(saleId)
             return response.data.data
         },
         onSuccess: () => {
@@ -304,7 +314,7 @@ export function useCancelSale() {
             saleId: number
             reason?: string
         }) => {
-            const response = await POSService.cancelSale(saleId, reason)
+            const response = await POSSaleService.cancelSale(saleId, reason)
             return response.data.data
         },
         onSuccess: () => {
@@ -325,7 +335,7 @@ export function useAddPayment() {
             saleId: number
             data: PaymentInput
         }) => {
-            const response = await POSService.addPayment(saleId, data)
+            const response = await POSSaleService.addPayment(saleId, data)
             return response.data.data
         },
     })
@@ -334,7 +344,7 @@ export function useAddPayment() {
 export function useCreateRefund() {
     return useMutation({
         mutationFn: async (data: CreateRefundInput) => {
-            const response = await POSService.createRefund(data)
+            const response = await POSRefundService.createRefund(data)
             return response.data.data
         },
     })
@@ -350,7 +360,10 @@ export function useProcessRefund() {
             refundId: number
             data: ProcessRefundInput
         }) => {
-            const response = await POSService.processRefund(refundId, data)
+            const response = await POSRefundService.processRefund(
+                refundId,
+                data
+            )
             return response.data.data
         },
         onSuccess: () => {
@@ -369,7 +382,7 @@ export function useAddCashMovement() {
             shiftId: number
             data: CashMovementInput
         }) => {
-            const response = await POSService.addCashMovement(shiftId, data)
+            const response = await ShiftService.addCashMovement(shiftId, data)
             return response.data.data
         },
         onSuccess: (_, variables) => {
@@ -383,7 +396,7 @@ export function useAddCashMovement() {
 export function useQuickCreateCustomer() {
     return useMutation({
         mutationFn: async (data: QuickCustomerInput) => {
-            const response = await POSService.quickCreateCustomer(data)
+            const response = await POSCustomerService.quickCreateCustomer(data)
             return response.data.data
         },
     })

@@ -10,7 +10,7 @@ import {
     POS_PAYMENT_METHOD_LABELS,
     type POSPaymentMethod,
     type QuickSalePaymentInput,
-} from '@/services/POSService'
+} from '@/services/pos/POSTypes'
 import { HiOutlineTrash } from 'react-icons/hi'
 
 interface PaymentDialogProps {

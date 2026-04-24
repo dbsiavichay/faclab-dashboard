@@ -5,7 +5,9 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useParkedSales, useResumeSale, useCancelSale } from '@/hooks/usePOS'
 import { usePOSStore } from '@/stores/usePOSStore'
-import POSService from '@/services/POSService'
+import POSSaleService from '@/services/pos/POSSaleService'
+import POSProductService from '@/services/pos/POSProductService'
+import POSCustomerService from '@/services/pos/POSCustomerService'
 import { useCan } from '@/stores'
 
 interface ParkedSalesDrawerProps {
@@ -22,19 +24,19 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
 
     const handleResume = async (saleId: number) => {
         try {
-            const saleResponse = await POSService.getSale(saleId)
+            const saleResponse = await POSSaleService.getSale(saleId)
             const saleData = saleResponse.data.data
 
             await resumeSale.mutateAsync(saleId)
 
-            const itemsResponse = await POSService.getSaleItems(saleId)
+            const itemsResponse = await POSSaleService.getSaleItems(saleId)
             const saleItems = itemsResponse.data.data
 
             clearCart()
 
             // Restore customer
             if (saleData.customerId) {
-                const customerResponse = await POSService.getCustomer(
+                const customerResponse = await POSCustomerService.getCustomer(
                     saleData.customerId
                 )
                 const customer = customerResponse.data.data
@@ -47,7 +49,7 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
             }
 
             for (const item of saleItems) {
-                const productResponse = await POSService.getProduct(
+                const productResponse = await POSProductService.getProduct(
                     item.productId
                 )
                 const product = productResponse.data.data

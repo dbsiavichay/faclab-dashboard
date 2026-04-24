@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
 import Input from '@/components/ui/Input'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { Field, Form, Formik } from 'formik'
+import { categorySchema } from '@/schemas'
 import type { Category } from '@/services/CategoryService'
 
 interface CategoryFormData {
@@ -20,66 +22,54 @@ const CategoryForm = ({
     isSubmitting = false,
     onSubmit,
 }: CategoryFormProps) => {
-    const [formData, setFormData] = useState<CategoryFormData>({
-        name: '',
-        description: '',
-    })
-
-    useEffect(() => {
-        setFormData(
-            category
-                ? {
-                      name: category.name,
-                      description: category.description || '',
-                  }
-                : { name: '', description: '' }
-        )
-    }, [category])
+    const initialValues: CategoryFormData = category
+        ? { name: category.name, description: category.description || '' }
+        : { name: '', description: '' }
 
     return (
-        <form
-            id={formId}
-            onSubmit={(e) => {
-                e.preventDefault()
-                onSubmit(formData)
-            }}
+        <Formik
+            enableReinitialize
+            initialValues={initialValues}
+            validationSchema={categorySchema}
+            onSubmit={(values) => onSubmit(values)}
         >
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Nombre <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                        required
-                        placeholder="Nombre de la categoría"
-                        value={formData.name}
-                        disabled={isSubmitting}
-                        onChange={(e) =>
-                            setFormData({ ...formData, name: e.target.value })
-                        }
-                    />
-                </div>
+            {({ touched, errors }) => (
+                <Form id={formId}>
+                    <FormContainer>
+                        <FormItem
+                            asterisk
+                            label="Nombre"
+                            invalid={!!(errors.name && touched.name)}
+                            errorMessage={errors.name}
+                        >
+                            <Field
+                                name="name"
+                                placeholder="Nombre de la categoría"
+                                component={Input}
+                                disabled={isSubmitting}
+                            />
+                        </FormItem>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Descripción
-                    </label>
-                    <Input
-                        textArea
-                        placeholder="Descripción de la categoría"
-                        value={formData.description}
-                        style={{ minHeight: '80px' }}
-                        disabled={isSubmitting}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                description: e.target.value,
-                            })
-                        }
-                    />
-                </div>
-            </div>
-        </form>
+                        <FormItem
+                            label="Descripción"
+                            invalid={
+                                !!(errors.description && touched.description)
+                            }
+                            errorMessage={errors.description}
+                        >
+                            <Field
+                                textArea
+                                name="description"
+                                placeholder="Descripción de la categoría"
+                                style={{ minHeight: '80px' }}
+                                component={Input}
+                                disabled={isSubmitting}
+                            />
+                        </FormItem>
+                    </FormContainer>
+                </Form>
+            )}
+        </Formik>
     )
 }
 

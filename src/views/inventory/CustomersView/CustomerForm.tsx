@@ -80,11 +80,13 @@ const CustomerForm = ({
                             <div className="md:col-span-2">
                                 <FormItem
                                     asterisk
+                                    htmlFor="name"
                                     label="Nombre"
                                     invalid={!!(errors.name && touched.name)}
                                     errorMessage={errors.name}
                                 >
                                     <Field
+                                        id="name"
                                         name="name"
                                         type="text"
                                         placeholder="Nombre del cliente"
@@ -96,11 +98,13 @@ const CustomerForm = ({
 
                             <FormItem
                                 asterisk
+                                htmlFor="taxId"
                                 label="Tax ID"
                                 invalid={!!(errors.taxId && touched.taxId)}
                                 errorMessage={errors.taxId}
                             >
                                 <Field
+                                    id="taxId"
                                     name="taxId"
                                     type="text"
                                     placeholder="RUC, Cédula, Pasaporte..."
@@ -111,11 +115,13 @@ const CustomerForm = ({
 
                             <FormItem
                                 asterisk
+                                htmlFor="taxType"
                                 label="Tipo de ID"
                                 invalid={!!(errors.taxType && touched.taxType)}
                                 errorMessage={errors.taxType as string}
                             >
                                 <Select
+                                    inputId="taxType"
                                     isDisabled={isSubmitting}
                                     value={taxTypeOptions.find(
                                         (opt) => opt.value === values.taxType
@@ -139,11 +145,13 @@ const CustomerForm = ({
                         </h6>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormItem
+                                htmlFor="email"
                                 label="Email"
                                 invalid={!!(errors.email && touched.email)}
                                 errorMessage={errors.email}
                             >
                                 <Field
+                                    id="email"
                                     name="email"
                                     type="email"
                                     placeholder="email@ejemplo.com"
@@ -153,11 +161,13 @@ const CustomerForm = ({
                             </FormItem>
 
                             <FormItem
+                                htmlFor="phone"
                                 label="Teléfono"
                                 invalid={!!(errors.phone && touched.phone)}
                                 errorMessage={errors.phone}
                             >
                                 <Field
+                                    id="phone"
                                     name="phone"
                                     type="text"
                                     placeholder="0987654321"
@@ -172,11 +182,13 @@ const CustomerForm = ({
                         </h6>
                         <div className="space-y-4">
                             <FormItem
+                                htmlFor="address"
                                 label="Dirección"
                                 invalid={!!(errors.address && touched.address)}
                                 errorMessage={errors.address}
                             >
                                 <Field
+                                    id="address"
                                     name="address"
                                     type="text"
                                     placeholder="Calle principal 123"
@@ -186,11 +198,13 @@ const CustomerForm = ({
                             </FormItem>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <FormItem
+                                    htmlFor="city"
                                     label="Ciudad"
                                     invalid={!!(errors.city && touched.city)}
                                     errorMessage={errors.city}
                                 >
                                     <Field
+                                        id="city"
                                         name="city"
                                         type="text"
                                         placeholder="Quito"
@@ -200,11 +214,13 @@ const CustomerForm = ({
                                 </FormItem>
 
                                 <FormItem
+                                    htmlFor="state"
                                     label="Provincia/Estado"
                                     invalid={!!(errors.state && touched.state)}
                                     errorMessage={errors.state}
                                 >
                                     <Field
+                                        id="state"
                                         name="state"
                                         type="text"
                                         placeholder="Pichincha"
@@ -214,6 +230,7 @@ const CustomerForm = ({
                                 </FormItem>
 
                                 <FormItem
+                                    htmlFor="country"
                                     label="País"
                                     invalid={
                                         !!(errors.country && touched.country)
@@ -221,6 +238,7 @@ const CustomerForm = ({
                                     errorMessage={errors.country}
                                 >
                                     <Field
+                                        id="country"
                                         name="country"
                                         type="text"
                                         placeholder="Ecuador"
@@ -236,6 +254,7 @@ const CustomerForm = ({
                         </h6>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormItem
+                                htmlFor="creditLimit"
                                 label="Límite de Crédito"
                                 invalid={
                                     !!(
@@ -246,6 +265,7 @@ const CustomerForm = ({
                                 errorMessage={errors.creditLimit as string}
                             >
                                 <Input
+                                    id="creditLimit"
                                     type="number"
                                     placeholder="0.00"
                                     value={values.creditLimit ?? ''}
@@ -267,6 +287,7 @@ const CustomerForm = ({
                             </FormItem>
 
                             <FormItem
+                                htmlFor="paymentTerms"
                                 label="Términos de Pago (días)"
                                 invalid={
                                     !!(
@@ -277,6 +298,7 @@ const CustomerForm = ({
                                 errorMessage={errors.paymentTerms as string}
                             >
                                 <Input
+                                    id="paymentTerms"
                                     type="number"
                                     placeholder="30"
                                     value={values.paymentTerms ?? ''}
@@ -297,8 +319,9 @@ const CustomerForm = ({
                             </FormItem>
                         </div>
 
-                        <FormItem label="Estado">
+                        <FormItem htmlFor="isActive" label="Estado">
                             <Switcher
+                                id="isActive"
                                 checked={values.isActive}
                                 onChange={(checked) =>
                                     setFieldValue('isActive', checked)

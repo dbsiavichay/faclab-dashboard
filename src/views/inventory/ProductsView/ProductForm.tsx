@@ -86,11 +86,13 @@ const ProductForm = ({
                     <FormContainer>
                         <FormItem
                             asterisk
+                            htmlFor="name"
                             label="Nombre"
                             invalid={!!(errors.name && touched.name)}
                             errorMessage={errors.name}
                         >
                             <Field
+                                id="name"
                                 name="name"
                                 type="text"
                                 placeholder="Nombre del producto"
@@ -101,11 +103,13 @@ const ProductForm = ({
 
                         <FormItem
                             asterisk
+                            htmlFor="sku"
                             label="SKU"
                             invalid={!!(errors.sku && touched.sku)}
                             errorMessage={errors.sku}
                         >
                             <Field
+                                id="sku"
                                 name="sku"
                                 type="text"
                                 placeholder="SKU del producto"
@@ -115,6 +119,7 @@ const ProductForm = ({
                         </FormItem>
 
                         <FormItem
+                            htmlFor="description"
                             label="Descripción"
                             invalid={
                                 !!(errors.description && touched.description)
@@ -123,6 +128,7 @@ const ProductForm = ({
                         >
                             <Field
                                 textArea
+                                id="description"
                                 name="description"
                                 placeholder="Descripción del producto"
                                 style={{ minHeight: '80px' }}
@@ -132,11 +138,13 @@ const ProductForm = ({
                         </FormItem>
 
                         <FormItem
+                            htmlFor="barcode"
                             label="Código de barras"
                             invalid={!!(errors.barcode && touched.barcode)}
                             errorMessage={errors.barcode as string}
                         >
                             <Field
+                                id="barcode"
                                 name="barcode"
                                 type="text"
                                 placeholder="Ej: 7501234567890"
@@ -146,6 +154,7 @@ const ProductForm = ({
                         </FormItem>
 
                         <FormItem
+                            htmlFor="categoryId"
                             label="Categoría"
                             invalid={
                                 !!(errors.categoryId && touched.categoryId)
@@ -153,6 +162,7 @@ const ProductForm = ({
                             errorMessage={errors.categoryId as string}
                         >
                             <Select
+                                inputId="categoryId"
                                 placeholder="Seleccione una categoría"
                                 isDisabled={isSubmitting}
                                 value={categoryOptions.find(
@@ -178,6 +188,7 @@ const ProductForm = ({
                         </FormItem>
 
                         <FormItem
+                            htmlFor="unitOfMeasureId"
                             label="Unidad de Medida"
                             invalid={
                                 !!(
@@ -188,6 +199,7 @@ const ProductForm = ({
                             errorMessage={errors.unitOfMeasureId as string}
                         >
                             <Select
+                                inputId="unitOfMeasureId"
                                 placeholder="Seleccione una unidad"
                                 isDisabled={isSubmitting}
                                 value={unitOptions.find(
@@ -216,6 +228,7 @@ const ProductForm = ({
 
                         <div className="grid grid-cols-2 gap-4">
                             <FormItem
+                                htmlFor="purchasePrice"
                                 label="Precio de compra"
                                 invalid={
                                     !!(
@@ -226,6 +239,7 @@ const ProductForm = ({
                                 errorMessage={errors.purchasePrice as string}
                             >
                                 <Input
+                                    id="purchasePrice"
                                     type="number"
                                     placeholder="0.00"
                                     value={values.purchasePrice ?? ''}
@@ -244,6 +258,7 @@ const ProductForm = ({
                                 />
                             </FormItem>
                             <FormItem
+                                htmlFor="salePrice"
                                 label="Precio de venta"
                                 invalid={
                                     !!(errors.salePrice && touched.salePrice)
@@ -251,6 +266,7 @@ const ProductForm = ({
                                 errorMessage={errors.salePrice as string}
                             >
                                 <Input
+                                    id="salePrice"
                                     type="number"
                                     placeholder="0.00"
                                     value={values.salePrice ?? ''}
@@ -273,23 +289,31 @@ const ProductForm = ({
                         <div className="flex gap-6">
                             <div className="flex items-center gap-3">
                                 <Switcher
+                                    id="isActive"
                                     checked={values.isActive}
                                     onChange={(checked) =>
                                         setFieldValue('isActive', checked)
                                     }
                                 />
-                                <label className="text-sm font-medium">
+                                <label
+                                    htmlFor="isActive"
+                                    className="text-sm font-medium"
+                                >
                                     Activo
                                 </label>
                             </div>
                             <div className="flex items-center gap-3">
                                 <Switcher
+                                    id="isService"
                                     checked={values.isService}
                                     onChange={(checked) =>
                                         setFieldValue('isService', checked)
                                     }
                                 />
-                                <label className="text-sm font-medium">
+                                <label
+                                    htmlFor="isService"
+                                    className="text-sm font-medium"
+                                >
                                     Es servicio
                                 </label>
                             </div>
@@ -297,6 +321,7 @@ const ProductForm = ({
 
                         <div className="grid grid-cols-2 gap-4">
                             <FormItem
+                                htmlFor="minStock"
                                 label="Stock mínimo"
                                 invalid={
                                     !!(errors.minStock && touched.minStock)
@@ -304,6 +329,7 @@ const ProductForm = ({
                                 errorMessage={errors.minStock as string}
                             >
                                 <Input
+                                    id="minStock"
                                     type="number"
                                     placeholder="0"
                                     value={values.minStock ?? ''}
@@ -322,6 +348,7 @@ const ProductForm = ({
                                 />
                             </FormItem>
                             <FormItem
+                                htmlFor="maxStock"
                                 label="Stock máximo"
                                 invalid={
                                     !!(errors.maxStock && touched.maxStock)
@@ -329,6 +356,7 @@ const ProductForm = ({
                                 errorMessage={errors.maxStock as string}
                             >
                                 <Input
+                                    id="maxStock"
                                     type="number"
                                     placeholder="Sin límite"
                                     value={values.maxStock ?? ''}
@@ -347,6 +375,7 @@ const ProductForm = ({
                                 />
                             </FormItem>
                             <FormItem
+                                htmlFor="reorderPoint"
                                 label="Punto de reorden"
                                 invalid={
                                     !!(
@@ -357,6 +386,7 @@ const ProductForm = ({
                                 errorMessage={errors.reorderPoint as string}
                             >
                                 <Input
+                                    id="reorderPoint"
                                     type="number"
                                     placeholder="0"
                                     value={values.reorderPoint ?? ''}
@@ -375,6 +405,7 @@ const ProductForm = ({
                                 />
                             </FormItem>
                             <FormItem
+                                htmlFor="leadTimeDays"
                                 label="Tiempo de entrega (días)"
                                 invalid={
                                     !!(
@@ -385,6 +416,7 @@ const ProductForm = ({
                                 errorMessage={errors.leadTimeDays as string}
                             >
                                 <Input
+                                    id="leadTimeDays"
                                     type="number"
                                     placeholder="Sin definir"
                                     value={values.leadTimeDays ?? ''}

@@ -80,11 +80,13 @@ const SupplierForm = ({
                             <div className="md:col-span-2">
                                 <FormItem
                                     asterisk
+                                    htmlFor="name"
                                     label="Nombre"
                                     invalid={!!(errors.name && touched.name)}
                                     errorMessage={errors.name}
                                 >
                                     <Field
+                                        id="name"
                                         name="name"
                                         type="text"
                                         placeholder="Nombre del proveedor"
@@ -96,11 +98,13 @@ const SupplierForm = ({
 
                             <FormItem
                                 asterisk
+                                htmlFor="taxId"
                                 label="Tax ID"
                                 invalid={!!(errors.taxId && touched.taxId)}
                                 errorMessage={errors.taxId}
                             >
                                 <Field
+                                    id="taxId"
                                     name="taxId"
                                     type="text"
                                     placeholder="RUC, Cédula, Pasaporte..."
@@ -111,11 +115,13 @@ const SupplierForm = ({
 
                             <FormItem
                                 asterisk
+                                htmlFor="taxType"
                                 label="Tipo de ID"
                                 invalid={!!(errors.taxType && touched.taxType)}
                                 errorMessage={errors.taxType as string}
                             >
                                 <Select
+                                    inputId="taxType"
                                     isDisabled={isSubmitting}
                                     value={taxTypeOptions.find(
                                         (opt) => opt.value === values.taxType
@@ -139,11 +145,13 @@ const SupplierForm = ({
                         </h6>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormItem
+                                htmlFor="email"
                                 label="Email"
                                 invalid={!!(errors.email && touched.email)}
                                 errorMessage={errors.email}
                             >
                                 <Field
+                                    id="email"
                                     name="email"
                                     type="email"
                                     placeholder="email@ejemplo.com"
@@ -153,11 +161,13 @@ const SupplierForm = ({
                             </FormItem>
 
                             <FormItem
+                                htmlFor="phone"
                                 label="Teléfono"
                                 invalid={!!(errors.phone && touched.phone)}
                                 errorMessage={errors.phone}
                             >
                                 <Field
+                                    id="phone"
                                     name="phone"
                                     type="text"
                                     placeholder="0987654321"
@@ -172,11 +182,13 @@ const SupplierForm = ({
                         </h6>
                         <div className="space-y-4">
                             <FormItem
+                                htmlFor="address"
                                 label="Dirección"
                                 invalid={!!(errors.address && touched.address)}
                                 errorMessage={errors.address}
                             >
                                 <Field
+                                    id="address"
                                     name="address"
                                     type="text"
                                     placeholder="Calle principal 123"
@@ -186,11 +198,13 @@ const SupplierForm = ({
                             </FormItem>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormItem
+                                    htmlFor="city"
                                     label="Ciudad"
                                     invalid={!!(errors.city && touched.city)}
                                     errorMessage={errors.city}
                                 >
                                     <Field
+                                        id="city"
                                         name="city"
                                         type="text"
                                         placeholder="Quito"
@@ -200,6 +214,7 @@ const SupplierForm = ({
                                 </FormItem>
 
                                 <FormItem
+                                    htmlFor="country"
                                     label="País"
                                     invalid={
                                         !!(errors.country && touched.country)
@@ -207,6 +222,7 @@ const SupplierForm = ({
                                     errorMessage={errors.country}
                                 >
                                     <Field
+                                        id="country"
                                         name="country"
                                         type="text"
                                         placeholder="Ecuador"
@@ -222,6 +238,7 @@ const SupplierForm = ({
                         </h6>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormItem
+                                htmlFor="paymentTerms"
                                 label="Términos de Pago (días)"
                                 invalid={
                                     !!(
@@ -232,6 +249,7 @@ const SupplierForm = ({
                                 errorMessage={errors.paymentTerms as string}
                             >
                                 <Input
+                                    id="paymentTerms"
                                     type="number"
                                     placeholder="30"
                                     value={values.paymentTerms ?? ''}
@@ -252,6 +270,7 @@ const SupplierForm = ({
                             </FormItem>
 
                             <FormItem
+                                htmlFor="leadTimeDays"
                                 label="Tiempo de Entrega (días)"
                                 invalid={
                                     !!(
@@ -262,6 +281,7 @@ const SupplierForm = ({
                                 errorMessage={errors.leadTimeDays as string}
                             >
                                 <Input
+                                    id="leadTimeDays"
                                     type="number"
                                     placeholder="7"
                                     value={values.leadTimeDays ?? ''}
@@ -283,12 +303,14 @@ const SupplierForm = ({
                         </div>
 
                         <FormItem
+                            htmlFor="notes"
                             label="Notas"
                             invalid={!!(errors.notes && touched.notes)}
                             errorMessage={errors.notes}
                         >
                             <Field
                                 textArea
+                                id="notes"
                                 name="notes"
                                 placeholder="Notas adicionales sobre el proveedor..."
                                 component={Input}
@@ -296,8 +318,9 @@ const SupplierForm = ({
                             />
                         </FormItem>
 
-                        <FormItem label="Estado">
+                        <FormItem htmlFor="isActive" label="Estado">
                             <Switcher
+                                id="isActive"
                                 checked={values.isActive}
                                 onChange={(checked) =>
                                     setFieldValue('isActive', checked)

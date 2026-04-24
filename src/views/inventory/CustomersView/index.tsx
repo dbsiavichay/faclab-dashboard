@@ -195,6 +195,7 @@ const CustomersView = () => {
                     <Button
                         size="sm"
                         variant="plain"
+                        aria-label={`Ver ${row.original.name}`}
                         icon={<HiOutlineEye />}
                         onClick={() =>
                             navigate(`/customers/${row.original.id}`)
@@ -203,12 +204,16 @@ const CustomersView = () => {
                     <Button
                         size="sm"
                         variant="plain"
+                        aria-label={`Editar ${row.original.name}`}
                         icon={<HiOutlinePencil />}
                         onClick={() => crud.openEdit(row.original)}
                     />
                     <Button
                         size="sm"
                         variant="plain"
+                        aria-label={`${
+                            row.original.isActive ? 'Desactivar' : 'Activar'
+                        } ${row.original.name}`}
                         icon={
                             row.original.isActive ? (
                                 <HiOutlineXCircle />
@@ -221,6 +226,7 @@ const CustomersView = () => {
                     <Button
                         size="sm"
                         variant="plain"
+                        aria-label={`Eliminar ${row.original.name}`}
                         icon={<HiOutlineTrash />}
                         onClick={() => crud.openDelete(row.original)}
                     />

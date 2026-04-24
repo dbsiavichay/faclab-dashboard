@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import { usePOSStore } from '@/stores/usePOSStore'
@@ -14,21 +14,51 @@ interface OrderItemRowProps {
     item: POSCartItem
 }
 
-const OrderItemRow = ({ item }: OrderItemRowProps) => {
-    const { updateItemQuantity, removeItem, updateItemPrice } = usePOSStore()
+const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
+    const updateItemQuantity = usePOSStore((s) => s.updateItemQuantity)
+    const removeItem = usePOSStore((s) => s.removeItem)
+    const updateItemPrice = usePOSStore((s) => s.updateItemPrice)
     const [editingPrice, setEditingPrice] = useState(false)
     const [newPrice, setNewPrice] = useState('')
 
     const lineTotal = item.salePrice * item.quantity * (1 - item.discount / 100)
 
-    const handlePriceSubmit = () => {
+    const handlePriceSubmit = useCallback(() => {
         const price = parseFloat(newPrice)
         if (price > 0) {
             updateItemPrice(item.productId, price)
         }
         setEditingPrice(false)
         setNewPrice('')
-    }
+    }, [newPrice, updateItemPrice, item.productId])
+
+    const handleToggleEdit = useCallback(() => {
+        setNewPrice(item.salePrice.toString())
+        setEditingPrice((prev) => !prev)
+    }, [item.salePrice])
+
+    const handleDecreaseQty = useCallback(
+        () => updateItemQuantity(item.productId, item.quantity - 1),
+        [updateItemQuantity, item.productId, item.quantity]
+    )
+
+    const handleIncreaseQty = useCallback(
+        () => updateItemQuantity(item.productId, item.quantity + 1),
+        [updateItemQuantity, item.productId, item.quantity]
+    )
+
+    const handleRemove = useCallback(
+        () => removeItem(item.productId),
+        [removeItem, item.productId]
+    )
+
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (e.key === 'Enter') handlePriceSubmit()
+            if (e.key === 'Escape') setEditingPrice(false)
+        },
+        [handlePriceSubmit]
+    )
 
     return (
         <div className="space-y-1">
@@ -46,10 +76,7 @@ const OrderItemRow = ({ item }: OrderItemRowProps) => {
                         </p>
                         <button
                             className="text-gray-400 hover:text-primary-500"
-                            onClick={() => {
-                                setNewPrice(item.salePrice.toString())
-                                setEditingPrice(!editingPrice)
-                            }}
+                            onClick={handleToggleEdit}
                         >
                             <HiOutlinePencil className="text-xs" />
                         </button>
@@ -61,12 +88,7 @@ const OrderItemRow = ({ item }: OrderItemRowProps) => {
                         size="xs"
                         variant="plain"
                         icon={<HiMinus />}
-                        onClick={() =>
-                            updateItemQuantity(
-                                item.productId,
-                                item.quantity - 1
-                            )
-                        }
+                        onClick={handleDecreaseQty}
                     />
                     <span className="w-8 text-center text-sm font-medium">
                         {item.quantity}
@@ -75,12 +97,7 @@ const OrderItemRow = ({ item }: OrderItemRowProps) => {
                         size="xs"
                         variant="plain"
                         icon={<HiPlus />}
-                        onClick={() =>
-                            updateItemQuantity(
-                                item.productId,
-                                item.quantity + 1
-                            )
-                        }
+                        onClick={handleIncreaseQty}
                     />
                 </div>
 
@@ -92,7 +109,7 @@ const OrderItemRow = ({ item }: OrderItemRowProps) => {
                     size="xs"
                     variant="plain"
                     icon={<HiOutlineTrash className="text-red-500" />}
-                    onClick={() => removeItem(item.productId)}
+                    onClick={handleRemove}
                 />
             </div>
 
@@ -106,10 +123,7 @@ const OrderItemRow = ({ item }: OrderItemRowProps) => {
                         placeholder="Nuevo precio"
                         className="w-32"
                         onChange={(e) => setNewPrice(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') handlePriceSubmit()
-                            if (e.key === 'Escape') setEditingPrice(false)
-                        }}
+                        onKeyDown={handleKeyDown}
                     />
                     <Button
                         size="xs"
@@ -129,6 +143,8 @@ const OrderItemRow = ({ item }: OrderItemRowProps) => {
             )}
         </div>
     )
-}
+})
+
+OrderItemRow.displayName = 'OrderItemRow'
 
 export default OrderItemRow

@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react'
 import { HiOutlinePhotograph } from 'react-icons/hi'
 import { usePOSStore } from '@/stores/usePOSStore'
 import type { POSProduct } from '@/services/pos/POSTypes'
@@ -6,10 +7,10 @@ interface ProductCardProps {
     product: POSProduct
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = memo(({ product }: ProductCardProps) => {
     const addItem = usePOSStore((s) => s.addItem)
 
-    const handleClick = () => {
+    const handleClick = useCallback(() => {
         addItem({
             productId: product.id,
             name: product.name,
@@ -17,7 +18,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             salePrice: product.salePrice ?? 0,
             taxRate: product.taxRate ?? 0,
         })
-    }
+    }, [addItem, product])
 
     return (
         <div
@@ -31,6 +32,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                     />
                 ) : (
                     <HiOutlinePhotograph className="text-4xl text-gray-400" />
@@ -47,6 +49,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
         </div>
     )
-}
+})
+
+ProductCard.displayName = 'ProductCard'
 
 export default ProductCard

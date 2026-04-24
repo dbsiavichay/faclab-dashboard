@@ -4,7 +4,8 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { usePOSStore, getCartTotal } from '@/stores/usePOSStore'
+import { usePOSStore } from '@/stores/usePOSStore'
+import { useCartTotals } from '@/hooks/utils'
 import { useQuickSale } from '@/hooks/usePOS'
 import {
     POS_PAYMENT_METHOD_LABELS,
@@ -30,8 +31,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     const { cartItems, customerId, discountType, discountValue, clearCart } =
         usePOSStore()
     const quickSale = useQuickSale()
-
-    const total = getCartTotal(cartItems, discountType, discountValue)
+    const { total } = useCartTotals()
 
     const [selectedMethod, setSelectedMethod] =
         useState<POSPaymentMethod>('CASH')

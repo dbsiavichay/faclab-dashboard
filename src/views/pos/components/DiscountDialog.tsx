@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -39,10 +39,15 @@ const DiscountDialog = ({ isOpen, onClose }: DiscountDialogProps) => {
         }
     }, [isOpen, currentType, currentValue])
 
-    const subtotal = getCartSubtotal(cartItems)
     const numValue = Number(value) || 0
-    const previewAmount = getCartDiscountAmount(subtotal, type, numValue)
-    const newTotal = getCartTotal(cartItems, type, numValue)
+
+    const { previewAmount, newTotal } = useMemo(() => {
+        const subtotal = getCartSubtotal(cartItems)
+        return {
+            previewAmount: getCartDiscountAmount(subtotal, type, numValue),
+            newTotal: getCartTotal(cartItems, type, numValue),
+        }
+    }, [cartItems, type, numValue])
 
     const handleApply = () => {
         if (numValue > 0) {

@@ -1,22 +1,9 @@
-import {
-    usePOSStore,
-    getCartSubtotal,
-    getCartDiscountAmount,
-    getCartTax,
-    getCartTotal,
-} from '@/stores/usePOSStore'
+import { usePOSStore } from '@/stores/usePOSStore'
+import { useCartTotals } from '@/hooks/utils'
 
 const PaymentSummary = () => {
-    const { cartItems, discountType, discountValue } = usePOSStore()
-
-    const subtotal = getCartSubtotal(cartItems)
-    const discountAmount = getCartDiscountAmount(
-        subtotal,
-        discountType,
-        discountValue
-    )
-    const tax = getCartTax(cartItems, discountType, discountValue)
-    const total = getCartTotal(cartItems, discountType, discountValue)
+    const { discountType, discountValue } = usePOSStore()
+    const { subtotal, discountAmount, tax, total } = useCartTotals()
 
     return (
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">

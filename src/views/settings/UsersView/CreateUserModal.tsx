@@ -11,7 +11,7 @@ import { ROLE, ROLE_LABELS, ALL_ROLES } from '@/constants/roles.constant'
 import type { RoleCode } from '@/constants/roles.constant'
 import type { CreateUserRequest } from '@/@types/auth'
 import { Field, Form, Formik } from 'formik'
-import * as Yup from 'yup'
+import { createUserSchema } from '@/schemas'
 
 interface CreateUserModalProps {
     open: boolean
@@ -22,24 +22,6 @@ const roleOptions = ALL_ROLES.map((role) => ({
     value: role,
     label: ROLE_LABELS[role],
 }))
-
-const validationSchema = Yup.object().shape({
-    username: Yup.string()
-        .min(1, 'Requerido')
-        .max(64, 'Máximo 64 caracteres')
-        .required('Ingresa el nombre de usuario'),
-    email: Yup.string()
-        .email('Email inválido')
-        .max(128, 'Máximo 128 caracteres')
-        .required('Ingresa el email'),
-    password: Yup.string()
-        .min(8, 'Mínimo 8 caracteres')
-        .max(128, 'Máximo 128 caracteres')
-        .required('Ingresa una contraseña'),
-    role: Yup.number()
-        .oneOf(ALL_ROLES as unknown as number[])
-        .required('Selecciona un rol'),
-})
 
 const initialValues: CreateUserRequest = {
     username: '',
@@ -67,7 +49,7 @@ const CreateUserModal = ({ open, onClose }: CreateUserModalProps) => {
             <h5 className="mb-4">Nuevo usuario</h5>
             <Formik
                 initialValues={initialValues}
-                validationSchema={validationSchema}
+                validationSchema={createUserSchema}
                 onSubmit={async (
                     values,
                     { setSubmitting, setFieldError, resetForm }

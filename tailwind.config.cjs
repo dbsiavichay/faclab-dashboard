@@ -1,9 +1,9 @@
 /* eslint-disable no-undef */
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors')
 const safeListFile = 'safelist.txt'
 
-// colors.indigo
-const SAFELIST_COLORS = 'colors'
+const SAFELIST_COLORS = 'safelistColors'
 
 module.exports = {
 	mode: 'jit',
@@ -60,6 +60,25 @@ module.exports = {
 				'2xl': '1536px',
 			},
 			extend: {
+				safelistColors: {
+					red: colors.red,
+					orange: colors.orange,
+					amber: colors.amber,
+					yellow: colors.yellow,
+					lime: colors.lime,
+					green: colors.green,
+					emerald: colors.emerald,
+					teal: colors.teal,
+					cyan: colors.cyan,
+					sky: colors.sky,
+					blue: colors.blue,
+					indigo: colors.indigo,
+					violet: colors.violet,
+					purple: colors.purple,
+					fuchsia: colors.fuchsia,
+					pink: colors.pink,
+					rose: colors.rose,
+				},
 				typography: (theme) => ({
 					DEFAULT: {
 						css: {

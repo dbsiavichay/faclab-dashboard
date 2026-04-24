@@ -5,7 +5,8 @@ import Input from '@/components/ui/Input'
 import Notification from '@/components/ui/Notification'
 import Switcher from '@/components/ui/Switcher'
 import toast from '@/components/ui/toast'
-import { usePOSStore, getCartTotal } from '@/stores/usePOSStore'
+import { usePOSStore } from '@/stores/usePOSStore'
+import { useCartTotals } from '@/hooks/utils'
 import { usePOSCustomerSearch, useQuickCreateCustomer } from '@/hooks/usePOS'
 import { HiOutlineUser } from 'react-icons/hi'
 
@@ -18,11 +19,8 @@ const CustomerSelector = () => {
         isFinalConsumer,
         setCustomer,
         setFinalConsumer,
-        cartItems,
-        discountType,
-        discountValue,
     } = usePOSStore()
-    const total = getCartTotal(cartItems, discountType, discountValue)
+    const { total } = useCartTotals()
     const finalConsumerBlocked = total > FINAL_CONSUMER_MAX
     const [dialogOpen, setDialogOpen] = useState(false)
     const [taxId, setTaxId] = useState('')

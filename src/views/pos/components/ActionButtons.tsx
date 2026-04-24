@@ -1,5 +1,6 @@
 import Button from '@/components/ui/Button'
-import { usePOSStore, getCartTotal } from '@/stores/usePOSStore'
+import { usePOSStore } from '@/stores/usePOSStore'
+import { useCartTotals } from '@/hooks/utils'
 
 interface ActionButtonsProps {
     onPayment: () => void
@@ -14,15 +15,9 @@ const ActionButtons = ({
     onHold,
     onViewOrders,
 }: ActionButtonsProps) => {
-    const {
-        cartItems,
-        customerId,
-        isFinalConsumer,
-        discountType,
-        discountValue,
-    } = usePOSStore()
+    const { cartItems, customerId, isFinalConsumer } = usePOSStore()
+    const { total } = useCartTotals()
     const cartEmpty = cartItems.length === 0
-    const total = getCartTotal(cartItems, discountType, discountValue)
     const requiresCustomer = total > 50
     const canPay =
         !cartEmpty &&

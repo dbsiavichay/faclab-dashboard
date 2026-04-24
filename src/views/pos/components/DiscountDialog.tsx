@@ -8,7 +8,7 @@ import {
     getCartDiscountAmount,
     getCartTotal,
 } from '@/stores/usePOSStore'
-import type { DiscountType } from '@/services/POSService'
+import type { DiscountType } from '@/services/pos/POSTypes'
 
 interface DiscountDialogProps {
     isOpen: boolean

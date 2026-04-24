@@ -2,10 +2,10 @@ import { useState } from 'react'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Dialog from '@/components/ui/Dialog'
 import Select from '@/components/ui/Select'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
+import { ConfirmDialog } from '@/components/shared'
 import {
     useAdminUsers,
     useUpdateUserRole,
@@ -17,6 +17,7 @@ import { ROLE_LABELS, ALL_ROLES } from '@/constants/roles.constant'
 import type { RoleCode } from '@/constants/roles.constant'
 import type { AdminUserResponse } from '@/@types/auth'
 import { HiPlus } from 'react-icons/hi'
+import { useCrudOperations } from '@/hooks'
 import CreateUserModal from './CreateUserModal'
 import ResetPasswordModal from './ResetPasswordModal'
 
@@ -40,8 +41,7 @@ const roleFilterOptions = [
 ]
 
 const UsersView = () => {
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
+    const crud = useCrudOperations<AdminUserResponse>()
     const [filterRole, setFilterRole] = useState<RoleCode | undefined>(
         undefined
     )
@@ -49,7 +49,6 @@ const UsersView = () => {
         undefined
     )
 
-    const [createOpen, setCreateOpen] = useState(false)
     const [resetDialog, setResetDialog] = useState<{
         open: boolean
         user: AdminUserResponse | null
@@ -66,9 +65,9 @@ const UsersView = () => {
     const [updatingRoleId, setUpdatingRoleId] = useState<number | null>(null)
     const [togglingId, setTogglingId] = useState<number | null>(null)
 
-    const offset = (pageIndex - 1) * pageSize
+    const offset = (crud.pageIndex - 1) * crud.pageSize
     const { data: usersData, isLoading } = useAdminUsers({
-        limit: pageSize,
+        limit: crud.pageSize,
         offset,
         role: filterRole,
         isActive: filterIsActive,
@@ -148,6 +147,9 @@ const UsersView = () => {
             setTogglingId(null)
         }
     }
+
+    const closeDeactivateDialog = () =>
+        setDeactivateDialog({ open: false, userId: null, username: '' })
 
     const formatDate = (dateStr: string | null) => {
         if (!dateStr) return '—'
@@ -294,7 +296,7 @@ const UsersView = () => {
                                 }
                                 onChange={(opt) => {
                                     setFilterRole(opt?.value)
-                                    setPageIndex(1)
+                                    crud.onPaginationChange(1, crud.pageSize)
                                 }}
                             />
                             <Select
@@ -308,14 +310,14 @@ const UsersView = () => {
                                 }
                                 onChange={(opt) => {
                                     setFilterIsActive(opt?.value)
-                                    setPageIndex(1)
+                                    crud.onPaginationChange(1, crud.pageSize)
                                 }}
                             />
                             <Button
                                 variant="solid"
                                 size="sm"
                                 icon={<HiPlus />}
-                                onClick={() => setCreateOpen(true)}
+                                onClick={crud.openCreate}
                             >
                                 Nuevo usuario
                             </Button>
@@ -326,20 +328,22 @@ const UsersView = () => {
                         columns={columns}
                         data={items}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <CreateUserModal
-                open={createOpen}
-                onClose={() => setCreateOpen(false)}
-            />
+            <CreateUserModal open={crud.isCreateOpen} onClose={crud.closeAll} />
 
             <ResetPasswordModal
                 open={resetDialog.open}
@@ -347,47 +351,23 @@ const UsersView = () => {
                 onClose={() => setResetDialog({ open: false, user: null })}
             />
 
-            <Dialog
+            <ConfirmDialog
                 isOpen={deactivateDialog.open}
-                onClose={() =>
-                    setDeactivateDialog({
-                        open: false,
-                        userId: null,
-                        username: '',
-                    })
-                }
-                onRequestClose={() =>
-                    setDeactivateDialog({
-                        open: false,
-                        userId: null,
-                        username: '',
-                    })
-                }
+                type="danger"
+                title="Desactivar usuario"
+                confirmText="Desactivar"
+                cancelText="Cancelar"
+                confirmButtonColor="red-600"
+                onClose={closeDeactivateDialog}
+                onCancel={closeDeactivateDialog}
+                onConfirm={handleDeactivateConfirm}
             >
-                <h5 className="mb-4">Confirmar desactivación</h5>
-                <p className="mb-6 text-sm">
+                <p>
                     ¿Desactivar a <strong>{deactivateDialog.username}</strong>?
                     Su sesión activa seguirá funcionando hasta que expire el
                     token.
                 </p>
-                <div className="flex justify-end gap-2">
-                    <Button
-                        variant="plain"
-                        onClick={() =>
-                            setDeactivateDialog({
-                                open: false,
-                                userId: null,
-                                username: '',
-                            })
-                        }
-                    >
-                        Cancelar
-                    </Button>
-                    <Button variant="solid" onClick={handleDeactivateConfirm}>
-                        Desactivar
-                    </Button>
-                </div>
-            </Dialog>
+            </ConfirmDialog>
         </>
     )
 }

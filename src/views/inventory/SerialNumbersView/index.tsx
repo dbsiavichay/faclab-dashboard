@@ -5,11 +5,20 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
-import { useSerialNumbers } from '@/hooks/useSerialNumbers'
+import Notification from '@/components/ui/Notification'
+import toast from '@/components/ui/toast'
+import {
+    useSerialNumbers,
+    useCreateSerialNumber,
+} from '@/hooks/useSerialNumbers'
+import { useCrudOperations } from '@/hooks'
+import { FormModal } from '@/components/shared'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import type {
     SerialNumber,
     SerialStatus,
     SerialNumberQueryParams,
+    SerialNumberInput,
 } from '@/services/SerialNumberService'
 import { SERIAL_STATUS_LABELS } from '@/services/SerialNumberService'
 import SerialNumberForm from './SerialNumberForm'
@@ -36,21 +45,19 @@ const statusFilterOptions = [
 ]
 
 const SerialNumbersView = () => {
-    const [isFormOpen, setIsFormOpen] = useState(false)
+    const crud = useCrudOperations<SerialNumber>()
     const [statusChangeSerial, setStatusChangeSerial] =
         useState<SerialNumber | null>(null)
     const [statusChangeOpen, setStatusChangeOpen] = useState(false)
 
     const [productId, setProductId] = useState<string>('')
     const [statusFilter, setStatusFilter] = useState<string>('')
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
     const queryParams: SerialNumberQueryParams = {
         productId: productId ? parseInt(productId) : undefined,
         status: (statusFilter as SerialStatus) || undefined,
-        limit: pageSize,
+        limit: crud.pageSize,
         offset,
     }
 
@@ -58,17 +65,34 @@ const SerialNumbersView = () => {
     const serials = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const handleCreate = () => {
-        setIsFormOpen(true)
+    const createSerialNumber = useCreateSerialNumber()
+
+    const handleFormSubmit = async (data: SerialNumberInput) => {
+        try {
+            await createSerialNumber.mutateAsync(data)
+            toast.push(
+                <Notification title="Número de serie creado" type="success">
+                    El número de serie se creó correctamente
+                </Notification>,
+                { placement: 'top-center' }
+            )
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(
+                        error,
+                        'Error al crear el número de serie'
+                    )}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const handleStatusChange = (serial: SerialNumber) => {
         setStatusChangeSerial(serial)
         setStatusChangeOpen(true)
-    }
-
-    const handleFormClose = () => {
-        setIsFormOpen(false)
     }
 
     const handleStatusChangeClose = () => {
@@ -79,7 +103,7 @@ const SerialNumbersView = () => {
     const handleReset = () => {
         setProductId('')
         setStatusFilter('')
-        setPageIndex(1)
+        crud.onPaginationChange(1, crud.pageSize)
     }
 
     const columns: ColumnDef<SerialNumber>[] = [
@@ -208,7 +232,7 @@ const SerialNumbersView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiPlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nuevo Serial
                         </Button>
@@ -218,17 +242,34 @@ const SerialNumbersView = () => {
                         columns={columns}
                         data={serials}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <SerialNumberForm open={isFormOpen} onClose={handleFormClose} />
+            <FormModal
+                formId="serial-form"
+                isOpen={crud.isCreateOpen}
+                title="Nuevo Número de Serie"
+                isSubmitting={createSerialNumber.isPending}
+                onClose={crud.closeAll}
+            >
+                <SerialNumberForm
+                    formId="serial-form"
+                    isSubmitting={createSerialNumber.isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
 
             <StatusChangeDialog
                 open={statusChangeOpen}

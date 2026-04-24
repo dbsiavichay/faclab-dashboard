@@ -4,25 +4,32 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Input from '@/components/ui/Input'
-import { useLots } from '@/hooks/useLots'
-import type { Lot, LotQueryParams } from '@/services/LotService'
+import Notification from '@/components/ui/Notification'
+import toast from '@/components/ui/toast'
+import { useLots, useCreateLot, useUpdateLot } from '@/hooks/useLots'
+import { useCrudOperations } from '@/hooks'
+import { FormModal } from '@/components/shared'
+import { getErrorMessage } from '@/utils/getErrorMessage'
+import type {
+    Lot,
+    LotInput,
+    LotUpdateInput,
+    LotQueryParams,
+} from '@/services/LotService'
 import LotForm from './LotForm'
 import { HiOutlinePencil, HiPlus } from 'react-icons/hi'
 
 const LotsView = () => {
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [selectedLot, setSelectedLot] = useState<Lot | null>(null)
+    const crud = useCrudOperations<Lot>()
 
     const [productId, setProductId] = useState<string>('')
     const [expiringInDays, setExpiringInDays] = useState<string>('')
-    const [pageIndex, setPageIndex] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
-    const offset = (pageIndex - 1) * pageSize
+    const offset = (crud.pageIndex - 1) * crud.pageSize
 
     const queryParams: LotQueryParams = {
         productId: productId ? parseInt(productId) : undefined,
         expiringInDays: expiringInDays ? parseInt(expiringInDays) : undefined,
-        limit: pageSize,
+        limit: crud.pageSize,
         offset,
     }
 
@@ -30,25 +37,47 @@ const LotsView = () => {
     const lots = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const handleCreate = () => {
-        setSelectedLot(null)
-        setIsFormOpen(true)
-    }
+    const createLot = useCreateLot()
+    const updateLot = useUpdateLot()
+    const isPending = createLot.isPending || updateLot.isPending
 
-    const handleEdit = (lot: Lot) => {
-        setSelectedLot(lot)
-        setIsFormOpen(true)
-    }
-
-    const handleFormClose = () => {
-        setIsFormOpen(false)
-        setSelectedLot(null)
+    const handleFormSubmit = async (data: LotInput | LotUpdateInput) => {
+        try {
+            if (crud.isEditOpen && crud.selectedItem) {
+                await updateLot.mutateAsync({
+                    id: crud.selectedItem.id,
+                    data: data as LotUpdateInput,
+                })
+                toast.push(
+                    <Notification title="Lote actualizado" type="success">
+                        El lote se actualizó correctamente
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
+            } else {
+                await createLot.mutateAsync(data as LotInput)
+                toast.push(
+                    <Notification title="Lote creado" type="success">
+                        El lote se creó correctamente
+                    </Notification>,
+                    { placement: 'top-center' }
+                )
+            }
+            crud.closeAll()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al guardar el lote')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
     }
 
     const handleReset = () => {
         setProductId('')
         setExpiringInDays('')
-        setPageIndex(1)
+        crud.onPaginationChange(1, crud.pageSize)
     }
 
     const getExpiryBadge = (lot: Lot) => {
@@ -187,7 +216,7 @@ const LotsView = () => {
                         size="sm"
                         variant="plain"
                         icon={<HiOutlinePencil />}
-                        onClick={() => handleEdit(row.original)}
+                        onClick={() => crud.openEdit(row.original)}
                     />
                 )
             },
@@ -246,7 +275,7 @@ const LotsView = () => {
                             variant="solid"
                             size="sm"
                             icon={<HiPlus />}
-                            onClick={handleCreate}
+                            onClick={crud.openCreate}
                         >
                             Nuevo Lote
                         </Button>
@@ -256,21 +285,36 @@ const LotsView = () => {
                         columns={columns}
                         data={lots}
                         loading={isLoading}
-                        pagingData={{ total, pageIndex, pageSize }}
-                        onPaginationChange={setPageIndex}
-                        onSelectChange={(size) => {
-                            setPageSize(size)
-                            setPageIndex(1)
+                        pagingData={{
+                            total,
+                            pageIndex: crud.pageIndex,
+                            pageSize: crud.pageSize,
                         }}
+                        onPaginationChange={(idx) =>
+                            crud.onPaginationChange(idx, crud.pageSize)
+                        }
+                        onSelectChange={(size) =>
+                            crud.onPaginationChange(1, size)
+                        }
                     />
                 </div>
             </Card>
 
-            <LotForm
-                open={isFormOpen}
-                lot={selectedLot}
-                onClose={handleFormClose}
-            />
+            <FormModal
+                formId="lot-form"
+                width={600}
+                isOpen={crud.isCreateOpen || crud.isEditOpen}
+                title={crud.isEditOpen ? 'Editar Lote' : 'Nuevo Lote'}
+                isSubmitting={isPending}
+                onClose={crud.closeAll}
+            >
+                <LotForm
+                    formId="lot-form"
+                    lot={crud.selectedItem}
+                    isSubmitting={isPending}
+                    onSubmit={handleFormSubmit}
+                />
+            </FormModal>
         </>
     )
 }

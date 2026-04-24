@@ -1,6 +1,6 @@
 import { HiOutlinePhotograph } from 'react-icons/hi'
 import { usePOSStore } from '@/stores/usePOSStore'
-import type { POSProduct } from '@/services/POSService'
+import type { POSProduct } from '@/services/pos/POSTypes'
 
 interface ProductCardProps {
     product: POSProduct

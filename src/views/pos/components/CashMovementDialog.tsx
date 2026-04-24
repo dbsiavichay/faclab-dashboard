@@ -6,7 +6,7 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useAddCashMovement } from '@/hooks/usePOS'
 import { useShift } from './useShift'
-import type { CashMovementType } from '@/services/POSService'
+import type { CashMovementType } from '@/services/pos/POSTypes'
 
 interface CashMovementDialogProps {
     isOpen: boolean

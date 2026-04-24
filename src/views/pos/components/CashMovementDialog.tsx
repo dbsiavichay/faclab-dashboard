@@ -99,8 +99,14 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
             </div>
 
             <div>
-                <label className="block text-sm font-medium mb-1">Monto</label>
+                <label
+                    htmlFor="cash-amount"
+                    className="block text-sm font-medium mb-1"
+                >
+                    Monto
+                </label>
                 <Input
+                    id="cash-amount"
                     type="number"
                     prefix="$"
                     value={amount}
@@ -110,10 +116,14 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
             </div>
 
             <div className="mt-3">
-                <label className="block text-sm font-medium mb-1">
+                <label
+                    htmlFor="cash-reason"
+                    className="block text-sm font-medium mb-1"
+                >
                     Razon (opcional)
                 </label>
                 <Input
+                    id="cash-reason"
                     value={reason}
                     placeholder="Razon del movimiento"
                     onChange={(e) => setReason(e.target.value)}

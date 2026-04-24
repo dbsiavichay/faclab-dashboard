@@ -179,12 +179,14 @@ const WarehousesView = () => {
                         <Button
                             size="sm"
                             variant="plain"
+                            aria-label={`Editar ${row.original.name}`}
                             icon={<HiOutlinePencil />}
                             onClick={() => crud.openEdit(row.original)}
                         />
                         <Button
                             size="sm"
                             variant="plain"
+                            aria-label={`Eliminar ${row.original.name}`}
                             icon={<HiOutlineTrash />}
                             onClick={() => crud.openDelete(row.original)}
                         />

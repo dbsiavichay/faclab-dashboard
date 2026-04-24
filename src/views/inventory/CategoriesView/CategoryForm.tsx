@@ -38,11 +38,13 @@ const CategoryForm = ({
                     <FormContainer>
                         <FormItem
                             asterisk
+                            htmlFor="name"
                             label="Nombre"
                             invalid={!!(errors.name && touched.name)}
                             errorMessage={errors.name}
                         >
                             <Field
+                                id="name"
                                 name="name"
                                 placeholder="Nombre de la categoría"
                                 component={Input}
@@ -51,6 +53,7 @@ const CategoryForm = ({
                         </FormItem>
 
                         <FormItem
+                            htmlFor="description"
                             label="Descripción"
                             invalid={
                                 !!(errors.description && touched.description)
@@ -59,6 +62,7 @@ const CategoryForm = ({
                         >
                             <Field
                                 textArea
+                                id="description"
                                 name="description"
                                 placeholder="Descripción de la categoría"
                                 style={{ minHeight: '80px' }}

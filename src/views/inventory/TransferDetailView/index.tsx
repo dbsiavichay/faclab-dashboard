@@ -121,7 +121,7 @@ const TransferDetailView = () => {
                 <Notification title="Transferencia actualizada" type="success">
                     La transferencia se actualizó correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setEditDialogOpen(false)
         } catch (error: unknown) {
@@ -132,7 +132,7 @@ const TransferDetailView = () => {
                         'Error al actualizar la transferencia'
                     )}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -144,7 +144,7 @@ const TransferDetailView = () => {
                 <Notification title="Transferencia confirmada" type="success">
                     La transferencia se confirmó y el stock fue reservado
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setConfirmDialogOpen(false)
         } catch (error: unknown) {
@@ -155,7 +155,7 @@ const TransferDetailView = () => {
                         'Error al confirmar la transferencia'
                     )}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -168,7 +168,7 @@ const TransferDetailView = () => {
                     La transferencia se completó y los movimientos fueron
                     generados
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setReceiveDialogOpen(false)
         } catch (error: unknown) {
@@ -179,7 +179,7 @@ const TransferDetailView = () => {
                         'Error al recibir la transferencia'
                     )}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -191,7 +191,7 @@ const TransferDetailView = () => {
                 <Notification title="Transferencia cancelada" type="success">
                     La transferencia fue cancelada
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setCancelDialogOpen(false)
         } catch (error: unknown) {
@@ -202,7 +202,7 @@ const TransferDetailView = () => {
                         'Error al cancelar la transferencia'
                     )}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -214,7 +214,7 @@ const TransferDetailView = () => {
                 <Notification title="Transferencia eliminada" type="success">
                     La transferencia fue eliminada
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             navigate('/transfers')
         } catch (error: unknown) {
@@ -225,7 +225,7 @@ const TransferDetailView = () => {
                         'Error al eliminar la transferencia'
                     )}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -241,7 +241,7 @@ const TransferDetailView = () => {
                 <Notification title="Item eliminado" type="success">
                     El item fue eliminado
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setDeleteItemDialog({ open: false, item: null })
         } catch (error: unknown) {
@@ -249,7 +249,7 @@ const TransferDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el item')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

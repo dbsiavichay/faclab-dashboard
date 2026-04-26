@@ -68,7 +68,7 @@ const Upload = forwardRef<HTMLDivElement, UploadProps>((props, ref) => {
                 {msg || 'Upload Failed!'}
             </Notification>,
             {
-                placement: 'top-center',
+                placement: 'top-end',
             }
         )
     }

@@ -119,7 +119,7 @@ const TransferItemForm = ({
                         ? 'El item se actualizó correctamente'
                         : 'El item se agregó correctamente'}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
 
             onClose()
@@ -128,7 +128,7 @@ const TransferItemForm = ({
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al guardar el item')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

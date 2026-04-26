@@ -5,6 +5,7 @@ import Theme from '@/components/template/Theme'
 import Layout from '@/components/layouts'
 import NavigationBinder from '@/components/route/NavigationBinder'
 import AuthBootstrap from '@/components/AuthBootstrap'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import mockServer from './mock'
 import appConfig from '@/configs/app.config'
 import './locales'
@@ -26,7 +27,9 @@ function App() {
                 <NavigationBinder />
                 <Theme>
                     <AuthBootstrap>
-                        <Layout />
+                        <ErrorBoundary>
+                            <Layout />
+                        </ErrorBoundary>
                     </AuthBootstrap>
                 </Theme>
             </BrowserRouter>

@@ -47,7 +47,7 @@ const ResetPasswordModal = ({
     const handleCopy = () => {
         navigator.clipboard.writeText(password)
         toast.push(<Notification type="success" title="Contraseña copiada" />, {
-            placement: 'top-center',
+            placement: 'top-end',
         })
     }
 
@@ -68,7 +68,7 @@ const ResetPasswordModal = ({
                         'Error al resetear la contraseña'
                     )}
                 />,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

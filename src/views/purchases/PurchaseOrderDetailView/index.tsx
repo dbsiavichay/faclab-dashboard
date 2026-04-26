@@ -151,7 +151,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Orden actualizada" type="success">
                     La orden de compra se actualizó correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setEditDialogOpen(false)
         } catch (error: unknown) {
@@ -159,7 +159,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al actualizar la orden')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -171,7 +171,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Orden enviada" type="success">
                     La orden de compra fue enviada al proveedor
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setSendDialogOpen(false)
         } catch (error: unknown) {
@@ -179,7 +179,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al enviar la orden')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -191,7 +191,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Orden cancelada" type="success">
                     La orden de compra fue cancelada
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setCancelDialogOpen(false)
         } catch (error: unknown) {
@@ -199,7 +199,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al cancelar la orden')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -211,7 +211,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Orden eliminada" type="success">
                     La orden de compra fue eliminada
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             navigate('/purchase-orders')
         } catch (error: unknown) {
@@ -219,7 +219,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar la orden')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -235,7 +235,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Item eliminado" type="success">
                     El item fue eliminado
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setDeleteItemDialog({ open: false, item: null })
         } catch (error: unknown) {
@@ -243,7 +243,7 @@ const PurchaseOrderDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el item')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

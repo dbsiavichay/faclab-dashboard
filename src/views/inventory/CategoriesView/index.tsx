@@ -13,6 +13,7 @@ import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCrudOperations } from '@/hooks'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import type { Category } from '@/services/CategoryService'
+import type { CategoryFormValues } from '@/schemas'
 import CategoryForm from './CategoryForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
@@ -29,10 +30,7 @@ const CategoriesView = () => {
     const updateCategory = useUpdateCategory()
     const isPending = createCategory.isPending || updateCategory.isPending
 
-    const handleFormSubmit = async (formData: {
-        name: string
-        description: string
-    }) => {
+    const handleFormSubmit = async (formData: CategoryFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
                 await updateCategory.mutateAsync({

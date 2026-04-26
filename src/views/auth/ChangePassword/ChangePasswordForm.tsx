@@ -7,27 +7,27 @@ import { useChangePassword, useLogout } from '@/hooks/useAuth'
 import { useAuthStore, useSession } from '@/stores/useAuthStore'
 import { isApiError } from '@/utils/errors/ApiError'
 import { ROLE } from '@/constants/roles.constant'
-import { Field, Form, Formik } from 'formik'
-import * as Yup from 'yup'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { useNavigate } from 'react-router-dom'
 import appConfig from '@/configs/app.config'
 
-type ChangePasswordSchema = {
-    currentPassword: string
-    newPassword: string
-    confirmNewPassword: string
-}
+const changePasswordSchema = z
+    .object({
+        currentPassword: z.string().min(1, 'Ingresa tu contraseña actual'),
+        newPassword: z
+            .string()
+            .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
+            .max(128, 'La contraseña es demasiado larga'),
+        confirmNewPassword: z.string().min(1, 'Confirma tu nueva contraseña'),
+    })
+    .refine((data) => data.confirmNewPassword === data.newPassword, {
+        message: 'Las contraseñas no coinciden',
+        path: ['confirmNewPassword'],
+    })
 
-const validationSchema = Yup.object().shape({
-    currentPassword: Yup.string().required('Ingresa tu contraseña actual'),
-    newPassword: Yup.string()
-        .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
-        .max(128, 'La contraseña es demasiado larga')
-        .required('Ingresa tu nueva contraseña'),
-    confirmNewPassword: Yup.string()
-        .oneOf([Yup.ref('newPassword')], 'Las contraseñas no coinciden')
-        .required('Confirma tu nueva contraseña'),
-})
+type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>
 
 const ChangePasswordForm = () => {
     const navigate = useNavigate()
@@ -38,12 +38,21 @@ const ChangePasswordForm = () => {
     const changePasswordMutation = useChangePassword()
     const logoutMutation = useLogout()
 
-    const onSubmit = async (
-        values: ChangePasswordSchema,
-        setSubmitting: (v: boolean) => void,
-        setFieldError: (field: string, msg: string) => void
-    ) => {
-        setSubmitting(true)
+    const {
+        register,
+        handleSubmit,
+        setError,
+        formState: { errors, isSubmitting },
+    } = useForm<ChangePasswordFormValues>({
+        resolver: zodResolver(changePasswordSchema),
+        defaultValues: {
+            currentPassword: '',
+            newPassword: '',
+            confirmNewPassword: '',
+        },
+    })
+
+    const onSubmit = async (values: ChangePasswordFormValues) => {
         try {
             await changePasswordMutation.mutateAsync({
                 currentPassword: values.currentPassword,
@@ -57,7 +66,9 @@ const ChangePasswordForm = () => {
             }
         } catch (err) {
             if (isApiError(err) && err.code === 'INVALID_CREDENTIALS') {
-                setFieldError('currentPassword', 'Contraseña actual incorrecta')
+                setError('currentPassword', {
+                    message: 'Contraseña actual incorrecta',
+                })
             } else {
                 setErrorMessage(
                     isApiError(err)
@@ -67,8 +78,6 @@ const ChangePasswordForm = () => {
                         : 'Error al cambiar la contraseña'
                 )
             }
-        } finally {
-            setSubmitting(false)
         }
     }
 
@@ -79,105 +88,80 @@ const ChangePasswordForm = () => {
                     <>{errorMessage}</>
                 </Alert>
             )}
-            <Formik
-                initialValues={{
-                    currentPassword: '',
-                    newPassword: '',
-                    confirmNewPassword: '',
-                }}
-                validationSchema={validationSchema}
-                onSubmit={(values, { setSubmitting, setFieldError }) => {
-                    onSubmit(values, setSubmitting, setFieldError)
-                }}
-            >
-                {({ touched, errors, isSubmitting }) => (
-                    <Form>
-                        <FormContainer>
-                            <FormItem
-                                label="Contraseña actual"
-                                invalid={
-                                    (errors.currentPassword &&
-                                        touched.currentPassword) as boolean
-                                }
-                                errorMessage={errors.currentPassword}
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <FormContainer>
+                    <FormItem
+                        label="Contraseña actual"
+                        invalid={!!errors.currentPassword}
+                        errorMessage={errors.currentPassword?.message}
+                    >
+                        <PasswordInput
+                            autoComplete="current-password"
+                            placeholder="Contraseña actual"
+                            invalid={!!errors.currentPassword}
+                            {...register('currentPassword')}
+                        />
+                    </FormItem>
+                    <FormItem
+                        label="Nueva contraseña"
+                        invalid={!!errors.newPassword}
+                        errorMessage={errors.newPassword?.message}
+                    >
+                        <PasswordInput
+                            autoComplete="new-password"
+                            placeholder="Mínimo 8 caracteres"
+                            invalid={!!errors.newPassword}
+                            {...register('newPassword')}
+                        />
+                    </FormItem>
+                    <FormItem
+                        label="Confirmar nueva contraseña"
+                        invalid={!!errors.confirmNewPassword}
+                        errorMessage={errors.confirmNewPassword?.message}
+                    >
+                        <PasswordInput
+                            autoComplete="new-password"
+                            placeholder="Repite la nueva contraseña"
+                            invalid={!!errors.confirmNewPassword}
+                            {...register('confirmNewPassword')}
+                        />
+                    </FormItem>
+                    <div className="flex flex-col gap-2 mt-2">
+                        <Button
+                            block
+                            loading={isSubmitting}
+                            variant="solid"
+                            type="submit"
+                        >
+                            {isSubmitting
+                                ? 'Guardando...'
+                                : 'Cambiar contraseña'}
+                        </Button>
+                        {!mandatory && (
+                            <Button
+                                block
+                                disabled={isSubmitting}
+                                type="button"
+                                variant="plain"
+                                onClick={() => navigate(-1)}
                             >
-                                <Field
-                                    autoComplete="current-password"
-                                    name="currentPassword"
-                                    placeholder="Contraseña actual"
-                                    component={PasswordInput}
-                                />
-                            </FormItem>
-                            <FormItem
-                                label="Nueva contraseña"
-                                invalid={
-                                    (errors.newPassword &&
-                                        touched.newPassword) as boolean
-                                }
-                                errorMessage={errors.newPassword}
+                                Volver
+                            </Button>
+                        )}
+                        {mandatory && (
+                            <Button
+                                block
+                                disabled={isSubmitting}
+                                type="button"
+                                variant="plain"
+                                onClick={() => logoutMutation.mutateAsync()}
                             >
-                                <Field
-                                    autoComplete="new-password"
-                                    name="newPassword"
-                                    placeholder="Mínimo 8 caracteres"
-                                    component={PasswordInput}
-                                />
-                            </FormItem>
-                            <FormItem
-                                label="Confirmar nueva contraseña"
-                                invalid={
-                                    (errors.confirmNewPassword &&
-                                        touched.confirmNewPassword) as boolean
-                                }
-                                errorMessage={errors.confirmNewPassword}
-                            >
-                                <Field
-                                    autoComplete="new-password"
-                                    name="confirmNewPassword"
-                                    placeholder="Repite la nueva contraseña"
-                                    component={PasswordInput}
-                                />
-                            </FormItem>
-                            <div className="flex flex-col gap-2 mt-2">
-                                <Button
-                                    block
-                                    loading={isSubmitting}
-                                    variant="solid"
-                                    type="submit"
-                                >
-                                    {isSubmitting
-                                        ? 'Guardando...'
-                                        : 'Cambiar contraseña'}
-                                </Button>
-                                {!mandatory && (
-                                    <Button
-                                        block
-                                        disabled={isSubmitting}
-                                        type="button"
-                                        variant="plain"
-                                        onClick={() => navigate(-1)}
-                                    >
-                                        Volver
-                                    </Button>
-                                )}
-                                {mandatory && (
-                                    <Button
-                                        block
-                                        disabled={isSubmitting}
-                                        type="button"
-                                        variant="plain"
-                                        onClick={() =>
-                                            logoutMutation.mutateAsync()
-                                        }
-                                    >
-                                        Cerrar sesión
-                                    </Button>
-                                )}
-                            </div>
-                        </FormContainer>
-                    </Form>
-                )}
-            </Formik>
+                                Cerrar sesión
+                            </Button>
+                        )}
+                    </div>
+                </FormContainer>
+            </form>
         </div>
     )
 }

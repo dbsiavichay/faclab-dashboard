@@ -1,8 +1,11 @@
-import * as Yup from 'yup'
+import { z } from 'zod'
 
-export const categorySchema = Yup.object({
-    name: Yup.string()
-        .required('Nombre requerido')
+export const categorySchema = z.object({
+    name: z
+        .string()
+        .min(1, 'Nombre requerido')
         .max(200, 'Máximo 200 caracteres'),
-    description: Yup.string().optional(),
+    description: z.string().optional(),
 })
+
+export type CategoryFormValues = z.infer<typeof categorySchema>

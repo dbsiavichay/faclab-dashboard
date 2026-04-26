@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -6,6 +6,9 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useResetUserPassword } from '@/hooks/useAdminUsers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import type { AdminUserResponse } from '@/@types/auth'
 
 interface ResetPasswordModalProps {
@@ -21,21 +24,40 @@ const generatePassword = () =>
         .map((b) => CHARS[b % CHARS.length])
         .join('')
 
+const resetPasswordSchema = z.object({
+    password: z.string().min(8, 'Mínimo 8 caracteres'),
+})
+
+type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
+
 const ResetPasswordModal = ({
     open,
     user,
     onClose,
 }: ResetPasswordModalProps) => {
-    const [password, setPassword] = useState('')
     const [done, setDone] = useState(false)
     const resetPassword = useResetUserPassword()
 
+    const {
+        register,
+        handleSubmit,
+        watch,
+        setValue,
+        reset,
+        formState: { errors },
+    } = useForm<ResetPasswordFormValues>({
+        resolver: zodResolver(resetPasswordSchema),
+        defaultValues: { password: '' },
+    })
+
+    const password = watch('password')
+
     useEffect(() => {
         if (open) {
-            setPassword(generatePassword())
+            reset({ password: generatePassword() })
             setDone(false)
         }
-    }, [open])
+    }, [open, reset])
 
     const handleClose = () => {
         if (!resetPassword.isPending) {
@@ -51,12 +73,12 @@ const ResetPasswordModal = ({
         })
     }
 
-    const handleSubmit = async () => {
+    const onSubmit = async (values: ResetPasswordFormValues) => {
         if (!user) return
         try {
             await resetPassword.mutateAsync({
                 id: user.id,
-                newPassword: password,
+                newPassword: values.password,
             })
             setDone(true)
         } catch (err) {
@@ -91,26 +113,35 @@ const ResetPasswordModal = ({
             </p>
 
             {!done ? (
-                <>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <p className="text-sm mb-3">
                         Se generó una contraseña temporal. Puedes editarla antes
                         de confirmar.
                     </p>
-                    <div className="flex gap-2 mb-6">
+                    <div className="flex gap-2 mb-2">
                         <Input
                             className="font-mono"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            invalid={!!errors.password}
+                            {...register('password')}
                         />
                         <Button
                             variant="default"
                             type="button"
-                            onClick={() => setPassword(generatePassword())}
+                            onClick={() =>
+                                setValue('password', generatePassword(), {
+                                    shouldValidate: true,
+                                })
+                            }
                         >
                             Regenerar
                         </Button>
                     </div>
-                    <div className="flex justify-end gap-2">
+                    {errors.password?.message && (
+                        <p className="text-xs text-red-500 mb-4">
+                            {errors.password.message}
+                        </p>
+                    )}
+                    <div className="flex justify-end gap-2 mt-6">
                         <Button
                             variant="plain"
                             disabled={resetPassword.isPending}
@@ -122,14 +153,12 @@ const ResetPasswordModal = ({
                         <Button
                             variant="solid"
                             loading={resetPassword.isPending}
-                            disabled={password.length < 8}
-                            type="button"
-                            onClick={handleSubmit}
+                            type="submit"
                         >
                             Resetear
                         </Button>
                     </div>
-                </>
+                </form>
             ) : (
                 <>
                     <div className="p-3 mb-4 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-800 dark:text-amber-300 text-sm">

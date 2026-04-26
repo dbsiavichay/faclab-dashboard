@@ -1,18 +1,24 @@
-import * as Yup from 'yup'
+import { z } from 'zod'
 
-export const supplierSchema = Yup.object({
-    name: Yup.string().required('Nombre requerido'),
-    taxId: Yup.string().required('Identificación requerida'),
-    taxType: Yup.number()
-        .oneOf([1, 2, 3, 4])
-        .required('Tipo de identificación requerido'),
-    email: Yup.string().email('Email inválido').optional(),
-    phone: Yup.string().optional(),
-    address: Yup.string().optional(),
-    city: Yup.string().optional(),
-    country: Yup.string().optional(),
-    paymentTerms: Yup.number().optional().integer().min(0),
-    leadTimeDays: Yup.number().optional().integer().min(0),
-    notes: Yup.string().optional(),
-    isActive: Yup.boolean().optional(),
+const optionalEmail = z
+    .union([z.string().email('Email inválido'), z.literal('')])
+    .optional()
+
+export const supplierSchema = z.object({
+    name: z.string().min(1, 'Nombre requerido'),
+    taxId: z.string().min(1, 'Identificación requerida'),
+    taxType: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)], {
+        errorMap: () => ({ message: 'Tipo de identificación requerido' }),
+    }),
+    email: optionalEmail,
+    phone: z.string().optional(),
+    address: z.string().optional(),
+    city: z.string().optional(),
+    country: z.string().optional(),
+    paymentTerms: z.number().int().min(0).optional(),
+    leadTimeDays: z.number().int().min(0).optional(),
+    notes: z.string().optional(),
+    isActive: z.boolean().optional(),
 })
+
+export type SupplierFormValues = z.infer<typeof supplierSchema>

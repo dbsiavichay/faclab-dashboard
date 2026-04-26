@@ -101,7 +101,7 @@ const SupplierDetailView = () => {
                 <Notification title="Contacto eliminado" type="success">
                     El contacto se eliminó correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setDeleteContactDialogOpen(false)
             setContactToDelete(null)
@@ -110,7 +110,7 @@ const SupplierDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el contacto')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -148,7 +148,7 @@ const SupplierDetailView = () => {
                 <Notification title="Producto eliminado" type="success">
                     El producto se eliminó del proveedor correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setDeleteProductDialogOpen(false)
             setProductToDelete(null)
@@ -157,7 +157,7 @@ const SupplierDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el producto')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

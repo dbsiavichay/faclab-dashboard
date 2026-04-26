@@ -142,7 +142,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Ajuste actualizado" type="success">
                     El ajuste se actualizó correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setEditDialogOpen(false)
         } catch (error: unknown) {
@@ -150,7 +150,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al actualizar el ajuste')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -163,7 +163,7 @@ const AdjustmentDetailView = () => {
                     El ajuste se confirmó y los movimientos de inventario fueron
                     generados
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setConfirmDialogOpen(false)
         } catch (error: unknown) {
@@ -171,7 +171,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al confirmar el ajuste')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -183,7 +183,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Ajuste cancelado" type="success">
                     El ajuste fue cancelado
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setCancelDialogOpen(false)
         } catch (error: unknown) {
@@ -191,7 +191,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al cancelar el ajuste')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -203,7 +203,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Ajuste eliminado" type="success">
                     El ajuste fue eliminado
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             navigate('/adjustments')
         } catch (error: unknown) {
@@ -211,7 +211,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el ajuste')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -227,7 +227,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Item eliminado" type="success">
                     El item fue eliminado
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setDeleteItemDialog({ open: false, item: null })
         } catch (error: unknown) {
@@ -235,7 +235,7 @@ const AdjustmentDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el item')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

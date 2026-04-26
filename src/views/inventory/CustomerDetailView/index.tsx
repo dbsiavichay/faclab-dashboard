@@ -75,7 +75,7 @@ const CustomerDetailView = () => {
                 <Notification title="Contacto eliminado" type="success">
                     El contacto se eliminó correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setDeleteDialogOpen(false)
             setContactToDelete(null)
@@ -84,7 +84,7 @@ const CustomerDetailView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el contacto')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

@@ -16,7 +16,7 @@ import type { Certificate } from '@/services/InvoicingService'
 import { HiOutlineTrash, HiOutlineUpload } from 'react-icons/hi'
 
 const CertificatesView = () => {
-    const [uploadDialog, setUploadDialog] = useState(false)
+    const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
     const [deleteDialog, setDeleteDialog] = useState<{
         open: boolean
         cert: Certificate | null
@@ -32,12 +32,12 @@ const CertificatesView = () => {
     const handleUploadOpen = () => {
         setSelectedFile(null)
         setPassword('')
-        setUploadDialog(true)
+        setIsUploadDialogOpen(true)
     }
 
     const handleUploadClose = () => {
         if (uploadCertificate.isPending) return
-        setUploadDialog(false)
+        setIsUploadDialogOpen(false)
         setSelectedFile(null)
         setPassword('')
         if (fileInputRef.current) fileInputRef.current.value = ''
@@ -56,7 +56,7 @@ const CertificatesView = () => {
                 <Notification title="Certificado subido" type="success">
                     El certificado se subió correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             handleUploadClose()
         } catch (error: unknown) {
@@ -64,7 +64,7 @@ const CertificatesView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al subir el certificado')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -77,7 +77,7 @@ const CertificatesView = () => {
                 <Notification title="Certificado eliminado" type="success">
                     El certificado se eliminó correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             setDeleteDialog({ open: false, cert: null })
         } catch (error: unknown) {
@@ -85,7 +85,7 @@ const CertificatesView = () => {
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al eliminar el certificado')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -213,7 +213,7 @@ const CertificatesView = () => {
 
             {/* Upload Dialog */}
             <Dialog
-                isOpen={uploadDialog}
+                isOpen={isUploadDialogOpen}
                 shouldCloseOnEsc={!uploadCertificate.isPending}
                 shouldCloseOnOverlayClick={!uploadCertificate.isPending}
                 onClose={handleUploadClose}

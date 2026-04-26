@@ -57,7 +57,7 @@ const StatusChangeDialog = ({
                 <Notification title="Estado actualizado" type="success">
                     El estado se cambió a {SERIAL_STATUS_LABELS[newStatus]}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
 
             onClose()
@@ -71,7 +71,7 @@ const StatusChangeDialog = ({
                 <Notification title="Error" type="danger">
                     {errorMessage}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

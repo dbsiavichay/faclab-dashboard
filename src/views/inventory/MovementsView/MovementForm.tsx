@@ -52,7 +52,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 <Notification title="Error de validación" type="warning">
                     El ID del producto debe ser mayor a 0
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             return
         }
@@ -62,7 +62,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 <Notification title="Error de validación" type="warning">
                     La cantidad no puede ser cero
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             return
         }
@@ -73,7 +73,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 <Notification title="Error de validación" type="warning">
                     Para movimientos de entrada, la cantidad debe ser positiva
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             return
         }
@@ -83,7 +83,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 <Notification title="Error de validación" type="warning">
                     Para movimientos de salida, la cantidad debe ser negativa
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             return
         }
@@ -95,7 +95,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 <Notification title="Movimiento creado" type="success">
                     El movimiento se registró correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
 
             onClose()
@@ -109,7 +109,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 <Notification title="Error" type="danger">
                     {errorMessage}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
 
             console.error('Error creating movement:', error)

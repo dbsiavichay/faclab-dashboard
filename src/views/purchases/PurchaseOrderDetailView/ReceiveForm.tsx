@@ -138,7 +138,7 @@ const ReceiveForm = ({
                 <Notification title="Mercancía recibida" type="success">
                     La recepción se registró correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
 
             onClose()
@@ -147,7 +147,7 @@ const ReceiveForm = ({
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al registrar la recepción')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

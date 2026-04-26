@@ -25,7 +25,7 @@ const CopyButton = () => {
                 {`Please replace themeConfig in 'src/configs/themeConfig.js'`}
             </Notification>,
             {
-                placement: 'top-center',
+                placement: 'top-end',
             }
         )
     }

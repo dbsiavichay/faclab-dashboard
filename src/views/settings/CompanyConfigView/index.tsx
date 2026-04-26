@@ -90,7 +90,7 @@ const CompanyConfigView = () => {
                 <Notification title="Configuración guardada" type="success">
                     La configuración fiscal se guardó correctamente
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         } catch (error: unknown) {
             toast.push(
@@ -100,7 +100,7 @@ const CompanyConfigView = () => {
                         'Error al guardar la configuración'
                     )}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }

@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import Select from '@/components/ui/Select'
 import Table from '@/components/ui/Table'
+import { ControlledSelect } from '@/components/ui/Form/controlled'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useReceivePurchaseOrder } from '@/hooks/usePurchaseOrders'
 import { useLocations } from '@/hooks/useLocations'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type {
-    PurchaseOrderItem,
-    ReceiveInput,
-} from '@/services/PurchaseOrderService'
+import { useForm, useFieldArray } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import type { PurchaseOrderItem } from '@/services/PurchaseOrderService'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -24,17 +24,35 @@ interface ReceiveFormProps {
     getProductName: (productId: number) => string
 }
 
-interface ReceiveItemState {
-    purchaseOrderItemId: number
-    productId: number
-    quantityOrdered: number
-    quantityReceived: number
-    quantityPending: number
-    quantityToReceive: number
-    locationId: number | null
-    lotNumber: string
-    serialNumbers: string
-}
+const receiveItemSchema = z
+    .object({
+        purchaseOrderItemId: z.number(),
+        productId: z.number(),
+        quantityOrdered: z.number(),
+        quantityReceived: z.number(),
+        quantityPending: z.number(),
+        quantityToReceive: z.number().min(0, 'Mínimo 0'),
+        locationId: z.number().nullable(),
+        lotNumber: z.string(),
+        serialNumbers: z.string(),
+    })
+    .refine((d) => d.quantityToReceive <= d.quantityPending, {
+        message: 'Excede pendiente',
+        path: ['quantityToReceive'],
+    })
+
+const receiveFormSchema = z
+    .object({
+        items: z.array(receiveItemSchema),
+        notes: z.string(),
+        receivedAt: z.string(),
+    })
+    .refine((d) => d.items.some((i) => i.quantityToReceive > 0), {
+        message: 'Debe recibir al menos un item',
+        path: ['items'],
+    })
+
+type ReceiveFormValues = z.infer<typeof receiveFormSchema>
 
 const ReceiveForm = ({
     open,
@@ -43,21 +61,32 @@ const ReceiveForm = ({
     items,
     getProductName,
 }: ReceiveFormProps) => {
-    const [receiveItems, setReceiveItems] = useState<ReceiveItemState[]>([])
-    const [notes, setNotes] = useState('')
-    const [receivedAt, setReceivedAt] = useState('')
-
     const receiveMutation = useReceivePurchaseOrder()
     const { data: locationsData } = useLocations({ limit: 100 })
     const locations = locationsData?.items ?? []
 
     const locationOptions = [
-        { value: '', label: 'Sin ubicación' },
+        { value: null as number | null, label: 'Sin ubicación' },
         ...locations.map((l) => ({
-            value: l.id.toString(),
+            value: l.id as number | null,
             label: `${l.name} (${l.code})`,
         })),
     ]
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        watch,
+        formState: { errors },
+    } = useForm<ReceiveFormValues>({
+        resolver: zodResolver(receiveFormSchema),
+        defaultValues: { items: [], notes: '', receivedAt: '' },
+    })
+
+    const { fields } = useFieldArray({ control, name: 'items' })
+    const watchedItems = watch('items')
 
     useEffect(() => {
         if (open) {
@@ -73,49 +102,33 @@ const ReceiveForm = ({
                     quantityPending:
                         item.quantityOrdered - item.quantityReceived,
                     quantityToReceive: 0,
-                    locationId: null as number | null,
+                    locationId: null,
                     lotNumber: '',
                     serialNumbers: '',
                 }))
-            setReceiveItems(pendingItems)
-            setNotes('')
-            setReceivedAt('')
+            reset({
+                items: pendingItems,
+                notes: '',
+                receivedAt: '',
+            })
         }
-    }, [open, items])
+    }, [open, items, reset])
 
-    const updateItem = (
-        index: number,
-        field: keyof ReceiveItemState,
-        value: string | number | null
-    ) => {
-        setReceiveItems((prev) =>
-            prev.map((item, i) =>
-                i === index ? { ...item, [field]: value } : item
-            )
-        )
+    const isPending = receiveMutation.isPending
+
+    const handleClose = () => {
+        if (!isPending) {
+            onClose()
+        }
     }
 
-    const hasItemsToReceive = receiveItems.some(
-        (item) => item.quantityToReceive > 0
-    )
-
-    const hasInvalidQuantities = receiveItems.some(
-        (item) =>
-            item.quantityToReceive < 0 ||
-            item.quantityToReceive > item.quantityPending
-    )
-
-    const isValid = hasItemsToReceive && !hasInvalidQuantities
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        const filteredItems = receiveItems
+    const onSubmit = async (values: ReceiveFormValues) => {
+        const filteredItems = values.items
             .filter((item) => item.quantityToReceive > 0)
             .map((item) => ({
                 purchaseOrderItemId: item.purchaseOrderItemId,
                 quantityReceived: item.quantityToReceive,
-                locationId: item.locationId || undefined,
+                locationId: item.locationId ?? undefined,
                 lotNumber: item.lotNumber || undefined,
                 serialNumbers: item.serialNumbers
                     ? item.serialNumbers
@@ -125,14 +138,17 @@ const ReceiveForm = ({
                     : undefined,
             }))
 
-        const data: ReceiveInput = {
-            items: filteredItems,
-            notes: notes || undefined,
-            receivedAt: receivedAt ? `${receivedAt}T00:00:00Z` : undefined,
-        }
-
         try {
-            await receiveMutation.mutateAsync({ id: orderId, data })
+            await receiveMutation.mutateAsync({
+                id: orderId,
+                data: {
+                    items: filteredItems,
+                    notes: values.notes || undefined,
+                    receivedAt: values.receivedAt
+                        ? `${values.receivedAt}T00:00:00Z`
+                        : undefined,
+                },
+            })
 
             toast.push(
                 <Notification title="Mercancía recibida" type="success">
@@ -152,14 +168,6 @@ const ReceiveForm = ({
         }
     }
 
-    const isPending = receiveMutation.isPending
-
-    const handleClose = () => {
-        if (!isPending) {
-            onClose()
-        }
-    }
-
     return (
         <Dialog
             isOpen={open}
@@ -170,9 +178,9 @@ const ReceiveForm = ({
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">Recibir Mercancía</h5>
 
-                <form className="flex-1" onSubmit={handleSubmit}>
+                <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
                     <div className="max-h-[60vh] overflow-y-auto pr-1">
-                        {receiveItems.length === 0 ? (
+                        {fields.length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
                                 No hay items pendientes de recepción
                             </div>
@@ -191,110 +199,109 @@ const ReceiveForm = ({
                                     </Tr>
                                 </THead>
                                 <TBody>
-                                    {receiveItems.map((item, index) => (
-                                        <Tr key={item.purchaseOrderItemId}>
-                                            <Td>
-                                                <span className="text-sm">
-                                                    {getProductName(
-                                                        item.productId
+                                    {fields.map((field, index) => {
+                                        const itemError =
+                                            errors.items?.[index]
+                                                ?.quantityToReceive
+                                        return (
+                                            <Tr key={field.id}>
+                                                <Td>
+                                                    <span className="text-sm">
+                                                        {getProductName(
+                                                            field.productId
+                                                        )}
+                                                    </span>
+                                                </Td>
+                                                <Td>{field.quantityOrdered}</Td>
+                                                <Td>
+                                                    {field.quantityReceived}
+                                                </Td>
+                                                <Td>
+                                                    <span className="font-medium text-amber-600 dark:text-amber-400">
+                                                        {field.quantityPending}
+                                                    </span>
+                                                </Td>
+                                                <Td>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        max={
+                                                            field.quantityPending
+                                                        }
+                                                        size="sm"
+                                                        className="w-20"
+                                                        invalid={!!itemError}
+                                                        {...register(
+                                                            `items.${index}.quantityToReceive`,
+                                                            {
+                                                                setValueAs: (
+                                                                    v
+                                                                ) =>
+                                                                    v === '' ||
+                                                                    v ===
+                                                                        null ||
+                                                                    v ===
+                                                                        undefined
+                                                                        ? 0
+                                                                        : parseInt(
+                                                                              String(
+                                                                                  v
+                                                                              ),
+                                                                              10
+                                                                          ) ||
+                                                                          0,
+                                                            }
+                                                        )}
+                                                    />
+                                                    {itemError?.message && (
+                                                        <p className="text-xs text-red-500 mt-1">
+                                                            {itemError.message}
+                                                        </p>
                                                     )}
-                                                </span>
-                                            </Td>
-                                            <Td>{item.quantityOrdered}</Td>
-                                            <Td>{item.quantityReceived}</Td>
-                                            <Td>
-                                                <span className="font-medium text-amber-600 dark:text-amber-400">
-                                                    {item.quantityPending}
-                                                </span>
-                                            </Td>
-                                            <Td>
-                                                <Input
-                                                    type="number"
-                                                    min={0}
-                                                    max={item.quantityPending}
-                                                    size="sm"
-                                                    className="w-20"
-                                                    value={
-                                                        item.quantityToReceive ||
-                                                        ''
-                                                    }
-                                                    onChange={(e) =>
-                                                        updateItem(
-                                                            index,
-                                                            'quantityToReceive',
-                                                            parseInt(
-                                                                e.target.value
-                                                            ) || 0
-                                                        )
-                                                    }
-                                                />
-                                                {item.quantityToReceive >
-                                                    item.quantityPending && (
-                                                    <p className="text-xs text-red-500 mt-1">
-                                                        Excede pendiente
-                                                    </p>
-                                                )}
-                                            </Td>
-                                            <Td>
-                                                <Select
-                                                    size="sm"
-                                                    className="w-40"
-                                                    placeholder="Ubicación"
-                                                    options={locationOptions}
-                                                    value={locationOptions.find(
-                                                        (o) =>
-                                                            o.value ===
-                                                            (item.locationId?.toString() ||
-                                                                '')
-                                                    )}
-                                                    onChange={(option) =>
-                                                        updateItem(
-                                                            index,
-                                                            'locationId',
-                                                            option &&
-                                                                option.value
-                                                                ? parseInt(
-                                                                      option.value
-                                                                  )
-                                                                : null
-                                                        )
-                                                    }
-                                                />
-                                            </Td>
-                                            <Td>
-                                                <Input
-                                                    size="sm"
-                                                    className="w-28"
-                                                    placeholder="Lote"
-                                                    value={item.lotNumber}
-                                                    onChange={(e) =>
-                                                        updateItem(
-                                                            index,
-                                                            'lotNumber',
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </Td>
-                                            <Td>
-                                                <Input
-                                                    size="sm"
-                                                    className="w-36"
-                                                    placeholder="SN1, SN2, ..."
-                                                    value={item.serialNumbers}
-                                                    onChange={(e) =>
-                                                        updateItem(
-                                                            index,
-                                                            'serialNumbers',
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </Td>
-                                        </Tr>
-                                    ))}
+                                                </Td>
+                                                <Td>
+                                                    <ControlledSelect
+                                                        name={`items.${index}.locationId`}
+                                                        control={control}
+                                                        options={
+                                                            locationOptions
+                                                        }
+                                                        size="sm"
+                                                        className="w-40"
+                                                        placeholder="Ubicación"
+                                                    />
+                                                </Td>
+                                                <Td>
+                                                    <Input
+                                                        size="sm"
+                                                        className="w-28"
+                                                        placeholder="Lote"
+                                                        {...register(
+                                                            `items.${index}.lotNumber`
+                                                        )}
+                                                    />
+                                                </Td>
+                                                <Td>
+                                                    <Input
+                                                        size="sm"
+                                                        className="w-36"
+                                                        placeholder="SN1, SN2, ..."
+                                                        {...register(
+                                                            `items.${index}.serialNumbers`
+                                                        )}
+                                                    />
+                                                </Td>
+                                            </Tr>
+                                        )
+                                    })}
                                 </TBody>
                             </Table>
+                        )}
+
+                        {errors.items?.root?.message && (
+                            <p className="text-sm text-red-500 mt-2">
+                                {errors.items.root.message}
+                            </p>
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -304,10 +311,7 @@ const ReceiveForm = ({
                                 </label>
                                 <Input
                                     type="date"
-                                    value={receivedAt}
-                                    onChange={(e) =>
-                                        setReceivedAt(e.target.value)
-                                    }
+                                    {...register('receivedAt')}
                                 />
                             </div>
                             <div>
@@ -317,8 +321,7 @@ const ReceiveForm = ({
                                 <Input
                                     textArea
                                     placeholder="Observaciones de la recepción"
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
+                                    {...register('notes')}
                                 />
                             </div>
                         </div>
@@ -337,7 +340,11 @@ const ReceiveForm = ({
                             type="submit"
                             variant="solid"
                             loading={isPending}
-                            disabled={!isValid}
+                            disabled={
+                                !watchedItems?.some(
+                                    (i) => i.quantityToReceive > 0
+                                )
+                            }
                         >
                             Confirmar Recepción
                         </Button>

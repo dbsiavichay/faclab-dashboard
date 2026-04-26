@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import Select from '@/components/ui/Select'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { ControlledSelect } from '@/components/ui/Form/controlled'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreatePurchaseOrder } from '@/hooks/usePurchaseOrders'
 import { useSuppliers } from '@/hooks/useSuppliers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type { PurchaseOrderInput } from '@/services/PurchaseOrderService'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 
 interface PurchaseOrderFormProps {
     open: boolean
@@ -16,48 +19,68 @@ interface PurchaseOrderFormProps {
     onCreated?: (id: number) => void
 }
 
+const purchaseOrderFormSchema = z.object({
+    supplierId: z
+        .number({ required_error: 'Selecciona un proveedor' })
+        .int()
+        .positive('Selecciona un proveedor'),
+    notes: z.string().optional(),
+    expectedDate: z.string().optional(),
+})
+
+type PurchaseOrderFormValues = z.infer<typeof purchaseOrderFormSchema>
+
 const PurchaseOrderForm = ({
     open,
     onClose,
     onCreated,
 }: PurchaseOrderFormProps) => {
-    const [formData, setFormData] = useState<PurchaseOrderInput>({
-        supplierId: 0,
-        notes: '',
-        expectedDate: '',
-    })
-
     const createOrder = useCreatePurchaseOrder()
     const { data: suppliersData } = useSuppliers({ limit: 100 })
     const suppliers = suppliersData?.items ?? []
 
     const supplierOptions = suppliers
         .filter((s) => s.isActive)
-        .map((s) => ({
-            value: s.id.toString(),
-            label: s.name,
-        }))
+        .map((s) => ({ value: s.id, label: s.name }))
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<PurchaseOrderFormValues>({
+        resolver: zodResolver(purchaseOrderFormSchema),
+        defaultValues: {
+            supplierId: 0,
+            notes: '',
+            expectedDate: '',
+        },
+    })
 
     useEffect(() => {
         if (open) {
-            setFormData({
-                supplierId: 0,
-                notes: '',
-                expectedDate: '',
-            })
+            reset({ supplierId: 0, notes: '', expectedDate: '' })
         }
-    }, [open])
+    }, [open, reset])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const isPending = createOrder.isPending || isSubmitting
 
+    const handleClose = () => {
+        if (!isPending) {
+            onClose()
+        }
+    }
+
+    const onSubmit = async (values: PurchaseOrderFormValues) => {
         try {
-            const submitData: PurchaseOrderInput = {
-                supplierId: formData.supplierId,
-                notes: formData.notes || undefined,
-                expectedDate: formData.expectedDate || undefined,
-            }
-            const order = await createOrder.mutateAsync(submitData)
+            const order = await createOrder.mutateAsync({
+                supplierId: values.supplierId,
+                notes: values.notes || undefined,
+                expectedDate: values.expectedDate
+                    ? `${values.expectedDate}T00:00:00Z`
+                    : undefined,
+            })
 
             toast.push(
                 <Notification title="Orden creada" type="success">
@@ -83,15 +106,6 @@ const PurchaseOrderForm = ({
         }
     }
 
-    const isPending = createOrder.isPending
-    const isValid = formData.supplierId > 0
-
-    const handleClose = () => {
-        if (!isPending) {
-            onClose()
-        }
-    }
-
     return (
         <Dialog
             isOpen={open}
@@ -102,71 +116,47 @@ const PurchaseOrderForm = ({
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">Nueva Orden de Compra</h5>
 
-                <form className="flex-1" onSubmit={handleSubmit}>
-                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Proveedor{' '}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Select
-                                placeholder="Seleccionar proveedor"
+                <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
+                    <FormContainer>
+                        <FormItem
+                            asterisk
+                            label="Proveedor"
+                            invalid={!!errors.supplierId}
+                            errorMessage={errors.supplierId?.message}
+                        >
+                            <ControlledSelect
+                                name="supplierId"
+                                control={control}
                                 options={supplierOptions}
-                                value={supplierOptions.find(
-                                    (o) =>
-                                        o.value ===
-                                        formData.supplierId.toString()
-                                )}
-                                onChange={(option) =>
-                                    setFormData({
-                                        ...formData,
-                                        supplierId: option
-                                            ? parseInt(option.value)
-                                            : 0,
-                                    })
-                                }
+                                placeholder="Seleccionar proveedor"
                             />
-                        </div>
+                        </FormItem>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Fecha Esperada
-                            </label>
+                        <FormItem
+                            label="Fecha Esperada"
+                            invalid={!!errors.expectedDate}
+                            errorMessage={errors.expectedDate?.message}
+                        >
                             <Input
                                 type="date"
-                                value={
-                                    formData.expectedDate
-                                        ? formData.expectedDate.split('T')[0]
-                                        : ''
-                                }
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        expectedDate: e.target.value
-                                            ? `${e.target.value}T00:00:00Z`
-                                            : '',
-                                    })
-                                }
+                                invalid={!!errors.expectedDate}
+                                {...register('expectedDate')}
                             />
-                        </div>
+                        </FormItem>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Notas
-                            </label>
+                        <FormItem
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
                             <Input
                                 textArea
                                 placeholder="Observaciones de la orden"
-                                value={formData.notes || ''}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        notes: e.target.value,
-                                    })
-                                }
+                                invalid={!!errors.notes}
+                                {...register('notes')}
                             />
-                        </div>
-                    </div>
+                        </FormItem>
+                    </FormContainer>
 
                     <div className="flex justify-end gap-2 mt-6">
                         <Button
@@ -181,7 +171,6 @@ const PurchaseOrderForm = ({
                             type="submit"
                             variant="solid"
                             loading={isPending}
-                            disabled={!isValid}
                         >
                             Crear
                         </Button>

@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { forwardRef, useState } from 'react'
 import { Input, InputProps } from '@/components/ui/Input'
 import { HiOutlineEyeOff, HiOutlineEye } from 'react-icons/hi'
-import type { MouseEvent } from 'react'
+import type { MouseEvent, ElementType } from 'react'
 
 interface PasswordInputProps extends InputProps {
     onVisibleChange?: (visible: boolean) => void
 }
 
-const PasswordInput = (props: PasswordInputProps) => {
+const PasswordInput = forwardRef<
+    ElementType | HTMLInputElement,
+    PasswordInputProps
+>((props, ref) => {
     const { onVisibleChange, ...rest } = props
 
     const [pwInputType, setPwInputType] = useState('password')
@@ -21,6 +24,7 @@ const PasswordInput = (props: PasswordInputProps) => {
 
     return (
         <Input
+            ref={ref}
             {...rest}
             type={pwInputType}
             suffix={
@@ -37,6 +41,8 @@ const PasswordInput = (props: PasswordInputProps) => {
             }
         />
     )
-}
+})
+
+PasswordInput.displayName = 'PasswordInput'
 
 export default PasswordInput

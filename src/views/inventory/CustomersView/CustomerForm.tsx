@@ -1,31 +1,30 @@
 import Input from '@/components/ui/Input'
-import Select from '@/components/ui/Select'
-import Switcher from '@/components/ui/Switcher'
 import { FormItem, FormContainer } from '@/components/ui/Form'
-import { Field, Form, Formik } from 'formik'
-import { customerSchema } from '@/schemas'
-import type {
-    Customer,
-    CustomerInput,
-    TaxType,
-} from '@/services/CustomerService'
+import {
+    ControlledSelect,
+    ControlledSwitcher,
+} from '@/components/ui/Form/controlled'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { customerSchema, type CustomerFormValues } from '@/schemas'
+import type { Customer } from '@/services/CustomerService'
 import { TAX_TYPE_LABELS } from '@/services/CustomerService'
 
 interface CustomerFormProps {
     formId: string
     customer?: Customer | null
     isSubmitting?: boolean
-    onSubmit: (data: CustomerInput) => void
+    onSubmit: (data: CustomerFormValues) => void
 }
 
 const taxTypeOptions = [
-    { value: 1, label: TAX_TYPE_LABELS[1] },
-    { value: 2, label: TAX_TYPE_LABELS[2] },
-    { value: 3, label: TAX_TYPE_LABELS[3] },
-    { value: 4, label: TAX_TYPE_LABELS[4] },
+    { value: 1 as const, label: TAX_TYPE_LABELS[1] },
+    { value: 2 as const, label: TAX_TYPE_LABELS[2] },
+    { value: 3 as const, label: TAX_TYPE_LABELS[3] },
+    { value: 4 as const, label: TAX_TYPE_LABELS[4] },
 ]
 
-const emptyValues: CustomerInput = {
+const emptyValues: CustomerFormValues = {
     name: '',
     taxId: '',
     taxType: 2,
@@ -46,7 +45,7 @@ const CustomerForm = ({
     isSubmitting = false,
     onSubmit,
 }: CustomerFormProps) => {
-    const initialValues: CustomerInput = customer
+    const defaultValues: CustomerFormValues = customer
         ? {
               name: customer.name,
               taxId: customer.taxId,
@@ -57,286 +56,237 @@ const CustomerForm = ({
               city: customer.city || '',
               state: customer.state || '',
               country: customer.country || '',
-              creditLimit: customer.creditLimit || undefined,
-              paymentTerms: customer.paymentTerms || undefined,
+              creditLimit: customer.creditLimit ?? undefined,
+              paymentTerms: customer.paymentTerms ?? undefined,
               isActive: customer.isActive,
           }
         : emptyValues
 
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm<CustomerFormValues>({
+        resolver: zodResolver(customerSchema),
+        defaultValues,
+    })
+
+    const numberRegister = (
+        name: 'creditLimit' | 'paymentTerms',
+        parser: (v: string) => number
+    ) =>
+        register(name, {
+            setValueAs: (v) =>
+                v === '' || v === null || v === undefined
+                    ? undefined
+                    : parser(String(v)),
+        })
+
     return (
-        <Formik
-            enableReinitialize
-            initialValues={initialValues}
-            validationSchema={customerSchema}
-            onSubmit={(values) => onSubmit(values)}
-        >
-            {({ touched, errors, values, setFieldValue, setFieldTouched }) => (
-                <Form id={formId}>
-                    <FormContainer>
-                        <h6 className="mb-3 text-sm font-semibold">
-                            Información Básica
-                        </h6>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="md:col-span-2">
-                                <FormItem
-                                    asterisk
-                                    htmlFor="name"
-                                    label="Nombre"
-                                    invalid={!!(errors.name && touched.name)}
-                                    errorMessage={errors.name}
-                                >
-                                    <Field
-                                        id="name"
-                                        name="name"
-                                        type="text"
-                                        placeholder="Nombre del cliente"
-                                        component={Input}
-                                        disabled={isSubmitting}
-                                    />
-                                </FormItem>
-                            </div>
-
-                            <FormItem
-                                asterisk
-                                htmlFor="taxId"
-                                label="Tax ID"
-                                invalid={!!(errors.taxId && touched.taxId)}
-                                errorMessage={errors.taxId}
-                            >
-                                <Field
-                                    id="taxId"
-                                    name="taxId"
-                                    type="text"
-                                    placeholder="RUC, Cédula, Pasaporte..."
-                                    component={Input}
-                                    disabled={isSubmitting}
-                                />
-                            </FormItem>
-
-                            <FormItem
-                                asterisk
-                                htmlFor="taxType"
-                                label="Tipo de ID"
-                                invalid={!!(errors.taxType && touched.taxType)}
-                                errorMessage={errors.taxType as string}
-                            >
-                                <Select
-                                    inputId="taxType"
-                                    isDisabled={isSubmitting}
-                                    value={taxTypeOptions.find(
-                                        (opt) => opt.value === values.taxType
-                                    )}
-                                    options={taxTypeOptions}
-                                    onChange={(option) =>
-                                        setFieldValue(
-                                            'taxType',
-                                            option?.value as TaxType
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('taxType', true)
-                                    }
-                                />
-                            </FormItem>
-                        </div>
-
-                        <h6 className="mb-3 text-sm font-semibold">
-                            Información de Contacto
-                        </h6>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormItem
-                                htmlFor="email"
-                                label="Email"
-                                invalid={!!(errors.email && touched.email)}
-                                errorMessage={errors.email}
-                            >
-                                <Field
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    placeholder="email@ejemplo.com"
-                                    component={Input}
-                                    disabled={isSubmitting}
-                                />
-                            </FormItem>
-
-                            <FormItem
-                                htmlFor="phone"
-                                label="Teléfono"
-                                invalid={!!(errors.phone && touched.phone)}
-                                errorMessage={errors.phone}
-                            >
-                                <Field
-                                    id="phone"
-                                    name="phone"
-                                    type="text"
-                                    placeholder="0987654321"
-                                    component={Input}
-                                    disabled={isSubmitting}
-                                />
-                            </FormItem>
-                        </div>
-
-                        <h6 className="mb-3 text-sm font-semibold">
-                            Dirección
-                        </h6>
-                        <div className="space-y-4">
-                            <FormItem
-                                htmlFor="address"
-                                label="Dirección"
-                                invalid={!!(errors.address && touched.address)}
-                                errorMessage={errors.address}
-                            >
-                                <Field
-                                    id="address"
-                                    name="address"
-                                    type="text"
-                                    placeholder="Calle principal 123"
-                                    component={Input}
-                                    disabled={isSubmitting}
-                                />
-                            </FormItem>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <FormItem
-                                    htmlFor="city"
-                                    label="Ciudad"
-                                    invalid={!!(errors.city && touched.city)}
-                                    errorMessage={errors.city}
-                                >
-                                    <Field
-                                        id="city"
-                                        name="city"
-                                        type="text"
-                                        placeholder="Quito"
-                                        component={Input}
-                                        disabled={isSubmitting}
-                                    />
-                                </FormItem>
-
-                                <FormItem
-                                    htmlFor="state"
-                                    label="Provincia/Estado"
-                                    invalid={!!(errors.state && touched.state)}
-                                    errorMessage={errors.state}
-                                >
-                                    <Field
-                                        id="state"
-                                        name="state"
-                                        type="text"
-                                        placeholder="Pichincha"
-                                        component={Input}
-                                        disabled={isSubmitting}
-                                    />
-                                </FormItem>
-
-                                <FormItem
-                                    htmlFor="country"
-                                    label="País"
-                                    invalid={
-                                        !!(errors.country && touched.country)
-                                    }
-                                    errorMessage={errors.country}
-                                >
-                                    <Field
-                                        id="country"
-                                        name="country"
-                                        type="text"
-                                        placeholder="Ecuador"
-                                        component={Input}
-                                        disabled={isSubmitting}
-                                    />
-                                </FormItem>
-                            </div>
-                        </div>
-
-                        <h6 className="mb-3 text-sm font-semibold">
-                            Información Financiera
-                        </h6>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormItem
-                                htmlFor="creditLimit"
-                                label="Límite de Crédito"
-                                invalid={
-                                    !!(
-                                        errors.creditLimit &&
-                                        touched.creditLimit
-                                    )
-                                }
-                                errorMessage={errors.creditLimit as string}
-                            >
-                                <Input
-                                    id="creditLimit"
-                                    type="number"
-                                    placeholder="0.00"
-                                    value={values.creditLimit ?? ''}
-                                    min="0"
-                                    step="0.01"
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'creditLimit',
-                                            e.target.value
-                                                ? parseFloat(e.target.value)
-                                                : undefined
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('creditLimit', true)
-                                    }
-                                />
-                            </FormItem>
-
-                            <FormItem
-                                htmlFor="paymentTerms"
-                                label="Términos de Pago (días)"
-                                invalid={
-                                    !!(
-                                        errors.paymentTerms &&
-                                        touched.paymentTerms
-                                    )
-                                }
-                                errorMessage={errors.paymentTerms as string}
-                            >
-                                <Input
-                                    id="paymentTerms"
-                                    type="number"
-                                    placeholder="30"
-                                    value={values.paymentTerms ?? ''}
-                                    min="0"
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'paymentTerms',
-                                            e.target.value
-                                                ? parseInt(e.target.value)
-                                                : undefined
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('paymentTerms', true)
-                                    }
-                                />
-                            </FormItem>
-                        </div>
-
-                        <FormItem htmlFor="isActive" label="Estado">
-                            <Switcher
-                                id="isActive"
-                                checked={values.isActive}
-                                onChange={(checked) =>
-                                    setFieldValue('isActive', checked)
-                                }
+        <form id={formId} onSubmit={handleSubmit(onSubmit)}>
+            <FormContainer>
+                <h6 className="mb-3 text-sm font-semibold">
+                    Información Básica
+                </h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                        <FormItem
+                            asterisk
+                            htmlFor="name"
+                            label="Nombre"
+                            invalid={!!errors.name}
+                            errorMessage={errors.name?.message}
+                        >
+                            <Input
+                                id="name"
+                                placeholder="Nombre del cliente"
+                                disabled={isSubmitting}
+                                invalid={!!errors.name}
+                                {...register('name')}
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                {values.isActive
-                                    ? 'Cliente activo'
-                                    : 'Cliente inactivo'}
-                            </p>
                         </FormItem>
-                    </FormContainer>
-                </Form>
-            )}
-        </Formik>
+                    </div>
+
+                    <FormItem
+                        asterisk
+                        htmlFor="taxId"
+                        label="Tax ID"
+                        invalid={!!errors.taxId}
+                        errorMessage={errors.taxId?.message}
+                    >
+                        <Input
+                            id="taxId"
+                            placeholder="RUC, Cédula, Pasaporte..."
+                            disabled={isSubmitting}
+                            invalid={!!errors.taxId}
+                            {...register('taxId')}
+                        />
+                    </FormItem>
+
+                    <FormItem
+                        asterisk
+                        htmlFor="taxType"
+                        label="Tipo de ID"
+                        invalid={!!errors.taxType}
+                        errorMessage={errors.taxType?.message}
+                    >
+                        <ControlledSelect
+                            name="taxType"
+                            control={control}
+                            options={taxTypeOptions}
+                            isDisabled={isSubmitting}
+                        />
+                    </FormItem>
+                </div>
+
+                <h6 className="mb-3 text-sm font-semibold">
+                    Información de Contacto
+                </h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormItem
+                        htmlFor="email"
+                        label="Email"
+                        invalid={!!errors.email}
+                        errorMessage={errors.email?.message}
+                    >
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="email@ejemplo.com"
+                            disabled={isSubmitting}
+                            invalid={!!errors.email}
+                            {...register('email')}
+                        />
+                    </FormItem>
+
+                    <FormItem
+                        htmlFor="phone"
+                        label="Teléfono"
+                        invalid={!!errors.phone}
+                        errorMessage={errors.phone?.message}
+                    >
+                        <Input
+                            id="phone"
+                            placeholder="0987654321"
+                            disabled={isSubmitting}
+                            invalid={!!errors.phone}
+                            {...register('phone')}
+                        />
+                    </FormItem>
+                </div>
+
+                <h6 className="mb-3 text-sm font-semibold">Dirección</h6>
+                <div className="space-y-4">
+                    <FormItem
+                        htmlFor="address"
+                        label="Dirección"
+                        invalid={!!errors.address}
+                        errorMessage={errors.address?.message}
+                    >
+                        <Input
+                            id="address"
+                            placeholder="Calle principal 123"
+                            disabled={isSubmitting}
+                            invalid={!!errors.address}
+                            {...register('address')}
+                        />
+                    </FormItem>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormItem
+                            htmlFor="city"
+                            label="Ciudad"
+                            invalid={!!errors.city}
+                            errorMessage={errors.city?.message}
+                        >
+                            <Input
+                                id="city"
+                                placeholder="Quito"
+                                disabled={isSubmitting}
+                                invalid={!!errors.city}
+                                {...register('city')}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            htmlFor="state"
+                            label="Provincia/Estado"
+                            invalid={!!errors.state}
+                            errorMessage={errors.state?.message}
+                        >
+                            <Input
+                                id="state"
+                                placeholder="Pichincha"
+                                disabled={isSubmitting}
+                                invalid={!!errors.state}
+                                {...register('state')}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            htmlFor="country"
+                            label="País"
+                            invalid={!!errors.country}
+                            errorMessage={errors.country?.message}
+                        >
+                            <Input
+                                id="country"
+                                placeholder="Ecuador"
+                                disabled={isSubmitting}
+                                invalid={!!errors.country}
+                                {...register('country')}
+                            />
+                        </FormItem>
+                    </div>
+                </div>
+
+                <h6 className="mb-3 text-sm font-semibold">
+                    Información Financiera
+                </h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormItem
+                        htmlFor="creditLimit"
+                        label="Límite de Crédito"
+                        invalid={!!errors.creditLimit}
+                        errorMessage={errors.creditLimit?.message}
+                    >
+                        <Input
+                            id="creditLimit"
+                            type="number"
+                            placeholder="0.00"
+                            min="0"
+                            step="0.01"
+                            disabled={isSubmitting}
+                            invalid={!!errors.creditLimit}
+                            {...numberRegister('creditLimit', parseFloat)}
+                        />
+                    </FormItem>
+
+                    <FormItem
+                        htmlFor="paymentTerms"
+                        label="Términos de Pago (días)"
+                        invalid={!!errors.paymentTerms}
+                        errorMessage={errors.paymentTerms?.message}
+                    >
+                        <Input
+                            id="paymentTerms"
+                            type="number"
+                            placeholder="30"
+                            min="0"
+                            disabled={isSubmitting}
+                            invalid={!!errors.paymentTerms}
+                            {...numberRegister('paymentTerms', (v) =>
+                                parseInt(v, 10)
+                            )}
+                        />
+                    </FormItem>
+                </div>
+
+                <FormItem htmlFor="isActive" label="Estado">
+                    <ControlledSwitcher name="isActive" control={control} />
+                </FormItem>
+            </FormContainer>
+        </form>
     )
 }
 

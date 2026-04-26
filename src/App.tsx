@@ -9,6 +9,7 @@ import ErrorBoundary from '@/components/ErrorBoundary'
 import mockServer from './mock'
 import appConfig from '@/configs/app.config'
 import './locales'
+import '@/configs/zod.config'
 
 const environment = process.env.NODE_ENV
 

@@ -1,21 +1,24 @@
 import Input from '@/components/ui/Input'
-import Select from '@/components/ui/Select'
-import Switcher from '@/components/ui/Switcher'
 import { FormItem, FormContainer } from '@/components/ui/Form'
-import { Field, Form, Formik } from 'formik'
+import {
+    ControlledSelect,
+    ControlledSwitcher,
+} from '@/components/ui/Form/controlled'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useCategories } from '@/hooks/useCategories'
 import { useUnitsOfMeasure } from '@/hooks/useUnitsOfMeasure'
-import { productSchema } from '@/schemas'
-import type { Product, ProductInput } from '@/services/ProductService'
+import { productSchema, type ProductFormValues } from '@/schemas'
+import type { Product } from '@/services/ProductService'
 
 interface ProductFormProps {
     formId: string
     product?: Product | null
     isSubmitting?: boolean
-    onSubmit: (data: ProductInput) => void
+    onSubmit: (data: ProductFormValues) => void
 }
 
-const emptyValues: ProductInput = {
+const emptyValues: ProductFormValues = {
     name: '',
     sku: '',
     description: '',
@@ -44,25 +47,31 @@ const ProductForm = ({
     const unitsOfMeasure = unitsData?.items ?? []
 
     const categoryOptions = [
-        { value: 0, label: 'Sin categoría' },
-        ...categories.map((cat) => ({ value: cat.id, label: cat.name })),
+        { value: undefined, label: 'Sin categoría' },
+        ...categories.map((cat) => ({
+            value: cat.id as number | undefined,
+            label: cat.name,
+        })),
     ]
 
     const unitOptions = [
-        { value: 0, label: 'Sin unidad' },
+        { value: undefined, label: 'Sin unidad' },
         ...unitsOfMeasure
             .filter((u) => u.isActive)
-            .map((u) => ({ value: u.id, label: `${u.name} (${u.symbol})` })),
+            .map((u) => ({
+                value: u.id as number | undefined,
+                label: `${u.name} (${u.symbol})`,
+            })),
     ]
 
-    const initialValues: ProductInput = product
+    const defaultValues: ProductFormValues = product
         ? {
               name: product.name,
               sku: product.sku,
               description: product.description || '',
               barcode: product.barcode || '',
-              categoryId: product.categoryId || undefined,
-              unitOfMeasureId: product.unitOfMeasureId || undefined,
+              categoryId: product.categoryId ?? undefined,
+              unitOfMeasureId: product.unitOfMeasureId ?? undefined,
               purchasePrice: product.purchasePrice ?? undefined,
               salePrice: product.salePrice ?? undefined,
               isActive: product.isActive,
@@ -74,371 +83,274 @@ const ProductForm = ({
           }
         : emptyValues
 
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm<ProductFormValues>({
+        resolver: zodResolver(productSchema),
+        defaultValues,
+    })
+
+    const numberRegister = (
+        name:
+            | 'purchasePrice'
+            | 'salePrice'
+            | 'minStock'
+            | 'maxStock'
+            | 'reorderPoint'
+            | 'leadTimeDays',
+        opts: { integer?: boolean; emptyValue?: number | undefined } = {}
+    ) => {
+        const { integer = false, emptyValue = undefined } = opts
+        return register(name, {
+            setValueAs: (v) => {
+                if (v === '' || v === null || v === undefined) return emptyValue
+                const parsed = integer
+                    ? parseInt(String(v), 10)
+                    : parseFloat(String(v))
+                return Number.isNaN(parsed) ? emptyValue : parsed
+            },
+        })
+    }
+
     return (
-        <Formik
-            enableReinitialize
-            initialValues={initialValues}
-            validationSchema={productSchema}
-            onSubmit={(values) => onSubmit(values)}
-        >
-            {({ touched, errors, values, setFieldValue, setFieldTouched }) => (
-                <Form id={formId}>
-                    <FormContainer>
-                        <FormItem
-                            asterisk
-                            htmlFor="name"
-                            label="Nombre"
-                            invalid={!!(errors.name && touched.name)}
-                            errorMessage={errors.name}
+        <form id={formId} onSubmit={handleSubmit(onSubmit)}>
+            <FormContainer>
+                <FormItem
+                    asterisk
+                    htmlFor="name"
+                    label="Nombre"
+                    invalid={!!errors.name}
+                    errorMessage={errors.name?.message}
+                >
+                    <Input
+                        id="name"
+                        placeholder="Nombre del producto"
+                        disabled={isSubmitting}
+                        invalid={!!errors.name}
+                        {...register('name')}
+                    />
+                </FormItem>
+
+                <FormItem
+                    asterisk
+                    htmlFor="sku"
+                    label="SKU"
+                    invalid={!!errors.sku}
+                    errorMessage={errors.sku?.message}
+                >
+                    <Input
+                        id="sku"
+                        placeholder="SKU del producto"
+                        disabled={isSubmitting}
+                        invalid={!!errors.sku}
+                        {...register('sku')}
+                    />
+                </FormItem>
+
+                <FormItem
+                    htmlFor="description"
+                    label="Descripción"
+                    invalid={!!errors.description}
+                    errorMessage={errors.description?.message}
+                >
+                    <Input
+                        textArea
+                        id="description"
+                        placeholder="Descripción del producto"
+                        style={{ minHeight: '80px' }}
+                        disabled={isSubmitting}
+                        invalid={!!errors.description}
+                        {...register('description')}
+                    />
+                </FormItem>
+
+                <FormItem
+                    htmlFor="barcode"
+                    label="Código de barras"
+                    invalid={!!errors.barcode}
+                    errorMessage={errors.barcode?.message}
+                >
+                    <Input
+                        id="barcode"
+                        placeholder="Ej: 7501234567890"
+                        disabled={isSubmitting}
+                        invalid={!!errors.barcode}
+                        {...register('barcode')}
+                    />
+                </FormItem>
+
+                <FormItem
+                    htmlFor="categoryId"
+                    label="Categoría"
+                    invalid={!!errors.categoryId}
+                    errorMessage={errors.categoryId?.message}
+                    extra={
+                        <span className="text-xs text-gray-500 ml-2">
+                            Opcional
+                        </span>
+                    }
+                >
+                    <ControlledSelect
+                        name="categoryId"
+                        control={control}
+                        options={categoryOptions}
+                        isDisabled={isSubmitting}
+                        placeholder="Seleccione una categoría"
+                    />
+                </FormItem>
+
+                <FormItem
+                    htmlFor="unitOfMeasureId"
+                    label="Unidad de Medida"
+                    invalid={!!errors.unitOfMeasureId}
+                    errorMessage={errors.unitOfMeasureId?.message}
+                    extra={
+                        <span className="text-xs text-gray-500 ml-2">
+                            Opcional
+                        </span>
+                    }
+                >
+                    <ControlledSelect
+                        name="unitOfMeasureId"
+                        control={control}
+                        options={unitOptions}
+                        isDisabled={isSubmitting}
+                        placeholder="Seleccione una unidad"
+                    />
+                </FormItem>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <FormItem
+                        htmlFor="purchasePrice"
+                        label="Precio de compra"
+                        invalid={!!errors.purchasePrice}
+                        errorMessage={errors.purchasePrice?.message}
+                    >
+                        <Input
+                            id="purchasePrice"
+                            type="number"
+                            placeholder="0.00"
+                            disabled={isSubmitting}
+                            invalid={!!errors.purchasePrice}
+                            {...numberRegister('purchasePrice')}
+                        />
+                    </FormItem>
+                    <FormItem
+                        htmlFor="salePrice"
+                        label="Precio de venta"
+                        invalid={!!errors.salePrice}
+                        errorMessage={errors.salePrice?.message}
+                    >
+                        <Input
+                            id="salePrice"
+                            type="number"
+                            placeholder="0.00"
+                            disabled={isSubmitting}
+                            invalid={!!errors.salePrice}
+                            {...numberRegister('salePrice')}
+                        />
+                    </FormItem>
+                </div>
+
+                <div className="flex gap-6">
+                    <div className="flex items-center gap-3">
+                        <ControlledSwitcher name="isActive" control={control} />
+                        <label
+                            htmlFor="isActive"
+                            className="text-sm font-medium"
                         >
-                            <Field
-                                id="name"
-                                name="name"
-                                type="text"
-                                placeholder="Nombre del producto"
-                                component={Input}
-                                disabled={isSubmitting}
-                            />
-                        </FormItem>
-
-                        <FormItem
-                            asterisk
-                            htmlFor="sku"
-                            label="SKU"
-                            invalid={!!(errors.sku && touched.sku)}
-                            errorMessage={errors.sku}
+                            Activo
+                        </label>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <ControlledSwitcher
+                            name="isService"
+                            control={control}
+                        />
+                        <label
+                            htmlFor="isService"
+                            className="text-sm font-medium"
                         >
-                            <Field
-                                id="sku"
-                                name="sku"
-                                type="text"
-                                placeholder="SKU del producto"
-                                component={Input}
-                                disabled={isSubmitting}
-                            />
-                        </FormItem>
+                            Es servicio
+                        </label>
+                    </div>
+                </div>
 
-                        <FormItem
-                            htmlFor="description"
-                            label="Descripción"
-                            invalid={
-                                !!(errors.description && touched.description)
-                            }
-                            errorMessage={errors.description as string}
-                        >
-                            <Field
-                                textArea
-                                id="description"
-                                name="description"
-                                placeholder="Descripción del producto"
-                                style={{ minHeight: '80px' }}
-                                component={Input}
-                                disabled={isSubmitting}
-                            />
-                        </FormItem>
-
-                        <FormItem
-                            htmlFor="barcode"
-                            label="Código de barras"
-                            invalid={!!(errors.barcode && touched.barcode)}
-                            errorMessage={errors.barcode as string}
-                        >
-                            <Field
-                                id="barcode"
-                                name="barcode"
-                                type="text"
-                                placeholder="Ej: 7501234567890"
-                                component={Input}
-                                disabled={isSubmitting}
-                            />
-                        </FormItem>
-
-                        <FormItem
-                            htmlFor="categoryId"
-                            label="Categoría"
-                            invalid={
-                                !!(errors.categoryId && touched.categoryId)
-                            }
-                            errorMessage={errors.categoryId as string}
-                        >
-                            <Select
-                                inputId="categoryId"
-                                placeholder="Seleccione una categoría"
-                                isDisabled={isSubmitting}
-                                value={categoryOptions.find(
-                                    (opt) =>
-                                        opt.value === (values.categoryId || 0)
-                                )}
-                                options={categoryOptions}
-                                onChange={(option) =>
-                                    setFieldValue(
-                                        'categoryId',
-                                        option?.value === 0
-                                            ? undefined
-                                            : option?.value
-                                    )
-                                }
-                                onBlur={() =>
-                                    setFieldTouched('categoryId', true)
-                                }
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Opcional: Seleccione la categoría del producto
-                            </p>
-                        </FormItem>
-
-                        <FormItem
-                            htmlFor="unitOfMeasureId"
-                            label="Unidad de Medida"
-                            invalid={
-                                !!(
-                                    errors.unitOfMeasureId &&
-                                    touched.unitOfMeasureId
-                                )
-                            }
-                            errorMessage={errors.unitOfMeasureId as string}
-                        >
-                            <Select
-                                inputId="unitOfMeasureId"
-                                placeholder="Seleccione una unidad"
-                                isDisabled={isSubmitting}
-                                value={unitOptions.find(
-                                    (opt) =>
-                                        opt.value ===
-                                        (values.unitOfMeasureId || 0)
-                                )}
-                                options={unitOptions}
-                                onChange={(option) =>
-                                    setFieldValue(
-                                        'unitOfMeasureId',
-                                        option?.value === 0
-                                            ? undefined
-                                            : option?.value
-                                    )
-                                }
-                                onBlur={() =>
-                                    setFieldTouched('unitOfMeasureId', true)
-                                }
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Opcional: Seleccione la unidad de medida del
-                                producto
-                            </p>
-                        </FormItem>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormItem
-                                htmlFor="purchasePrice"
-                                label="Precio de compra"
-                                invalid={
-                                    !!(
-                                        errors.purchasePrice &&
-                                        touched.purchasePrice
-                                    )
-                                }
-                                errorMessage={errors.purchasePrice as string}
-                            >
-                                <Input
-                                    id="purchasePrice"
-                                    type="number"
-                                    placeholder="0.00"
-                                    value={values.purchasePrice ?? ''}
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'purchasePrice',
-                                            e.target.value !== ''
-                                                ? Number(e.target.value)
-                                                : undefined
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('purchasePrice', true)
-                                    }
-                                />
-                            </FormItem>
-                            <FormItem
-                                htmlFor="salePrice"
-                                label="Precio de venta"
-                                invalid={
-                                    !!(errors.salePrice && touched.salePrice)
-                                }
-                                errorMessage={errors.salePrice as string}
-                            >
-                                <Input
-                                    id="salePrice"
-                                    type="number"
-                                    placeholder="0.00"
-                                    value={values.salePrice ?? ''}
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'salePrice',
-                                            e.target.value !== ''
-                                                ? Number(e.target.value)
-                                                : undefined
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('salePrice', true)
-                                    }
-                                />
-                            </FormItem>
-                        </div>
-
-                        <div className="flex gap-6">
-                            <div className="flex items-center gap-3">
-                                <Switcher
-                                    id="isActive"
-                                    checked={values.isActive}
-                                    onChange={(checked) =>
-                                        setFieldValue('isActive', checked)
-                                    }
-                                />
-                                <label
-                                    htmlFor="isActive"
-                                    className="text-sm font-medium"
-                                >
-                                    Activo
-                                </label>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <Switcher
-                                    id="isService"
-                                    checked={values.isService}
-                                    onChange={(checked) =>
-                                        setFieldValue('isService', checked)
-                                    }
-                                />
-                                <label
-                                    htmlFor="isService"
-                                    className="text-sm font-medium"
-                                >
-                                    Es servicio
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormItem
-                                htmlFor="minStock"
-                                label="Stock mínimo"
-                                invalid={
-                                    !!(errors.minStock && touched.minStock)
-                                }
-                                errorMessage={errors.minStock as string}
-                            >
-                                <Input
-                                    id="minStock"
-                                    type="number"
-                                    placeholder="0"
-                                    value={values.minStock ?? ''}
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'minStock',
-                                            e.target.value !== ''
-                                                ? Number(e.target.value)
-                                                : 0
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('minStock', true)
-                                    }
-                                />
-                            </FormItem>
-                            <FormItem
-                                htmlFor="maxStock"
-                                label="Stock máximo"
-                                invalid={
-                                    !!(errors.maxStock && touched.maxStock)
-                                }
-                                errorMessage={errors.maxStock as string}
-                            >
-                                <Input
-                                    id="maxStock"
-                                    type="number"
-                                    placeholder="Sin límite"
-                                    value={values.maxStock ?? ''}
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'maxStock',
-                                            e.target.value !== ''
-                                                ? Number(e.target.value)
-                                                : undefined
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('maxStock', true)
-                                    }
-                                />
-                            </FormItem>
-                            <FormItem
-                                htmlFor="reorderPoint"
-                                label="Punto de reorden"
-                                invalid={
-                                    !!(
-                                        errors.reorderPoint &&
-                                        touched.reorderPoint
-                                    )
-                                }
-                                errorMessage={errors.reorderPoint as string}
-                            >
-                                <Input
-                                    id="reorderPoint"
-                                    type="number"
-                                    placeholder="0"
-                                    value={values.reorderPoint ?? ''}
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'reorderPoint',
-                                            e.target.value !== ''
-                                                ? Number(e.target.value)
-                                                : 0
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('reorderPoint', true)
-                                    }
-                                />
-                            </FormItem>
-                            <FormItem
-                                htmlFor="leadTimeDays"
-                                label="Tiempo de entrega (días)"
-                                invalid={
-                                    !!(
-                                        errors.leadTimeDays &&
-                                        touched.leadTimeDays
-                                    )
-                                }
-                                errorMessage={errors.leadTimeDays as string}
-                            >
-                                <Input
-                                    id="leadTimeDays"
-                                    type="number"
-                                    placeholder="Sin definir"
-                                    value={values.leadTimeDays ?? ''}
-                                    disabled={isSubmitting}
-                                    onChange={(e) =>
-                                        setFieldValue(
-                                            'leadTimeDays',
-                                            e.target.value !== ''
-                                                ? Number(e.target.value)
-                                                : undefined
-                                        )
-                                    }
-                                    onBlur={() =>
-                                        setFieldTouched('leadTimeDays', true)
-                                    }
-                                />
-                            </FormItem>
-                        </div>
-                    </FormContainer>
-                </Form>
-            )}
-        </Formik>
+                <div className="grid grid-cols-2 gap-4">
+                    <FormItem
+                        htmlFor="minStock"
+                        label="Stock mínimo"
+                        invalid={!!errors.minStock}
+                        errorMessage={errors.minStock?.message}
+                    >
+                        <Input
+                            id="minStock"
+                            type="number"
+                            placeholder="0"
+                            disabled={isSubmitting}
+                            invalid={!!errors.minStock}
+                            {...numberRegister('minStock', {
+                                integer: true,
+                                emptyValue: 0,
+                            })}
+                        />
+                    </FormItem>
+                    <FormItem
+                        htmlFor="maxStock"
+                        label="Stock máximo"
+                        invalid={!!errors.maxStock}
+                        errorMessage={errors.maxStock?.message}
+                    >
+                        <Input
+                            id="maxStock"
+                            type="number"
+                            placeholder="Sin límite"
+                            disabled={isSubmitting}
+                            invalid={!!errors.maxStock}
+                            {...numberRegister('maxStock', { integer: true })}
+                        />
+                    </FormItem>
+                    <FormItem
+                        htmlFor="reorderPoint"
+                        label="Punto de reorden"
+                        invalid={!!errors.reorderPoint}
+                        errorMessage={errors.reorderPoint?.message}
+                    >
+                        <Input
+                            id="reorderPoint"
+                            type="number"
+                            placeholder="0"
+                            disabled={isSubmitting}
+                            invalid={!!errors.reorderPoint}
+                            {...numberRegister('reorderPoint', {
+                                integer: true,
+                                emptyValue: 0,
+                            })}
+                        />
+                    </FormItem>
+                    <FormItem
+                        htmlFor="leadTimeDays"
+                        label="Tiempo de entrega (días)"
+                        invalid={!!errors.leadTimeDays}
+                        errorMessage={errors.leadTimeDays?.message}
+                    >
+                        <Input
+                            id="leadTimeDays"
+                            type="number"
+                            placeholder="Sin definir"
+                            disabled={isSubmitting}
+                            invalid={!!errors.leadTimeDays}
+                            {...numberRegister('leadTimeDays', {
+                                integer: true,
+                            })}
+                        />
+                    </FormItem>
+                </div>
+            </FormContainer>
+        </form>
     )
 }
 

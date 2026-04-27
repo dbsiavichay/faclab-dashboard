@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useCallback } from 'react'
-import { findDOMNode } from 'react-dom'
 import type { RefObject, ReactEventHandler } from 'react'
 
-type TargetType = RefObject<Element> | Element | null | undefined
+type TargetType = RefObject<Element | null> | Element | null | undefined
 
 type Options = {
     disabled: boolean
@@ -35,7 +34,7 @@ const domContains = (context: Element, node: (Node & ParentNode) | null) => {
     return false
 }
 
-const getRefTarget = (ref: RefObject<Element> | Element | null | undefined) => {
+const getRefTarget = (ref: TargetType) => {
     return ref && ('current' in ref ? ref.current : ref)
 }
 
@@ -47,8 +46,7 @@ function getDOMNode(elementOrRef: any) {
         return element
     }
 
-    // eslint-disable-next-line react/no-find-dom-node
-    return findDOMNode(element)
+    return null
 }
 
 function isLeftClickEvent(e: MouseEvent) {

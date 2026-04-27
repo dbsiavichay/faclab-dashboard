@@ -155,7 +155,7 @@ export default function customerFakeApi(server: Server) {
 
         customerData.splice(customerIndex, 1)
 
-        return new Response(204, {}, null)
+        return new Response(204, {}, {})
     })
 
     // POST /customers/:id/activate - Activate customer

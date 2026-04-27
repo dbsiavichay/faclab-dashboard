@@ -64,8 +64,8 @@ const TimeInputRange = forwardRef<HTMLInputElement, TimeInputRangeProps>(
 
         const uuid = useUniqueId(id)
 
-        const fromTimeRef = useRef<HTMLInputElement>()
-        const toTimeRef = useRef<HTMLInputElement>()
+        const fromTimeRef = useRef<HTMLInputElement | null>(null)
+        const toTimeRef = useRef<HTMLInputElement | null>(null)
         const [_value, setValue] = useState(value ?? defaultValue)
 
         useDidUpdate(() => {

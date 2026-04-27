@@ -6,8 +6,9 @@ import { HiCheck } from 'react-icons/hi'
 import { components } from 'react-select'
 import type { ColorLevel } from '@/@types/theme'
 import type { ControlProps, OptionProps } from 'react-select'
+import type { ComponentType } from 'react'
 
-const { Control } = components
+const Control = components.Control as ComponentType<ControlProps<ColorList>>
 
 type ColorList = {
     label: string

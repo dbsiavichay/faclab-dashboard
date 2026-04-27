@@ -10,7 +10,7 @@ import classNames from 'classnames'
 import RadioGroupContext from './context'
 import { useConfig } from '../ConfigProvider'
 import type { CommonProps } from '../@types/common'
-import type { InputHTMLAttributes } from 'react'
+import type { InputHTMLAttributes, Ref } from 'react'
 
 export interface RadioProps
     extends CommonProps,
@@ -19,7 +19,7 @@ export interface RadioProps
     color?: string
     defaultChecked?: boolean
     disabled?: boolean
-    labelRef?: string
+    labelRef?: Ref<HTMLLabelElement>
     name?: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange?: (value: any, e: MouseEvent) => void

@@ -11,6 +11,7 @@ import { ROLE, ROLE_LABELS, ALL_ROLES } from '@/constants/roles.constant'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createUserSchema, type CreateUserFormValues } from '@/schemas'
+import type { CreateUserRequest } from '@/@types/auth'
 
 interface CreateUserModalProps {
     open: boolean
@@ -51,7 +52,7 @@ const CreateUserModal = ({ open, onClose }: CreateUserModalProps) => {
 
     const onSubmit = async (values: CreateUserFormValues) => {
         try {
-            await createUser.mutateAsync(values)
+            await createUser.mutateAsync(values as CreateUserRequest)
             toast.push(<Notification type="success" title="Usuario creado" />, {
                 placement: 'top-center',
             })

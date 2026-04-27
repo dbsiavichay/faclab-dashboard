@@ -24,7 +24,7 @@ const AmPmInput = forwardRef<HTMLInputElement, AmPmInputProps>((props, ref) => {
     const { className, onChange, onFocus, value, amLabel, pmLabel, ...rest } =
         props
 
-    const inputRef = useRef<HTMLInputElement>()
+    const inputRef = useRef<HTMLInputElement | null>(null)
 
     const handleClick = (event: MouseEvent<HTMLInputElement>) => {
         event.stopPropagation()

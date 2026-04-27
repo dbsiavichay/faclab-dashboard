@@ -20,7 +20,7 @@ import type {
 } from 'react-select'
 import type { AsyncProps } from 'react-select/async'
 import type { CreatableProps } from 'react-select/creatable'
-import type { ForwardedRef } from 'react'
+import type { ForwardedRef, JSX } from 'react'
 
 interface DefaultOptionProps {
     innerProps: JSX.IntrinsicElements['div']

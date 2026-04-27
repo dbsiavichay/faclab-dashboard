@@ -4,14 +4,14 @@ import CheckboxGroupContext from './context'
 import { useConfig } from '../ConfigProvider'
 import type { CommonProps } from '../@types/common'
 import type { CheckboxValue } from './context'
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, Ref } from 'react'
 
 export interface CheckboxProps extends CommonProps {
     checked?: boolean
     color?: string
     defaultChecked?: boolean
     disabled?: boolean
-    labelRef?: string
+    labelRef?: Ref<HTMLLabelElement>
     name?: string
     onChange?: (values: boolean, e: ChangeEvent<HTMLInputElement>) => void
     readOnly?: boolean

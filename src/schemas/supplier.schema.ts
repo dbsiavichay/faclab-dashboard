@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
 const optionalEmail = z
-    .union([z.string().email('Email inválido'), z.literal('')])
+    .union([z.email('Email inválido'), z.literal('')])
     .optional()
 
 export const supplierSchema = z.object({
     name: z.string().min(1, 'Nombre requerido'),
     taxId: z.string().min(1, 'Identificación requerida'),
     taxType: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)], {
-        errorMap: () => ({ message: 'Tipo de identificación requerido' }),
+        error: 'Tipo de identificación requerido',
     }),
     email: optionalEmail,
     phone: z.string().optional(),

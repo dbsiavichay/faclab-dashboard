@@ -62,8 +62,8 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>((props, ref) => {
         ...rest
     } = props
 
-    const overlayTarget = useRef(null)
-    const triggerTarget = useRef(null)
+    const overlayTarget = useRef<HTMLDivElement | null>(null)
+    const triggerTarget = useRef<HTMLDivElement | null>(null)
     const menuControl = useDropdownMenuContext(overlayTarget)
     const open = menuControl.open
 

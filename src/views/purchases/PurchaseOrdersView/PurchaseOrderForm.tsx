@@ -21,7 +21,7 @@ interface PurchaseOrderFormProps {
 
 const purchaseOrderFormSchema = z.object({
     supplierId: z
-        .number({ required_error: 'Selecciona un proveedor' })
+        .number({ error: 'Selecciona un proveedor' })
         .int()
         .positive('Selecciona un proveedor'),
     notes: z.string().optional(),

@@ -56,7 +56,7 @@ export interface ThemeState {
     setDirection: (direction: Direction) => void
     setMode: (mode: Mode) => void
     setLayout: (type: LayoutType) => void
-    setPreviousLayout: (type: LayoutType) => void
+    setPreviousLayout: (type: LayoutType | undefined) => void
     setSideNavCollapse: (collapse: boolean) => void
     setNavMode: (mode: NavMode | 'default') => void
     setPanelExpand: (expand: boolean) => void

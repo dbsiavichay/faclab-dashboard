@@ -4,7 +4,7 @@ import { lazy } from 'react'
 
 export const publicRoutes: Routes = [...authRoute]
 
-export const protectedRoutes = [
+export const protectedRoutes: Routes = [
     {
         key: 'home',
         path: '/home',

@@ -1,8 +1,8 @@
-import { forwardRef } from 'react'
-import ReactQuill, { ReactQuillProps } from 'react-quill'
-import 'react-quill/dist/quill.snow.css'
+import { forwardRef, ComponentProps } from 'react'
+import ReactQuill from 'react-quill-new'
+import 'react-quill-new/dist/quill.snow.css'
 
-type RichTextEditorProps = ReactQuillProps
+type RichTextEditorProps = ComponentProps<typeof ReactQuill>
 
 export type RichTextEditorRef = ReactQuill
 

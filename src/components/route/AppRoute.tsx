@@ -33,7 +33,7 @@ const AppRoute = <T extends Record<string, unknown>>({
 
         if (!props.layout && previousLayout && layoutType !== previousLayout) {
             setLayout(previousLayout)
-            setPreviousLayout('')
+            setPreviousLayout(undefined)
         }
     }, [
         layoutType,

@@ -95,6 +95,6 @@ export default function customerContactFakeApi(server: Server) {
 
         customerContactData.splice(contactIndex, 1)
 
-        return new Response(204, {}, null)
+        return new Response(204, {}, {})
     })
 }

@@ -75,10 +75,10 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>((props, ref) => {
 
     const uuid = useUniqueId(id)
 
-    const hoursRef = useRef<HTMLInputElement>()
-    const minutesRef = useRef<HTMLInputElement>()
-    const secondsRef = useRef<HTMLInputElement>()
-    const amPmRef = useRef<HTMLInputElement>()
+    const hoursRef = useRef<HTMLInputElement | null>(null)
+    const minutesRef = useRef<HTMLInputElement | null>(null)
+    const secondsRef = useRef<HTMLInputElement | null>(null)
+    const amPmRef = useRef<HTMLInputElement | null>(null)
     const [time, setTime] = useState(
         getTimeValues(value || (defaultValue as Date), format, amLabel, pmLabel)
     )

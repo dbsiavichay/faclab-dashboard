@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import { Spinner } from '../Spinner'
 import { useConfig } from '../ConfigProvider'
 import type { CommonProps } from '../@types/common'
-import type { ReactNode, ChangeEvent } from 'react'
+import type { ReactNode, ChangeEvent, Ref } from 'react'
 
 export interface SwitcherProps extends CommonProps {
     checked?: boolean
@@ -12,7 +12,7 @@ export interface SwitcherProps extends CommonProps {
     defaultChecked?: boolean
     disabled?: boolean
     isLoading?: boolean
-    labelRef?: string
+    labelRef?: Ref<HTMLLabelElement>
     name?: string
     onChange?: (checked: boolean, e: ChangeEvent<HTMLInputElement>) => void
     readOnly?: boolean

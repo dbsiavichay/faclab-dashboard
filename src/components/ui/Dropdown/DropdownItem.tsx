@@ -34,7 +34,7 @@ export interface DropdownItemProps extends CommonProps {
     asElement?: ElementType
     active?: boolean
     disabled?: boolean
-    submenu?: ReactElement
+    submenu?: ReactElement<Record<string, unknown>>
     eventKey?: string
     onClick?: () => void
     onSelect?: (eventKey: string, e: SyntheticEvent) => void
@@ -66,7 +66,7 @@ const DropdownItem = forwardRef<HTMLElement, DropdownItemProps>(
             ref
         ) as RefObject<HTMLElement>
         const menuitemId = useUniqueId('menu-item-')
-        const submenuRef = useRef(null)
+        const submenuRef = useRef<HTMLDivElement | null>(null)
 
         const dropdown = useContext(DropdownContext)
         const menu = useContext(MenuContext)

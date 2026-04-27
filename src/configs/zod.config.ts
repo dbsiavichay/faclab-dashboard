@@ -1,51 +1,47 @@
 import { z } from 'zod'
 
-const errorMap: z.ZodErrorMap = (issue, ctx) => {
-    switch (issue.code) {
-        case z.ZodIssueCode.invalid_type:
-            if (
-                issue.received === 'undefined' ||
-                issue.received === 'null' ||
-                issue.received === 'nan'
-            ) {
-                return { message: 'Campo requerido' }
-            }
-            if (issue.expected === 'number') {
-                return { message: 'Debe ser un número' }
-            }
-            return { message: 'Tipo inválido' }
-        case z.ZodIssueCode.too_small:
-            if (issue.type === 'string') {
-                if (issue.minimum === 1) {
-                    return { message: 'Campo requerido' }
+z.config({
+    customError: (issue) => {
+        switch (issue.code) {
+            case 'invalid_type':
+                if (
+                    issue.input === undefined ||
+                    issue.input === null ||
+                    (typeof issue.input === 'number' && isNaN(issue.input))
+                ) {
+                    return 'Campo requerido'
                 }
-                return { message: `Mínimo ${issue.minimum} caracteres` }
-            }
-            if (issue.type === 'number') {
-                return {
-                    message: `Debe ser mayor o igual a ${issue.minimum}`,
+                if (issue.expected === 'number') {
+                    return 'Debe ser un número'
                 }
-            }
-            break
-        case z.ZodIssueCode.too_big:
-            if (issue.type === 'string') {
-                return { message: `Máximo ${issue.maximum} caracteres` }
-            }
-            if (issue.type === 'number') {
-                return {
-                    message: `Debe ser menor o igual a ${issue.maximum}`,
+                return 'Tipo inválido'
+            case 'too_small':
+                if (issue.origin === 'string') {
+                    if (issue.minimum === 1) {
+                        return 'Campo requerido'
+                    }
+                    return `Mínimo ${issue.minimum} caracteres`
                 }
-            }
-            break
-        case z.ZodIssueCode.invalid_string:
-            if (issue.validation === 'email') {
-                return { message: 'Correo electrónico inválido' }
-            }
-            break
-        case z.ZodIssueCode.invalid_enum_value:
-            return { message: 'Valor no permitido' }
-    }
-    return { message: ctx.defaultError }
-}
-
-z.setErrorMap(errorMap)
+                if (issue.origin === 'number') {
+                    return `Debe ser mayor o igual a ${issue.minimum}`
+                }
+                break
+            case 'too_big':
+                if (issue.origin === 'string') {
+                    return `Máximo ${issue.maximum} caracteres`
+                }
+                if (issue.origin === 'number') {
+                    return `Debe ser menor o igual a ${issue.maximum}`
+                }
+                break
+            case 'invalid_format':
+                if (issue.format === 'email') {
+                    return 'Correo electrónico inválido'
+                }
+                break
+            case 'invalid_value':
+                return 'Valor no permitido'
+        }
+        return undefined
+    },
+})

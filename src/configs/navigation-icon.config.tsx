@@ -18,6 +18,7 @@ import {
     HiOutlineUserGroup,
     HiOutlineUsers,
 } from 'react-icons/hi'
+import type { JSX } from 'react'
 
 export type NavigationIcons = Record<string, JSX.Element>
 

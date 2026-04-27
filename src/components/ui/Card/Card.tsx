@@ -51,7 +51,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>((props, ref) => {
     const cardHeaderClass = classNames(
         'card-header',
         headerBorder && 'card-header-border',
-        headerExtra && 'card-header-extra',
+        !!headerExtra && 'card-header-extra',
         headerClass
     )
     const cardFooterClass = classNames(

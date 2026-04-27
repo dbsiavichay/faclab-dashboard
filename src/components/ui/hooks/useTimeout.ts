@@ -10,7 +10,7 @@ function useTimeout(
     ms = 0,
     enabled = true
 ): UseTimeoutReturn {
-    const timeout = useRef<ReturnType<typeof setTimeout>>()
+    const timeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
     const callback = useRef(fn)
 
     const clear = useCallback(() => {

@@ -26,6 +26,10 @@ module.exports = {
   },
   rules: {
     "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-unused-expressions": [
+      "error",
+      { "allowShortCircuit": true, "allowTernary": true }
+    ],
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
       "warn",

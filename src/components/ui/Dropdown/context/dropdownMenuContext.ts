@@ -21,7 +21,7 @@ export const DropdownMenuContextProvider = DropdownMenuContext.Provider
 export const DropdownMenuContextConsumer = DropdownMenuContext.Consumer
 
 export function useDropdownMenuContext<E extends HTMLElement>(
-    menuRef: React.RefObject<E>
+    menuRef: React.RefObject<E | null>
 ) {
     const [open, setOpen] = useState(false)
 

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ALL_ROLES, type RoleCode } from '@/constants/roles.constant'
+import { ALL_ROLES } from '@/constants/roles.constant'
 
 export const createUserSchema = z.object({
     username: z
@@ -16,10 +16,10 @@ export const createUserSchema = z.object({
         .min(8, 'Mínimo 8 caracteres')
         .max(128, 'Máximo 128 caracteres'),
     role: z
-        .number({ required_error: 'Selecciona un rol' })
+        .number({ error: 'Selecciona un rol' })
         .refine((v) => (ALL_ROLES as number[]).includes(v), {
-            message: 'Selecciona un rol válido',
-        }) as z.ZodType<RoleCode>,
+            error: 'Selecciona un rol válido',
+        }),
 })
 
 export type CreateUserFormValues = z.infer<typeof createUserSchema>

@@ -5,7 +5,7 @@ import {
     HiXCircle,
 } from 'react-icons/hi'
 import type { TypeAttributes, CommonProps } from '../@types/common'
-import type { ReactNode } from 'react'
+import type { JSX, ReactNode } from 'react'
 
 export interface StatusIconProps extends CommonProps {
     type: TypeAttributes.Status

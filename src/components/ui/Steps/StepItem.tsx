@@ -73,7 +73,7 @@ const StepItem = forwardRef<HTMLDivElement, StepItemProps>((props, ref) => {
 
     const stepConnectClass = classNames(
         'step-connect',
-        title && 'ml-2.5 rtl:mr-2.5',
+        !!title && 'ml-2.5 rtl:mr-2.5',
         vertical && 'step-connect-vertical',
         status === COMPLETE ? `bg-${color}` : `inactive`
     )

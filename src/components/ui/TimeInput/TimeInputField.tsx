@@ -43,7 +43,7 @@ const TimeInputField = forwardRef<HTMLInputElement, TimeInputFieldProps>(
 
         const [digitsEntered, setDigitsEntered] = useState(0)
 
-        const inputRef = useRef<HTMLInputElement>()
+        const inputRef = useRef<HTMLInputElement | null>(null)
 
         const handleFocus = (event: FocusEvent<HTMLInputElement>) => {
             typeof onFocus === 'function' && onFocus(event)

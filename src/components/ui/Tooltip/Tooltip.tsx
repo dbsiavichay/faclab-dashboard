@@ -43,7 +43,7 @@ const Tooltip = (props: TooltipProps) => {
     } = props
 
     const [tooltipOpen, setTooltipOpen] = useState<boolean>(isOpen)
-    const tooltipNode = useRef()
+    const tooltipNode = useRef<HTMLDivElement | null>(null)
 
     const tooltipBackground = 'gray-800'
     const tooltipDarkBackground = 'black'

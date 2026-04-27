@@ -23,10 +23,15 @@ const Simple = ({ children, content, ...rest }: SimpleProps) => {
                     <div className="text-center">
                         {content}
                         {children
-                            ? cloneElement(children as ReactElement, {
-                                  contentClassName: 'text-center',
-                                  ...rest,
-                              })
+                            ? cloneElement(
+                                  children as ReactElement<
+                                      Record<string, unknown>
+                                  >,
+                                  {
+                                      contentClassName: 'text-center',
+                                      ...rest,
+                                  }
+                              )
                             : null}
                     </div>
                 </Card>

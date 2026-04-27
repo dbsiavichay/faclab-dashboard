@@ -1,5 +1,5 @@
 import { LayoutType } from './theme'
-import type { LazyExoticComponent, ReactNode } from 'react'
+import type { JSX, LazyExoticComponent, ReactNode } from 'react'
 
 export interface Meta {
     pageContainerType?: 'default' | 'gutterless' | 'contained'

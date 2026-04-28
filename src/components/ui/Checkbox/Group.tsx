@@ -1,4 +1,4 @@
-import { forwardRef, useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import classNames from 'classnames'
 import { CheckboxGroupContextProvider } from './context'
 import cloneDeep from 'lodash/cloneDeep'
@@ -6,23 +6,25 @@ import remove from 'lodash/remove'
 import shallowEqual from '../utils/shallowEqual'
 import type { CommonProps } from '../@types/common'
 import type { CheckboxGroupValue, CheckboxValue } from './context'
-import type { SyntheticEvent } from 'react'
+import type { Ref, SyntheticEvent } from 'react'
 
 export interface CheckboxGroupProps extends CommonProps {
     color?: string
     name?: string
     onChange?: (value: CheckboxGroupValue, event: SyntheticEvent) => void
+    ref?: Ref<HTMLDivElement>
     value?: CheckboxGroupValue
     vertical?: boolean
 }
 
-const Group = forwardRef<HTMLDivElement, CheckboxGroupProps>((props, ref) => {
+const Group = (props: CheckboxGroupProps) => {
     const {
         children,
         className,
         color,
         name,
         onChange,
+        ref,
         value: valueProp,
         vertical,
         ...rest
@@ -77,7 +79,7 @@ const Group = forwardRef<HTMLDivElement, CheckboxGroupProps>((props, ref) => {
             </div>
         </CheckboxGroupContextProvider>
     )
-})
+}
 
 Group.displayName = 'CheckboxGroup'
 

@@ -1,25 +1,26 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import { CgSpinner } from 'react-icons/cg'
 import type { CommonProps } from '../@types/common'
-import type { ElementType } from 'react'
+import type { ElementType, Ref } from 'react'
 
 export interface SpinnerProps extends CommonProps {
     color?: string
     enableTheme?: boolean
     indicator?: ElementType
     isSpining?: boolean
+    ref?: Ref<HTMLElement>
     size?: string | number
 }
 
-const Spinner = forwardRef((props: SpinnerProps, ref) => {
+const Spinner = (props: SpinnerProps) => {
     const {
         className,
         color,
         enableTheme = true,
         indicator: Component = CgSpinner,
         isSpining = true,
+        ref,
         size = 20,
         style,
         ...rest
@@ -50,7 +51,7 @@ const Spinner = forwardRef((props: SpinnerProps, ref) => {
             {...rest}
         />
     )
-})
+}
 
 Spinner.displayName = 'Spinner'
 

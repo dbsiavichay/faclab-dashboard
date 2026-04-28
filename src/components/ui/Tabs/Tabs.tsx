@@ -1,22 +1,24 @@
-import { forwardRef } from 'react'
+import classNames from 'classnames'
 import { TabsContextProvider } from './context'
 import useControllableState from '../hooks/useControllableState'
-import classNames from 'classnames'
 import type { CommonProps } from '../@types/common'
 import type { TabsVariant, TabsValue } from './context'
+import type { Ref } from 'react'
 
 export interface TabsProps extends CommonProps {
     defaultValue?: TabsValue
     onChange?: (tabValue: TabsValue) => void
+    ref?: Ref<HTMLDivElement>
     value?: TabsValue
     variant?: TabsVariant
 }
 
-const Tabs = forwardRef<HTMLDivElement, TabsProps>((props, ref) => {
+const Tabs = (props: TabsProps) => {
     const {
         className,
         defaultValue,
         onChange,
+        ref,
         value: valueProp,
         variant = 'underline',
         ...rest
@@ -41,7 +43,7 @@ const Tabs = forwardRef<HTMLDivElement, TabsProps>((props, ref) => {
             <div className={tabsClass} {...rest} ref={ref} />
         </TabsContextProvider>
     )
-})
+}
 
 Tabs.displayName = 'Tabs'
 

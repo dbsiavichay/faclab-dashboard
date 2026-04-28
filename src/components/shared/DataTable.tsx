@@ -1,5 +1,4 @@
 import {
-    forwardRef,
     useMemo,
     useRef,
     useEffect,
@@ -26,7 +25,7 @@ import {
     CellContext,
 } from '@tanstack/react-table'
 import type { SkeletonProps } from '@/components/ui/Skeleton'
-import type { ForwardedRef, ChangeEvent } from 'react'
+import type { ForwardedRef, ChangeEvent, Ref } from 'react'
 import type { CheckboxProps } from '@/components/ui/Checkbox'
 
 export type OnSortParam = { order: 'asc' | 'desc' | ''; key: string | number }
@@ -101,9 +100,8 @@ export type DataTableResetHandle = {
     resetSelected: () => void
 }
 
-function _DataTable<T>(
-    props: DataTableProps<T>,
-    ref: ForwardedRef<DataTableResetHandle>
+function DataTable<T>(
+    props: DataTableProps<T> & { ref?: Ref<DataTableResetHandle> }
 ) {
     const {
         skeletonAvatarColumns,
@@ -116,6 +114,7 @@ function _DataTable<T>(
         onSelectChange,
         onSort,
         pageSizes = [10, 25, 50, 100],
+        ref,
         selectable = false,
         skeletonAvatarProps,
         pagingData = {
@@ -243,7 +242,7 @@ function _DataTable<T>(
         table.toggleAllRowsSelected(false)
     }
 
-    useImperativeHandle(ref, () => ({
+    useImperativeHandle(ref as ForwardedRef<DataTableResetHandle>, () => ({
         resetSorting,
         resetSelected,
     }))
@@ -344,12 +343,6 @@ function _DataTable<T>(
         </Loading>
     )
 }
-
-const DataTable = forwardRef(_DataTable) as <T>(
-    props: DataTableProps<T> & {
-        ref?: ForwardedRef<DataTableResetHandle>
-    }
-) => ReturnType<typeof _DataTable>
 
 export type { ColumnDef, Row, CellContext }
 export default DataTable

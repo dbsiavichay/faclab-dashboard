@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import classNames from 'classnames'
 import { SegmentContextProvider } from './context'
 import useControllableState from '../hooks/useControllableState'
@@ -7,16 +7,18 @@ import { useInputGroup } from '../InputGroup/context'
 import { useConfig } from '../ConfigProvider'
 import type { CommonProps, TypeAttributes } from '../@types/common'
 import type { SegmentValue } from './context'
+import type { Ref } from 'react'
 
 export interface SegmentProps extends CommonProps {
     defaultValue?: SegmentValue
     onChange?: (segmentValue: SegmentValue) => void
+    ref?: Ref<HTMLDivElement>
     selectionType?: 'single' | 'multiple'
     size?: TypeAttributes.Size
     value?: SegmentValue
 }
 
-const Segment = forwardRef<HTMLDivElement, SegmentProps>((props, ref) => {
+const Segment = (props: SegmentProps) => {
     const {
         children,
         className,
@@ -24,6 +26,7 @@ const Segment = forwardRef<HTMLDivElement, SegmentProps>((props, ref) => {
         onChange = () => {
             // empty callback
         },
+        ref,
         selectionType = 'single',
         size,
         value: valueProp,
@@ -105,7 +108,7 @@ const Segment = forwardRef<HTMLDivElement, SegmentProps>((props, ref) => {
             </div>
         </SegmentContextProvider>
     )
-})
+}
 
 Segment.displayName = 'Segment'
 

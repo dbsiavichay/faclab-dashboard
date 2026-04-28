@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import { useForm } from '../Form/context'
@@ -31,7 +30,7 @@ type ButtonColor = {
     textColor: string
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
+const Button = (props: ButtonProps) => {
     const {
         active = false,
         block = false,
@@ -41,6 +40,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
         disabled,
         icon,
         loading = false,
+        ref,
         shape = 'round',
         size,
         variant = 'default',
@@ -234,7 +234,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
             {renderChildren()}
         </button>
     )
-})
+}
 
 Button.displayName = 'Button'
 

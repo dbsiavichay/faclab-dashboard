@@ -1,7 +1,6 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { CommonProps, TypeAttributes } from '../@types/common'
-import type { ElementType } from 'react'
+import type { ElementType, Ref } from 'react'
 
 export interface MenuItemProps extends CommonProps {
     asElement?: ElementType
@@ -11,10 +10,11 @@ export interface MenuItemProps extends CommonProps {
     isActive?: boolean
     menuItemHeight?: string | number
     onSelect?: (eventKey: string, e: MouseEvent) => void
+    ref?: Ref<HTMLElement>
     variant?: TypeAttributes.MenuVariant
 }
 
-const MenuItem = forwardRef<HTMLElement, MenuItemProps>((props, ref) => {
+const MenuItem = (props: MenuItemProps) => {
     const {
         asElement: Component = 'div',
         children,
@@ -24,6 +24,7 @@ const MenuItem = forwardRef<HTMLElement, MenuItemProps>((props, ref) => {
         isActive,
         menuItemHeight = 35,
         onSelect,
+        ref,
         style,
         variant = 'light',
         ...rest
@@ -58,7 +59,7 @@ const MenuItem = forwardRef<HTMLElement, MenuItemProps>((props, ref) => {
             {children}
         </Component>
     )
-})
+}
 
 MenuItem.displayName = 'BaseMenuItem'
 

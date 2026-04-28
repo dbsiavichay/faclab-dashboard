@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import { MenuContextProvider } from './context/menuContext'
 import useUncertainRef from '../hooks/useUncertainRef'
 import {
@@ -17,9 +16,10 @@ export interface DropdownInnerMenuProps extends CommonProps {
     hidden?: boolean
     placement?: DropdownPlacement
     menuClass?: string
+    ref?: Ref<HTMLElement>
 }
 
-const Menu = forwardRef<HTMLElement, DropdownInnerMenuProps>((props, ref) => {
+const Menu = (props: DropdownInnerMenuProps) => {
     const {
         children,
         activeKey,
@@ -27,6 +27,7 @@ const Menu = forwardRef<HTMLElement, DropdownInnerMenuProps>((props, ref) => {
         hidden,
         placement,
         menuClass,
+        ref,
         ...rest
     } = props
 
@@ -83,7 +84,7 @@ const Menu = forwardRef<HTMLElement, DropdownInnerMenuProps>((props, ref) => {
             </DropdownMenuContextProvider>
         </MenuContextProvider>
     )
-})
+}
 
 Menu.displayName = 'DropdownInnerMenu'
 

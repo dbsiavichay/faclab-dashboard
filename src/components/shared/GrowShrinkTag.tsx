@@ -1,9 +1,8 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import Tag from '@/components/ui/Tag'
 import { HiArrowUp, HiArrowDown } from 'react-icons/hi'
 import growShrinkColor from '@/utils/growShrinkColor'
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 type GrowShrinkTagProps = {
     value?: number
@@ -11,37 +10,35 @@ type GrowShrinkTagProps = {
     prefix?: ReactNode | string
     suffix?: ReactNode | string
     className?: string
+    ref?: Ref<HTMLDivElement>
 }
 
-const GrowShrinkTag = forwardRef<HTMLDivElement, GrowShrinkTagProps>(
-    (props, ref) => {
-        const { value = 0, className, prefix, suffix, showIcon = true } = props
+const GrowShrinkTag = (props: GrowShrinkTagProps) => {
+    const { value = 0, className, prefix, ref, suffix, showIcon = true } = props
 
-        return (
-            <Tag
-                ref={ref}
-                className={classNames(
-                    'gap-1 font-bold border-0',
-                    growShrinkColor(value, 'text'),
-                    growShrinkColor(value, 'bg'),
-                    className
-                )}
-            >
-                {value !== 0 && (
-                    <span>
-                        {showIcon &&
-                            (value > 0 ? <HiArrowUp /> : <HiArrowDown />)}
-                    </span>
-                )}
+    return (
+        <Tag
+            ref={ref}
+            className={classNames(
+                'gap-1 font-bold border-0',
+                growShrinkColor(value, 'text'),
+                growShrinkColor(value, 'bg'),
+                className
+            )}
+        >
+            {value !== 0 && (
                 <span>
-                    {prefix}
-                    {value}
-                    {suffix}
+                    {showIcon && (value > 0 ? <HiArrowUp /> : <HiArrowDown />)}
                 </span>
-            </Tag>
-        )
-    }
-)
+            )}
+            <span>
+                {prefix}
+                {value}
+                {suffix}
+            </span>
+        </Tag>
+    )
+}
 
 GrowShrinkTag.displayName = 'GrowShrinkTag'
 

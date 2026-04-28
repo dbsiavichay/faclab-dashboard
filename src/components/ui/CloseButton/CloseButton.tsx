@@ -1,17 +1,17 @@
-import { forwardRef } from 'react'
 import { HiX } from 'react-icons/hi'
 import classNames from 'classnames'
 import type { CommonProps } from '../@types/common'
-import type { MouseEvent } from 'react'
+import type { MouseEvent, Ref } from 'react'
 
 export interface CloseButtonProps extends CommonProps {
     absolute?: boolean
     defaultStyle?: boolean
     onClick?: (e: MouseEvent<HTMLSpanElement>) => void
+    ref?: Ref<HTMLElement>
 }
 
-const CloseButton = forwardRef<HTMLElement, CloseButtonProps>((props, ref) => {
-    const { absolute, className, defaultStyle, ...rest } = props
+const CloseButton = (props: CloseButtonProps) => {
+    const { absolute, className, defaultStyle, ref, ...rest } = props
     const closeButtonAbsoluteClass = 'absolute z-10'
 
     const closeButtonClass = classNames(
@@ -26,7 +26,7 @@ const CloseButton = forwardRef<HTMLElement, CloseButtonProps>((props, ref) => {
             <HiX />
         </span>
     )
-})
+}
 
 CloseButton.displayName = 'CloseButton'
 

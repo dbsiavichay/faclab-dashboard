@@ -1,17 +1,18 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import { useForm } from '../Form/context'
 import { useInputGroup } from '../InputGroup/context'
 import { CONTROL_SIZES } from '../utils/constants'
 import type { CommonProps, TypeAttributes } from '../@types/common'
+import type { Ref } from 'react'
 
 export interface AddonProps extends CommonProps {
+    ref?: Ref<HTMLDivElement>
     size?: TypeAttributes.ControlSize
 }
 
-const Addon = forwardRef<HTMLDivElement, AddonProps>((props, ref) => {
-    const { size, children, className } = props
+const Addon = (props: AddonProps) => {
+    const { size, children, className, ref } = props
 
     const { controlSize } = useConfig()
     const formControlSize = useForm()?.size
@@ -31,7 +32,7 @@ const Addon = forwardRef<HTMLDivElement, AddonProps>((props, ref) => {
             {children}
         </div>
     )
-})
+}
 
 Addon.displayName = 'Addon'
 

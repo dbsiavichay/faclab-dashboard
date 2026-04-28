@@ -1,16 +1,17 @@
-import { forwardRef } from 'react'
 import { Scrollbars } from 'react-custom-scrollbars-2'
 import type { ScrollbarProps as ReactCustomScrollbarProps } from 'react-custom-scrollbars-2'
 import type { TypeAttributes } from '../@types/common'
+import type { Ref } from 'react'
 
 export interface ScrollbarProps extends ReactCustomScrollbarProps {
     direction?: TypeAttributes.Direction
+    ref?: Ref<ScrollbarRef>
 }
 
 export type ScrollbarRef = Scrollbars
 
-const ScrollBar = forwardRef<ScrollbarRef, ScrollbarProps>((props, ref) => {
-    const { direction = 'ltr', ...rest } = props
+const ScrollBar = (props: ScrollbarProps) => {
+    const { direction = 'ltr', ref, ...rest } = props
 
     return (
         <Scrollbars
@@ -30,7 +31,7 @@ const ScrollBar = forwardRef<ScrollbarRef, ScrollbarProps>((props, ref) => {
             {...rest}
         />
     )
-})
+}
 
 ScrollBar.displayName = 'ScrollBar'
 

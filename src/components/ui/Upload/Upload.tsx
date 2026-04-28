@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import cloneDeep from 'lodash/cloneDeep'
@@ -8,7 +8,7 @@ import CloseButton from '../CloseButton'
 import Notification from '../Notification/Notification'
 import toast from '../toast/toast'
 import type { CommonProps } from '../@types/common'
-import type { ReactNode, ChangeEvent, MouseEvent } from 'react'
+import type { ReactNode, ChangeEvent, MouseEvent, Ref } from 'react'
 
 export interface UploadProps extends CommonProps {
     accept?: string
@@ -19,6 +19,7 @@ export interface UploadProps extends CommonProps {
     multiple?: boolean
     onChange?: (file: File[], fileList: File[]) => void
     onFileRemove?: (file: File[]) => void
+    ref?: Ref<HTMLDivElement>
     showList?: boolean
     tip?: string | ReactNode
     uploadLimit?: number
@@ -30,7 +31,7 @@ const filesToArray = (files: File[]) =>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Object.keys(files).map((key) => files[key as any])
 
-const Upload = forwardRef<HTMLDivElement, UploadProps>((props, ref) => {
+const Upload = (props: UploadProps) => {
     const {
         accept,
         beforeUpload,
@@ -40,6 +41,7 @@ const Upload = forwardRef<HTMLDivElement, UploadProps>((props, ref) => {
         multiple,
         onChange,
         onFileRemove,
+        ref,
         showList = true,
         tip,
         uploadLimit,
@@ -231,7 +233,7 @@ const Upload = forwardRef<HTMLDivElement, UploadProps>((props, ref) => {
             )}
         </>
     )
-})
+}
 
 Upload.displayName = 'Upload'
 

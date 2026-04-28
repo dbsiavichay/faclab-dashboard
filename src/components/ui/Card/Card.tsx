@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import type { CommonProps } from '../@types/common'
@@ -20,7 +19,7 @@ export interface CardProps
     onClick?: (e: MouseEvent<HTMLDivElement>) => void
 }
 
-const Card = forwardRef<HTMLDivElement, CardProps>((props, ref) => {
+const Card = (props: CardProps) => {
     const { cardBordered } = useConfig()
 
     const {
@@ -37,6 +36,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>((props, ref) => {
         footerClass,
         footerBorder = true,
         onClick,
+        ref,
         ...rest
     } = props
 
@@ -89,7 +89,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>((props, ref) => {
             {footer && <div className={cardFooterClass}>{footer}</div>}
         </div>
     )
-})
+}
 
 Card.displayName = 'Card'
 

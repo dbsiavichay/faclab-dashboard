@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { ComponentPropsWithRef, ElementType } from 'react'
 
@@ -6,11 +5,12 @@ export interface TBodyProps extends ComponentPropsWithRef<'tbody'> {
     asElement?: ElementType
 }
 
-const TBody = forwardRef<HTMLElement, TBodyProps>((props, ref) => {
+const TBody = (props: TBodyProps) => {
     const {
         asElement: Component = 'tbody',
         children,
         className,
+        ref,
         ...rest
     } = props
 
@@ -21,7 +21,7 @@ const TBody = forwardRef<HTMLElement, TBodyProps>((props, ref) => {
             {children}
         </Component>
     )
-})
+}
 
 TBody.displayName = 'TBody'
 

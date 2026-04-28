@@ -1,17 +1,18 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import { useForm } from '../Form/context'
 import { InputGroupContextProvider, InputGroupContextConsumer } from './context'
 
 import type { CommonProps, TypeAttributes } from '../@types/common'
+import type { Ref } from 'react'
 
 export interface InputGroupProps extends CommonProps {
+    ref?: Ref<HTMLDivElement>
     size?: TypeAttributes.ControlSize
 }
 
-const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>((props, ref) => {
-    const { children, className, size } = props
+const InputGroup = (props: InputGroupProps) => {
+    const { children, className, ref, size } = props
 
     const { controlSize } = useConfig()
     const formControlSize = useForm()?.size
@@ -36,7 +37,7 @@ const InputGroup = forwardRef<HTMLDivElement, InputGroupProps>((props, ref) => {
             </InputGroupContextConsumer>
         </InputGroupContextProvider>
     )
-})
+}
 
 InputGroup.displayName = 'InputGroup'
 

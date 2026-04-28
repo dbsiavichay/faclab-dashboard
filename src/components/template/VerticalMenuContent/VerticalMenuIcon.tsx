@@ -3,7 +3,7 @@ import type { ElementType, ComponentPropsWithRef } from 'react'
 
 type VerticalMenuIconProps = {
     icon: string
-    gutter: string
+    gutter?: boolean
 }
 
 export const Icon = <T extends ElementType>({
@@ -16,7 +16,7 @@ export const Icon = <T extends ElementType>({
     return <Component {...props} />
 }
 
-const VerticalMenuIcon = ({ icon, gutter }: VerticalMenuIconProps) => {
+const VerticalMenuIcon = ({ icon, gutter = true }: VerticalMenuIconProps) => {
     if (typeof icon !== 'string' && !icon) {
         return <></>
     }
@@ -26,10 +26,6 @@ const VerticalMenuIcon = ({ icon, gutter }: VerticalMenuIconProps) => {
             {navigationIcon[icon]}
         </span>
     )
-}
-
-VerticalMenuIcon.defaultProps = {
-    gutter: true,
 }
 
 export default VerticalMenuIcon

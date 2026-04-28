@@ -1,4 +1,4 @@
-import { useState, forwardRef } from 'react'
+import { useState } from 'react'
 import classNames from 'classnames'
 import useTimeout from '../hooks/useTimeout'
 import {
@@ -11,7 +11,7 @@ import { motion } from 'framer-motion'
 import CloseButton from '../CloseButton'
 import StatusIcon from '../StatusIcon'
 import type { TypeAttributes, CommonProps } from '../@types/common'
-import type { ReactNode, MouseEvent } from 'react'
+import type { ReactNode, MouseEvent, Ref } from 'react'
 
 export interface AlertProps extends CommonProps {
     closable?: boolean
@@ -20,6 +20,7 @@ export interface AlertProps extends CommonProps {
     duration?: number
     title?: ReactNode | string
     onClose?: (e?: MouseEvent<HTMLDivElement>) => void
+    ref?: Ref<HTMLDivElement>
     rounded?: boolean
     showIcon?: boolean
     triggerByToast?: boolean
@@ -66,7 +67,7 @@ const TYPE_ARRAY: TypeAttributes.Status[] = [
     'warning',
 ]
 
-const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
+const Alert = (props: AlertProps) => {
     const {
         children,
         className,
@@ -76,6 +77,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
         duration = 3000,
         title = null,
         onClose,
+        ref,
         rounded = true,
         showIcon = false,
         triggerByToast = false,
@@ -181,7 +183,7 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
             {closable ? renderClose() : null}
         </motion.div>
     )
-})
+}
 
 Alert.displayName = 'Alert'
 

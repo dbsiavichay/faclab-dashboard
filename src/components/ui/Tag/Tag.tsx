@@ -1,21 +1,22 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { CommonProps } from '../@types/common'
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 export interface TagProps extends CommonProps {
     children: ReactNode
     prefix?: boolean | ReactNode
     prefixClass?: string
+    ref?: Ref<HTMLDivElement>
     suffix?: boolean | ReactNode
     suffixClass?: string
 }
 
-const Tag = forwardRef<HTMLDivElement, TagProps>((props, ref) => {
+const Tag = (props: TagProps) => {
     const {
         className,
         children,
         prefix,
+        ref,
         suffix,
         prefixClass,
         suffixClass,
@@ -39,7 +40,7 @@ const Tag = forwardRef<HTMLDivElement, TagProps>((props, ref) => {
             {typeof suffix === 'object' && suffix}
         </div>
     )
-})
+}
 
 Tag.displayName = 'Tag'
 

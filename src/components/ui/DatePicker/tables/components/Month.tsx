@@ -1,4 +1,4 @@
-import { useMemo, forwardRef, CSSProperties } from 'react'
+import { useMemo, CSSProperties } from 'react'
 import classNames from 'classnames'
 import dayjs from 'dayjs'
 import Day from './Day'
@@ -9,7 +9,7 @@ import type { CommonProps } from '../../../@types/common'
 import type { FirstDayOfWeek } from '../../../@types/date'
 import type { Modifiers, DayKeydownPayload } from './types'
 import type { GetDayPropsReturn } from './props/getDayProps'
-import type { KeyboardEvent, ReactNode, MouseEvent } from 'react'
+import type { KeyboardEvent, ReactNode, MouseEvent, Ref } from 'react'
 
 export interface MonthBaseProps {
     month?: Date
@@ -48,13 +48,14 @@ export interface MonthProps extends CommonProps, MonthBaseProps {
         event: KeyboardEvent<HTMLButtonElement>
     ) => void
     daysRefs: HTMLButtonElement[][]
+    ref?: Ref<HTMLTableElement>
     renderDay?: (date: Date) => ReactNode
     weekdayLabelFormat?: string
 }
 
 const noop = () => false
 
-const Month = forwardRef<HTMLTableElement, MonthProps>((props, ref) => {
+const Month = (props: MonthProps) => {
     const {
         className,
         month,
@@ -80,6 +81,7 @@ const Month = forwardRef<HTMLTableElement, MonthProps>((props, ref) => {
         isDateInRange = noop,
         isDateFirstInRange = noop,
         isDateLastInRange = noop,
+        ref,
         renderDay,
         weekdayLabelFormat,
         weekendDays = [0, 6],
@@ -232,7 +234,7 @@ const Month = forwardRef<HTMLTableElement, MonthProps>((props, ref) => {
             <tbody>{rows}</tbody>
         </table>
     )
-})
+}
 
 Month.displayName = 'Month'
 

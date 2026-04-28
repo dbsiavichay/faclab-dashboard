@@ -1,16 +1,16 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { CommonProps } from '../@types/common'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, Ref } from 'react'
 
 export interface BadgeProps extends CommonProps {
     badgeStyle?: CSSProperties
     content?: string | number
     innerClass?: string
     maxCount?: number
+    ref?: Ref<HTMLElement>
 }
 
-const Badge = forwardRef<HTMLElement, BadgeProps>((props, ref) => {
+const Badge = (props: BadgeProps) => {
     const {
         badgeStyle,
         children,
@@ -18,6 +18,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>((props, ref) => {
         content,
         innerClass,
         maxCount = 99,
+        ref,
         ...rest
     } = props
 
@@ -58,7 +59,7 @@ const Badge = forwardRef<HTMLElement, BadgeProps>((props, ref) => {
     }
 
     return renderBadge()
-})
+}
 
 Badge.displayName = 'Badge'
 

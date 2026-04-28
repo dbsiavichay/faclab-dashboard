@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import {
     HiChevronDown,
@@ -8,7 +7,7 @@ import {
 } from 'react-icons/hi'
 import type { CommonProps } from '../@types/common'
 import type { DropdownPlacement } from '../@types/placement'
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 export interface DropdownToggleSharedProps {
     renderTitle?: ReactNode
@@ -19,6 +18,7 @@ export interface DropdownToggleSharedProps {
 interface DropdownToggleProps extends CommonProps, DropdownToggleSharedProps {
     disabled?: boolean
     id?: string
+    ref?: Ref<HTMLDivElement>
 }
 
 const DropdownToggleDefaultContent = ({
@@ -63,52 +63,51 @@ const DropdownToggleDefaultContent = ({
     )
 }
 
-const DropdownToggle = forwardRef<HTMLDivElement, DropdownToggleProps>(
-    (props, ref) => {
-        const {
-            className,
-            renderTitle,
-            children,
-            placement = 'bottom-start',
-            disabled,
-            toggleClassName,
-            ...rest
-        } = props
+const DropdownToggle = (props: DropdownToggleProps) => {
+    const {
+        className,
+        renderTitle,
+        children,
+        placement = 'bottom-start',
+        disabled,
+        ref,
+        toggleClassName,
+        ...rest
+    } = props
 
-        const toggleClass = 'dropdown-toggle'
-        const disabledClass = 'dropdown-toggle-disabled'
+    const toggleClass = 'dropdown-toggle'
+    const disabledClass = 'dropdown-toggle-disabled'
 
-        const dropdownToggleClass = classNames(
-            toggleClass,
-            className,
-            toggleClassName,
-            disabled && disabledClass
-        )
+    const dropdownToggleClass = classNames(
+        toggleClass,
+        className,
+        toggleClassName,
+        disabled && disabledClass
+    )
 
-        const dropdownToggleDefaultClass = classNames(
-            dropdownToggleClass,
-            'dropdown-toggle-default'
-        )
+    const dropdownToggleDefaultClass = classNames(
+        dropdownToggleClass,
+        'dropdown-toggle-default'
+    )
 
-        if (renderTitle) {
-            return (
-                <div className={dropdownToggleClass} {...rest} ref={ref}>
-                    {renderTitle}
-                </div>
-            )
-        }
-
+    if (renderTitle) {
         return (
-            <div ref={ref} className={dropdownToggleDefaultClass} {...rest}>
-                <span className="flex items-center">
-                    <DropdownToggleDefaultContent placement={placement}>
-                        {children}
-                    </DropdownToggleDefaultContent>
-                </span>
+            <div className={dropdownToggleClass} {...rest} ref={ref}>
+                {renderTitle}
             </div>
         )
     }
-)
+
+    return (
+        <div ref={ref} className={dropdownToggleDefaultClass} {...rest}>
+            <span className="flex items-center">
+                <DropdownToggleDefaultContent placement={placement}>
+                    {children}
+                </DropdownToggleDefaultContent>
+            </span>
+        </div>
+    )
+}
 
 DropdownToggle.displayName = 'DropdownToggle'
 

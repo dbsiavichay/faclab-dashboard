@@ -1,4 +1,4 @@
-import { useRef, forwardRef } from 'react'
+import { useRef } from 'react'
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { Input } from '../Input'
@@ -15,6 +15,7 @@ import type {
     KeyboardEvent,
     MouseEvent,
     ChangeEvent,
+    Ref,
 } from 'react'
 
 dayjs.extend(localizedFormat)
@@ -47,164 +48,157 @@ interface BasePickerProps extends CommonProps, BasePickerSharedProps {
     onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void
     onClear?: (event: MouseEvent<HTMLElement>) => void
     onChange?: (event: ChangeEvent<HTMLInputElement>) => void
+    ref?: Ref<HTMLInputElement>
     setDropdownOpened: (opened: boolean) => void
 }
 
-const BasePicker = forwardRef<HTMLInputElement, BasePickerProps>(
-    (props, ref) => {
-        const {
-            className,
-            clearable = true,
-            clearButton,
-            children,
-            disabled,
-            dropdownOpened,
-            inputtable,
-            inputtableBlurClose = true,
-            inputLabel,
-            inputPrefix,
-            inputSuffix = <HiOutlineCalendar className="text-lg" />,
-            name,
-            onDropdownOpen,
-            onDropdownClose,
-            onBlur,
-            onFocus,
-            onChange,
-            onKeyDown,
-            onClear,
-            placeholder,
-            setDropdownOpened,
-            size,
-            type,
-            form,
-            field,
-        } = props
+const BasePicker = (props: BasePickerProps) => {
+    const {
+        className,
+        clearable = true,
+        clearButton,
+        children,
+        disabled,
+        dropdownOpened,
+        inputtable,
+        inputtableBlurClose = true,
+        inputLabel,
+        inputPrefix,
+        inputSuffix = <HiOutlineCalendar className="text-lg" />,
+        name,
+        onDropdownOpen,
+        onDropdownClose,
+        onBlur,
+        onFocus,
+        onChange,
+        onKeyDown,
+        onClear,
+        placeholder,
+        ref,
+        setDropdownOpened,
+        size,
+        type,
+        form,
+        field,
+    } = props
 
-        const handleInputClick = () => {
-            !inputtable ? toggleDropdown() : openDropdown()
-        }
-
-        const closeDropdown = () => {
-            setDropdownOpened(false)
-            onDropdownClose?.()
-        }
-
-        const suffixIconSlot = clearable ? (
-            clearButton ? (
-                <div role="presentation" onClick={onClear}>
-                    {clearButton}
-                </div>
-            ) : (
-                <CloseButton className="text-base" onClick={onClear} />
-            )
-        ) : (
-            <>{inputSuffix}</>
-        )
-
-        const toggleDropdown = () => {
-            setDropdownOpened(!dropdownOpened)
-            !dropdownOpened ? onDropdownOpen?.() : onDropdownClose?.()
-        }
-
-        const openDropdown = () => {
-            setDropdownOpened(true)
-            onDropdownOpen?.()
-        }
-
-        const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-            typeof onKeyDown === 'function' && onKeyDown(event)
-            if (
-                (event.key === 'Space' || event.key === 'Enter') &&
-                !inputtable
-            ) {
-                event.preventDefault()
-                openDropdown()
-            }
-        }
-
-        const handleInputBlur = (
-            event: FocusEvent<HTMLInputElement, Element>
-        ) => {
-            typeof onBlur === 'function' && onBlur(event)
-            if (inputtable && inputtableBlurClose) {
-                closeDropdown()
-            }
-        }
-
-        const handleInputFocus = (
-            event: FocusEvent<HTMLInputElement, Element>
-        ) => {
-            typeof onFocus === 'function' && onFocus(event)
-            if (inputtable) {
-                openDropdown()
-            }
-        }
-
-        const referenceRef = useRef<HTMLInputElement>(null)
-        const popperRef = useRef(null)
-
-        const { styles, attributes } = usePopper(
-            referenceRef.current,
-            popperRef.current,
-            {
-                placement: 'bottom-start',
-                modifiers: [
-                    {
-                        name: 'offset',
-                        enabled: true,
-                        options: {
-                            offset: [0, 10],
-                        },
-                    },
-                ],
-            }
-        )
-
-        useRootClose(() => closeDropdown(), {
-            triggerTarget: referenceRef,
-            overlayTarget: popperRef,
-            disabled: !dropdownOpened,
-            listenEscape: false,
-        })
-
-        return (
-            <>
-                <Input
-                    ref={useMergedRef(ref, referenceRef)}
-                    form={form}
-                    field={field}
-                    className={className}
-                    placeholder={placeholder}
-                    size={size}
-                    name={name}
-                    value={inputLabel}
-                    readOnly={!inputtable}
-                    suffix={suffixIconSlot}
-                    prefix={inputPrefix}
-                    autoComplete="off"
-                    type={type}
-                    disabled={disabled}
-                    asElement={'input'}
-                    onClick={handleInputClick}
-                    onKeyDown={handleKeyDown}
-                    onBlur={handleInputBlur}
-                    onFocus={handleInputFocus}
-                    onChange={onChange}
-                />
-                <div
-                    ref={popperRef}
-                    className="picker"
-                    style={styles.popper}
-                    {...attributes.popper}
-                >
-                    {dropdownOpened && (
-                        <div className="picker-panel">{children}</div>
-                    )}
-                </div>
-            </>
-        )
+    const handleInputClick = () => {
+        !inputtable ? toggleDropdown() : openDropdown()
     }
-)
+
+    const closeDropdown = () => {
+        setDropdownOpened(false)
+        onDropdownClose?.()
+    }
+
+    const suffixIconSlot = clearable ? (
+        clearButton ? (
+            <div role="presentation" onClick={onClear}>
+                {clearButton}
+            </div>
+        ) : (
+            <CloseButton className="text-base" onClick={onClear} />
+        )
+    ) : (
+        <>{inputSuffix}</>
+    )
+
+    const toggleDropdown = () => {
+        setDropdownOpened(!dropdownOpened)
+        !dropdownOpened ? onDropdownOpen?.() : onDropdownClose?.()
+    }
+
+    const openDropdown = () => {
+        setDropdownOpened(true)
+        onDropdownOpen?.()
+    }
+
+    const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        typeof onKeyDown === 'function' && onKeyDown(event)
+        if ((event.key === 'Space' || event.key === 'Enter') && !inputtable) {
+            event.preventDefault()
+            openDropdown()
+        }
+    }
+
+    const handleInputBlur = (event: FocusEvent<HTMLInputElement, Element>) => {
+        typeof onBlur === 'function' && onBlur(event)
+        if (inputtable && inputtableBlurClose) {
+            closeDropdown()
+        }
+    }
+
+    const handleInputFocus = (event: FocusEvent<HTMLInputElement, Element>) => {
+        typeof onFocus === 'function' && onFocus(event)
+        if (inputtable) {
+            openDropdown()
+        }
+    }
+
+    const referenceRef = useRef<HTMLInputElement>(null)
+    const popperRef = useRef(null)
+
+    const { styles, attributes } = usePopper(
+        referenceRef.current,
+        popperRef.current,
+        {
+            placement: 'bottom-start',
+            modifiers: [
+                {
+                    name: 'offset',
+                    enabled: true,
+                    options: {
+                        offset: [0, 10],
+                    },
+                },
+            ],
+        }
+    )
+
+    useRootClose(() => closeDropdown(), {
+        triggerTarget: referenceRef,
+        overlayTarget: popperRef,
+        disabled: !dropdownOpened,
+        listenEscape: false,
+    })
+
+    return (
+        <>
+            <Input
+                ref={useMergedRef(ref ?? null, referenceRef)}
+                form={form}
+                field={field}
+                className={className}
+                placeholder={placeholder}
+                size={size}
+                name={name}
+                value={inputLabel}
+                readOnly={!inputtable}
+                suffix={suffixIconSlot}
+                prefix={inputPrefix}
+                autoComplete="off"
+                type={type}
+                disabled={disabled}
+                asElement={'input'}
+                onClick={handleInputClick}
+                onKeyDown={handleKeyDown}
+                onBlur={handleInputBlur}
+                onFocus={handleInputFocus}
+                onChange={onChange}
+            />
+            <div
+                ref={popperRef}
+                className="picker"
+                style={styles.popper}
+                {...attributes.popper}
+            >
+                {dropdownOpened && (
+                    <div className="picker-panel">{children}</div>
+                )}
+            </div>
+        </>
+    )
+}
 
 BasePicker.displayName = 'BasePicker'
 

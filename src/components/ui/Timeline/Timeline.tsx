@@ -1,13 +1,15 @@
-import { forwardRef, Children } from 'react'
+import { Children } from 'react'
 import classNames from 'classnames'
 import mapCloneElement from '../utils/mapCloneElement'
-import type { DetailedReactHTMLElement } from 'react'
+import type { DetailedReactHTMLElement, Ref } from 'react'
 import type { CommonProps } from '../@types/common'
 
-export type TimelineProps = CommonProps
+export type TimelineProps = CommonProps & {
+    ref?: Ref<HTMLUListElement>
+}
 
-const Timeline = forwardRef<HTMLUListElement, TimelineProps>((props, ref) => {
-    const { children, className } = props
+const Timeline = (props: TimelineProps) => {
+    const { children, className, ref } = props
 
     const count = Children.count(children)
 
@@ -25,7 +27,7 @@ const Timeline = forwardRef<HTMLUListElement, TimelineProps>((props, ref) => {
             {items}
         </ul>
     )
-})
+}
 
 Timeline.displayName = 'Timeline'
 

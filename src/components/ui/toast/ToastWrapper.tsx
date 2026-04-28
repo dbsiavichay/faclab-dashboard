@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-    forwardRef,
     useState,
     useImperativeHandle,
     useRef,
@@ -87,6 +86,7 @@ export interface ToastProps {
 export interface ToastWrapperProps extends ToastProps {
     messageKey: string
     callback: (ref: HTMLDivElement | null) => void
+    ref?: any
     wrapper?: HTMLElement | (() => HTMLElement)
 }
 
@@ -98,7 +98,7 @@ export interface ToastWrapperInstance {
 }
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-const ToastWrapper = forwardRef((props: ToastWrapperProps, ref: any) => {
+const ToastWrapper = ((props: ToastWrapperProps) => {
     const rootRef = useRef<HTMLDivElement | null>(null)
 
     const {
@@ -109,6 +109,7 @@ const ToastWrapper = forwardRef((props: ToastWrapperProps, ref: any) => {
         messageKey,
         block = false,
         callback,
+        ref,
         ...rest
     } = props
 

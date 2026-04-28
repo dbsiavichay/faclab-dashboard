@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { ComponentPropsWithRef, ElementType } from 'react'
 
@@ -6,8 +5,14 @@ export interface ThProps extends ComponentPropsWithRef<'th'> {
     asElement?: ElementType
 }
 
-const Th = forwardRef<HTMLTableCellElement, ThProps>((props, ref) => {
-    const { asElement: Component = 'th', children, className, ...rest } = props
+const Th = (props: ThProps) => {
+    const {
+        asElement: Component = 'th',
+        children,
+        className,
+        ref,
+        ...rest
+    } = props
 
     const thClass = classNames(Component !== 'th' && 'th', className)
 
@@ -16,7 +21,7 @@ const Th = forwardRef<HTMLTableCellElement, ThProps>((props, ref) => {
             {children}
         </Component>
     )
-})
+}
 
 Th.displayName = 'Th'
 

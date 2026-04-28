@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../../../ConfigProvider'
 import type { ComponentPropsWithRef, ReactNode, MouseEvent } from 'react'
@@ -47,7 +46,7 @@ function getDayTabIndex({
     return firstInMonth ? 0 : -1
 }
 
-const Day = forwardRef<HTMLButtonElement, DayProps>((props, ref) => {
+const Day = (props: DayProps) => {
     const {
         className,
         value,
@@ -63,6 +62,7 @@ const Day = forwardRef<HTMLButtonElement, DayProps>((props, ref) => {
         firstInMonth,
         focusable,
         hideOutOfMonthDates,
+        ref,
         renderDay,
         disabled,
         fullWidth: _fullWidth,
@@ -123,7 +123,7 @@ const Day = forwardRef<HTMLButtonElement, DayProps>((props, ref) => {
                 : value?.getDate()}
         </button>
     )
-})
+}
 
 Day.displayName = 'Day'
 

@@ -1,22 +1,23 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { CommonProps } from '../@types/common'
-import type { ElementType } from 'react'
+import type { ElementType, Ref } from 'react'
 
 export interface SkeletonProps extends CommonProps {
     animation?: boolean
     asElement?: ElementType
     height?: string | number
+    ref?: Ref<HTMLElement>
     variant?: 'block' | 'circle'
     width?: string | number
 }
 
-const Skeleton = forwardRef<ElementType, SkeletonProps>((props, ref) => {
+const Skeleton = (props: SkeletonProps) => {
     const {
         animation = true,
         asElement: Component = 'span',
         className,
         height,
+        ref,
         style,
         variant = 'block',
         width,
@@ -39,7 +40,7 @@ const Skeleton = forwardRef<ElementType, SkeletonProps>((props, ref) => {
             }}
         />
     )
-})
+}
 
 Skeleton.displayName = 'Skeleton'
 

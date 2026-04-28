@@ -1,4 +1,4 @@
-import { useRef, forwardRef } from 'react'
+import { useRef } from 'react'
 import classNames from 'classnames'
 import useMergedRef from '../hooks/useMergeRef'
 import type { CommonProps } from '../@types/common'
@@ -17,12 +17,21 @@ interface AmPmInputProps extends CommonProps {
     onFocus?: (e: FocusEvent<HTMLInputElement>) => void
     placeholder?: string
     pmLabel?: string
+    ref?: Ref<HTMLInputElement>
     value: string | number | readonly string[]
 }
 
-const AmPmInput = forwardRef<HTMLInputElement, AmPmInputProps>((props, ref) => {
-    const { className, onChange, onFocus, value, amLabel, pmLabel, ...rest } =
-        props
+const AmPmInput = (props: AmPmInputProps) => {
+    const {
+        className,
+        onChange,
+        onFocus,
+        ref,
+        value,
+        amLabel,
+        pmLabel,
+        ...rest
+    } = props
 
     const inputRef = useRef<HTMLInputElement | null>(null)
 
@@ -66,7 +75,7 @@ const AmPmInput = forwardRef<HTMLInputElement, AmPmInputProps>((props, ref) => {
 
     return (
         <input
-            ref={useMergedRef(inputRef as Ref<HTMLInputElement>, ref)}
+            ref={useMergedRef(inputRef as Ref<HTMLInputElement>, ref ?? null)}
             type="text"
             value={value}
             className={classNames('time-input-field', 'am-pm-input', className)}
@@ -77,7 +86,7 @@ const AmPmInput = forwardRef<HTMLInputElement, AmPmInputProps>((props, ref) => {
             {...rest}
         />
     )
-})
+}
 
 AmPmInput.displayName = 'AmPmInput'
 

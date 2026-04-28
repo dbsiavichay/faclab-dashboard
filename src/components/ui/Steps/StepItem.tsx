@@ -1,10 +1,9 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import { HiCheck, HiX } from 'react-icons/hi'
 import { STEPS_STATUS } from '../utils/constants'
 import type { CommonProps, StepStatus } from '../@types/common'
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 const { COMPLETE, PENDING, IN_PROGRESS, ERROR } = STEPS_STATUS
 
@@ -20,19 +19,21 @@ export interface StepItemProps extends CommonProps {
     description?: ReactNode | string
     isLast?: boolean
     onStepChange?: () => void
+    ref?: Ref<HTMLDivElement>
     status?: StepStatus
     stepNumber?: number
     title?: ReactNode | string
     vertical?: boolean
 }
 
-const StepItem = forwardRef<HTMLDivElement, StepItemProps>((props, ref) => {
+const StepItem = (props: StepItemProps) => {
     const {
         className,
         customIcon,
         description,
         isLast,
         onStepChange,
+        ref,
         status,
         stepNumber,
         title,
@@ -114,7 +115,7 @@ const StepItem = forwardRef<HTMLDivElement, StepItemProps>((props, ref) => {
             {!isLast && <div className={stepConnectClass} />}
         </div>
     )
-})
+}
 
 StepItem.displayName = 'StepItem'
 

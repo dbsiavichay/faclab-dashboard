@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import Line from './Line'
 import Circle from './Circle'
@@ -6,7 +5,7 @@ import { useConfig } from '../ConfigProvider'
 import { SIZES, DIRECTIONS } from '../utils/constants'
 import type { CommonProps } from '../@types/common'
 import type { StrokeLinecap, GapPosition } from './Circle'
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 export interface ProgressProps extends CommonProps {
     customInfo?: string | ReactNode
@@ -14,6 +13,7 @@ export interface ProgressProps extends CommonProps {
     gapDegree?: number
     gapPosition?: GapPosition
     percent?: number
+    ref?: Ref<HTMLDivElement>
     showInfo?: boolean
     size?: 'sm' | 'md'
     strokeLinecap?: StrokeLinecap
@@ -22,7 +22,7 @@ export interface ProgressProps extends CommonProps {
     variant?: 'line' | 'circle'
 }
 
-const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) => {
+const Progress = (props: ProgressProps) => {
     const {
         className,
         customInfo,
@@ -30,6 +30,7 @@ const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) => {
         gapDegree = 0,
         gapPosition = DIRECTIONS.TOP,
         percent = 0,
+        ref,
         showInfo = true,
         size = SIZES.MD,
         strokeLinecap = 'round',
@@ -101,7 +102,7 @@ const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) => {
             {renderProgress()}
         </div>
     )
-})
+}
 
 Progress.displayName = 'Progress'
 

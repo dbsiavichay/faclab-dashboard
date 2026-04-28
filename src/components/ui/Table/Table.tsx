@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { ComponentPropsWithRef, ElementType } from 'react'
 
@@ -10,7 +9,7 @@ export interface TableProps extends ComponentPropsWithRef<'table'> {
     overflow?: boolean
 }
 
-const Table = forwardRef<HTMLElement, TableProps>((props, ref) => {
+const Table = (props: TableProps) => {
     const {
         asElement: Component = 'table',
         borderlessRow,
@@ -19,6 +18,7 @@ const Table = forwardRef<HTMLElement, TableProps>((props, ref) => {
         compact = false,
         hoverable = true,
         overflow = true,
+        ref,
         ...rest
     } = props
 
@@ -37,7 +37,7 @@ const Table = forwardRef<HTMLElement, TableProps>((props, ref) => {
             </Component>
         </div>
     )
-})
+}
 
 Table.displayName = 'Table'
 

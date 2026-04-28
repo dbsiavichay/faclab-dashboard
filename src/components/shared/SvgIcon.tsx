@@ -1,9 +1,13 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { CommonProps } from '@/@types/common'
+import type { Ref } from 'react'
 
-const SvgIcon = forwardRef<HTMLSpanElement, CommonProps>((props, ref) => {
-    const { children, className, ...rest } = props
+type SvgIconProps = CommonProps & {
+    ref?: Ref<HTMLSpanElement>
+}
+
+const SvgIcon = (props: SvgIconProps) => {
+    const { children, className, ref, ...rest } = props
 
     return (
         <span
@@ -14,7 +18,7 @@ const SvgIcon = forwardRef<HTMLSpanElement, CommonProps>((props, ref) => {
             {children}
         </span>
     )
-})
+}
 
 SvgIcon.displayName = 'SvgIcon'
 

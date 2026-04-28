@@ -1,4 +1,4 @@
-import { forwardRef, Ref } from 'react'
+import { Ref } from 'react'
 import classNames from 'classnames'
 import ReactSelect from 'react-select'
 import CreatableSelect from 'react-select/creatable'
@@ -114,13 +114,14 @@ export interface SelectProps<
     componentAs?: ReactSelect | CreatableSelect | AsyncSelect
 }
 
-function _Select<
+function Select<
     Option,
     IsMulti extends boolean = false,
     Group extends GroupBase<Option> = GroupBase<Option>
 >(
-    props: SelectProps<Option, IsMulti, Group>,
-    ref: ForwardedRef<ReactSelect | CreatableSelect | AsyncSelect>
+    props: SelectProps<Option, IsMulti, Group> & {
+        ref?: ForwardedRef<ReactSelect | CreatableSelect | AsyncSelect>
+    }
 ) {
     const {
         size,
@@ -130,6 +131,7 @@ function _Select<
         field,
         components,
         componentAs: Component = ReactSelect,
+        ref,
         ...rest
     } = props
 
@@ -240,15 +242,5 @@ function _Select<
         />
     )
 }
-
-const Select = forwardRef(_Select) as <
-    Option,
-    IsMulti extends boolean = false,
-    Group extends GroupBase<Option> = GroupBase<Option>
->(
-    props: SelectProps<Option, IsMulti, Group> & {
-        ref?: ForwardedRef<ReactSelect | CreatableSelect | AsyncSelect>
-    }
-) => ReturnType<typeof _Select>
 
 export default Select

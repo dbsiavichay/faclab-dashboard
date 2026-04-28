@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useCallback, useState } from 'react'
+import { useContext, useCallback, useState } from 'react'
 import classNames from 'classnames'
 import CheckboxGroupContext from './context'
 import { useConfig } from '../ConfigProvider'
@@ -15,12 +15,13 @@ export interface CheckboxProps extends CommonProps {
     name?: string
     onChange?: (values: boolean, e: ChangeEvent<HTMLInputElement>) => void
     readOnly?: boolean
+    ref?: Ref<HTMLInputElement>
     value?: CheckboxValue
     // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     field?: any
 }
 
-const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
+const Checkbox = (props: CheckboxProps) => {
     const {
         name: nameContext,
         value: groupValue,
@@ -40,6 +41,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
         value,
         checked: controlledChecked,
         labelRef,
+        ref,
         field,
         ...rest
     } = props
@@ -162,7 +164,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
             ) : null}
         </label>
     )
-})
+}
 
 Checkbox.displayName = 'Checkbox'
 

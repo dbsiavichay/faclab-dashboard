@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { forwardRef, useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import classNames from 'classnames'
 import { RadioGroupContextProvider } from './context'
 import type { CommonProps } from '../@types/common'
+import type { Ref } from 'react'
 
 export interface RadioGroupProps extends CommonProps {
     color?: string
@@ -10,17 +11,19 @@ export interface RadioGroupProps extends CommonProps {
     name?: string
     onChange?: (values: any, e: MouseEvent) => void
     radioGutter?: number
+    ref?: Ref<HTMLDivElement>
     value?: any
     vertical?: boolean
 }
 
-const Group = forwardRef<HTMLDivElement, RadioGroupProps>((props, ref) => {
+const Group = (props: RadioGroupProps) => {
     const {
         color,
         disabled,
         name,
         onChange,
         radioGutter = 3,
+        ref,
         value: valueProp,
         vertical = false,
         className,
@@ -71,7 +74,7 @@ const Group = forwardRef<HTMLDivElement, RadioGroupProps>((props, ref) => {
             </div>
         </RadioGroupContextProvider>
     )
-})
+}
 
 Group.displayName = 'RadioGroup'
 

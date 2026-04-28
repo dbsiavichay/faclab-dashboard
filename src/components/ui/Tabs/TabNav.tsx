@@ -1,25 +1,26 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useTabs } from './context'
 import useCallbackRef from '../hooks/useCallbackRef'
 import { useConfig } from '../ConfigProvider'
 import type { CommonProps } from '../@types/common'
 import type { TabsValue } from './context'
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 
 export interface TabNavProps extends CommonProps {
     disabled?: boolean
     icon?: string | ReactNode
+    ref?: Ref<HTMLDivElement>
     value: TabsValue
 }
 
-const TabNav = forwardRef<HTMLDivElement, TabNavProps>((props, ref) => {
+const TabNav = (props: TabNavProps) => {
     const {
         value: valueProp,
         disabled,
         className,
         icon,
         children,
+        ref,
         ...rest
     } = props
 
@@ -67,7 +68,7 @@ const TabNav = forwardRef<HTMLDivElement, TabNavProps>((props, ref) => {
             {children}
         </div>
     )
-})
+}
 
 TabNav.displayName = 'TabNav'
 

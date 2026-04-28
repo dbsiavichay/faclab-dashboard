@@ -1,11 +1,4 @@
-import {
-    forwardRef,
-    useState,
-    useMemo,
-    useContext,
-    useCallback,
-    useEffect,
-} from 'react'
+import { useState, useMemo, useContext, useCallback, useEffect } from 'react'
 import classNames from 'classnames'
 import RadioGroupContext from './context'
 import { useConfig } from '../ConfigProvider'
@@ -23,6 +16,7 @@ export interface RadioProps
     name?: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onChange?: (value: any, e: MouseEvent) => void
+    ref?: Ref<HTMLInputElement>
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value?: any
     vertical?: boolean
@@ -31,7 +25,7 @@ export interface RadioProps
     field?: any
 }
 
-const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
+const Radio = (props: RadioProps) => {
     const {
         name: nameContext,
         disabled: disabledContext,
@@ -54,6 +48,7 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
         name = nameContext,
         onChange,
         readOnly,
+        ref,
         value,
         vertical = verticalContext,
         ...rest
@@ -148,7 +143,7 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
             ) : null}
         </label>
     )
-})
+}
 
 Radio.displayName = 'Radio'
 

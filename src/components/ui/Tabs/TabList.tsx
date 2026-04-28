@@ -1,12 +1,14 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import { useTabs } from './context'
 import type { CommonProps } from '../@types/common'
+import type { Ref } from 'react'
 
-export type TabListProps = CommonProps
+export type TabListProps = CommonProps & {
+    ref?: Ref<HTMLDivElement>
+}
 
-const TabList = forwardRef<HTMLDivElement, TabListProps>((props, ref) => {
-    const { className, children, ...rest } = props
+const TabList = (props: TabListProps) => {
+    const { className, children, ref, ...rest } = props
 
     const { variant } = useTabs()
 
@@ -21,7 +23,7 @@ const TabList = forwardRef<HTMLDivElement, TabListProps>((props, ref) => {
             {children}
         </div>
     )
-})
+}
 
 TabList.displayName = 'TabList'
 

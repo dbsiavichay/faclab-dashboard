@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useCallback } from 'react'
+import { useRef, useCallback } from 'react'
 import DropdownMenu from './DropdownMenu'
 import DropdownToggle from './DropdownToggle'
 import useUniqueId from '../hooks/useUniqueId'
@@ -13,7 +13,7 @@ import { PLACEMENT } from '../utils/constants'
 import type { CommonProps } from '../@types/common'
 import type { DropdownToggleSharedProps } from './DropdownToggle'
 import type { DropdownPlacement } from '../@types/placement'
-import type { SyntheticEvent, CSSProperties } from 'react'
+import type { SyntheticEvent, CSSProperties, Ref } from 'react'
 
 export interface DropdownProps extends CommonProps, DropdownToggleSharedProps {
     title?: string
@@ -21,6 +21,7 @@ export interface DropdownProps extends CommonProps, DropdownToggleSharedProps {
     menuStyle?: CSSProperties
     disabled?: boolean
     activeKey?: string
+    ref?: Ref<HTMLDivElement>
     trigger?: 'click' | 'hover' | 'context'
     onClick?: (event: SyntheticEvent) => void
     onMouseEnter?: (event: SyntheticEvent) => void
@@ -38,7 +39,7 @@ const CLICK = 'click'
 const HOVER = 'hover'
 const CONTEXT = 'context'
 
-const Dropdown = forwardRef<HTMLDivElement, DropdownProps>((props, ref) => {
+const Dropdown = (props: DropdownProps) => {
     const {
         title,
         children,
@@ -48,6 +49,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>((props, ref) => {
         renderTitle,
         placement = BOTTOM_START,
         activeKey,
+        ref,
         toggleClassName,
         trigger = 'click',
         style,
@@ -201,7 +203,7 @@ const Dropdown = forwardRef<HTMLDivElement, DropdownProps>((props, ref) => {
             </div>
         </DropdownContext.Provider>
     )
-})
+}
 
 Dropdown.displayName = 'Dropdown'
 

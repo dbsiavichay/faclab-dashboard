@@ -1,4 +1,4 @@
-import { useState, useRef, forwardRef } from 'react'
+import { useState, useRef } from 'react'
 import useUniqueId from '../hooks/useUniqueId'
 import useMergedRef from '../hooks/useMergeRef'
 import useDidUpdate from '../hooks/useDidUpdate'
@@ -32,6 +32,7 @@ export interface TimeInputProps extends CommonProps {
     onChange?: (value: Value) => void
     pmLabel?: string
     prefix?: string | ReactNode
+    ref?: Ref<HTMLInputElement>
     showSeconds?: boolean
     size?: TypeAttributes.ControlSize
     suffix?: string | ReactNode
@@ -45,7 +46,7 @@ export interface TimeInputProps extends CommonProps {
     form?: any
 }
 
-const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>((props, ref) => {
+const TimeInput = (props: TimeInputProps) => {
     const {
         amLabel = 'am',
         amPmPlaceholder = 'am',
@@ -63,6 +64,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>((props, ref) => {
         onChange,
         pmLabel = 'pm',
         prefix,
+        ref,
         showSeconds = false,
         size = 'md',
         style,
@@ -188,7 +190,10 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>((props, ref) => {
         >
             <div className="time-input-wrapper">
                 <TimeInputField
-                    ref={useMergedRef(hoursRef as Ref<HTMLInputElement>, ref)}
+                    ref={useMergedRef(
+                        hoursRef as Ref<HTMLInputElement>,
+                        ref ?? null
+                    )}
                     withSeparator
                     value={time.hours}
                     setValue={(val) =>
@@ -247,7 +252,7 @@ const TimeInput = forwardRef<HTMLInputElement, TimeInputProps>((props, ref) => {
             </div>
         </Input>
     )
-})
+}
 
 TimeInput.displayName = 'TimeInput'
 

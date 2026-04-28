@@ -1,4 +1,3 @@
-import { forwardRef } from 'react'
 import classNames from 'classnames'
 import type { ComponentPropsWithRef, ElementType } from 'react'
 
@@ -6,11 +5,12 @@ export interface THeadProps extends ComponentPropsWithRef<'thead'> {
     asElement?: ElementType
 }
 
-const THead = forwardRef<HTMLElement, THeadProps>((props, ref) => {
+const THead = (props: THeadProps) => {
     const {
         asElement: Component = 'thead',
         children,
         className,
+        ref,
         ...rest
     } = props
 
@@ -21,7 +21,7 @@ const THead = forwardRef<HTMLElement, THeadProps>((props, ref) => {
             {children}
         </Component>
     )
-})
+}
 
 THead.displayName = 'THead'
 

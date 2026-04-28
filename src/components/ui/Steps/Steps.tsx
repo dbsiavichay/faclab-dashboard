@@ -1,20 +1,22 @@
-import { forwardRef, Children } from 'react'
+import { Children } from 'react'
 import classNames from 'classnames'
 import { STEPS_STATUS } from '../utils/constants'
 import mapCloneElement from '../utils/mapCloneElement'
 import type { CommonProps, StepStatus } from '../@types/common'
 import type { StepItemProps } from './StepItem'
+import type { Ref } from 'react'
 
 const { COMPLETE, PENDING, IN_PROGRESS, ERROR } = STEPS_STATUS
 
 export interface StepsProps extends CommonProps {
     current?: number
     onChange?: (index: number) => void
+    ref?: Ref<HTMLDivElement>
     status?: StepStatus
     vertical?: boolean
 }
 
-const Steps = forwardRef<HTMLDivElement, StepsProps>((props, ref) => {
+const Steps = (props: StepsProps) => {
     const {
         className,
         children,
@@ -22,6 +24,7 @@ const Steps = forwardRef<HTMLDivElement, StepsProps>((props, ref) => {
         current = 0,
         status = IN_PROGRESS,
         onChange,
+        ref,
         ...rest
     } = props
 
@@ -77,7 +80,7 @@ const Steps = forwardRef<HTMLDivElement, StepsProps>((props, ref) => {
             {items}
         </div>
     )
-})
+}
 
 Steps.displayName = 'Steps'
 

@@ -1,4 +1,4 @@
-import { forwardRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import classNames from 'classnames'
 import { Spinner } from '../Spinner'
 import { useConfig } from '../ConfigProvider'
@@ -16,12 +16,13 @@ export interface SwitcherProps extends CommonProps {
     name?: string
     onChange?: (checked: boolean, e: ChangeEvent<HTMLInputElement>) => void
     readOnly?: boolean
+    ref?: Ref<HTMLInputElement>
     unCheckedContent?: string | ReactNode
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     field?: any
 }
 
-const Switcher = forwardRef<HTMLInputElement, SwitcherProps>((props, ref) => {
+const Switcher = (props: SwitcherProps) => {
     const {
         checked,
         checkedContent,
@@ -34,6 +35,7 @@ const Switcher = forwardRef<HTMLInputElement, SwitcherProps>((props, ref) => {
         name,
         onChange,
         readOnly,
+        ref,
         unCheckedContent,
         field,
         ...rest
@@ -131,7 +133,7 @@ const Switcher = forwardRef<HTMLInputElement, SwitcherProps>((props, ref) => {
             </span>
         </label>
     )
-})
+}
 
 Switcher.displayName = 'Switcher'
 

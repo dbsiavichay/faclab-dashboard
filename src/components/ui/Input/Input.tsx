@@ -73,10 +73,8 @@ const Input = (props: InputProps) => {
         return val
     }
 
-    if ('value' in props) {
-        rest.value = fixControlledValue(props.value)
-        delete rest.defaultValue
-    }
+    const valueOverride =
+        'value' in props ? { value: fixControlledValue(props.value) } : null
 
     const isInvalid = useMemo(() => {
         let validate = false
@@ -168,13 +166,15 @@ const Input = (props: InputProps) => {
         return gutterStyle
     }
 
+    const { defaultValue: _restDefaultValue, ...restWithoutDefault } = rest
     const inputProps = {
         className: !unstyle ? inputClass : '',
         disabled,
         type,
         ref,
         ...field,
-        ...rest,
+        ...(valueOverride ? restWithoutDefault : rest),
+        ...(valueOverride ?? {}),
     }
 
     const renderTextArea = <textarea style={style} {...inputProps}></textarea>

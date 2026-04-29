@@ -9,7 +9,7 @@ module.exports = {
     "prettier",
     "eslint-config-prettier",
   ],
-  plugins: ["react-refresh", "unused-imports"],
+  plugins: ["react-refresh", "unused-imports", "react-compiler"],
   settings: {
     react: {
       version: "detect",
@@ -25,6 +25,7 @@ module.exports = {
     }
   },
   rules: {
+    "react-compiler/react-compiler": "warn",
     "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/no-unused-expressions": [
       "error",

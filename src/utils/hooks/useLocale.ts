@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-// eslint-disable-next-line import/no-named-as-default
 import i18n from 'i18next'
 import dayjs from 'dayjs'
 import { dateLocales } from '@/locales'

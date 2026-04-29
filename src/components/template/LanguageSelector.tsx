@@ -7,7 +7,6 @@ import withHeaderItem from '@/utils/hoc/withHeaderItem'
 import { useLocaleStore } from '@/stores'
 import { dateLocales } from '@/locales'
 import dayjs from 'dayjs'
-// eslint-disable-next-line import/no-named-as-default
 import i18n from 'i18next'
 import { HiCheck } from 'react-icons/hi'
 import type { CommonProps } from '@/@types/common'

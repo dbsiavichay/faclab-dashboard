@@ -1,6 +1,6 @@
-/* eslint-disable no-undef */
 /** @type {import('tailwindcss').Config} */
 const colors = require('tailwindcss/colors')
+
 const safeListFile = 'safelist.txt'
 
 const SAFELIST_COLORS = 'safelistColors'
@@ -95,7 +95,6 @@ module.exports = {
 			},
 		},
 	plugins: [
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		require('./twSafelistGenerator')({
             path: safeListFile,
             patterns: [

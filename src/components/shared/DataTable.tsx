@@ -289,7 +289,6 @@ function DataTable<T>(
                 </THead>
                 {loading && data.length === 0 ? (
                     <TableRowSkeleton
-                        // eslint-disable-next-line  @typescript-eslint/no-explicit-any
                         columns={(finalColumns as Array<T>).length}
                         rows={pagingData.pageSize}
                         avatarInColumns={skeletonAvatarColumns}

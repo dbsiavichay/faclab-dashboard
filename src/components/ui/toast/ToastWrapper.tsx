@@ -16,7 +16,6 @@ import { createRoot } from 'react-dom/client'
 import { NotificationPlacement } from '../@types/placement'
 import type { DetailedReactHTMLElement, ReactNode } from 'react'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type NodeProps = DetailedReactHTMLElement<any, HTMLDivElement>
 
 type Message = {
@@ -97,7 +96,6 @@ export interface ToastWrapperInstance {
     removeAll: () => void
 }
 
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 const ToastWrapper = ((props: ToastWrapperProps) => {
     const rootRef = useRef<HTMLDivElement | null>(null)
 

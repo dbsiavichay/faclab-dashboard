@@ -128,6 +128,7 @@ export function useLogout() {
         onSuccess: () => {
             if (refreshTimer) {
                 clearTimeout(refreshTimer)
+                // eslint-disable-next-line react-compiler/react-compiler
                 refreshTimer = null
             }
             clear()

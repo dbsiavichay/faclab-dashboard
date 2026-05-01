@@ -6,7 +6,7 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useResetUserPassword } from '@/hooks/useAdminUsers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { AdminUserResponse } from '@/@types/auth'
@@ -41,7 +41,7 @@ const ResetPasswordModal = ({
     const {
         register,
         handleSubmit,
-        watch,
+        control,
         setValue,
         reset,
         formState: { errors },
@@ -50,7 +50,7 @@ const ResetPasswordModal = ({
         defaultValues: { password: '' },
     })
 
-    const password = watch('password')
+    const password = useWatch({ control, name: 'password' })
 
     useEffect(() => {
         if (open) {

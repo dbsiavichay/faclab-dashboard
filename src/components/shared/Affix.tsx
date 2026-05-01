@@ -1,4 +1,4 @@
-import { useEffect, createRef } from 'react'
+import { useEffect, useRef } from 'react'
 import classNames from 'classnames'
 import type { CommonProps } from '@/@types/common'
 
@@ -15,12 +15,12 @@ interface AffixProps extends CommonProps {
 function Affix(props: AffixProps) {
     const { offset = 0, className, children } = props
 
-    const ref = createRef<HTMLDivElement>()
-    const prevStyle: AffixStyles = {
+    const ref = useRef<HTMLDivElement>(null)
+    const prevStyleRef = useRef<AffixStyles>({
         position: '',
         top: '',
         width: '',
-    }
+    })
 
     const checkPosition = (distanceToBody: number, width?: number) => {
         const scrollTop = window.scrollY
@@ -28,8 +28,8 @@ function Affix(props: AffixProps) {
         if (ref.current) {
             if (distanceToBody - scrollTop < offset) {
                 if (ref.current.style.position !== 'fixed') {
-                    for (const key in prevStyle) {
-                        prevStyle[key as keyof AffixStyles] =
+                    for (const key in prevStyleRef.current) {
+                        prevStyleRef.current[key as keyof AffixStyles] =
                             ref.current.style[key as keyof AffixStyles]
                     }
                     ref.current.style.position = 'fixed'
@@ -37,9 +37,9 @@ function Affix(props: AffixProps) {
                     ref.current.style.top = offset + 'px'
                 }
             } else {
-                for (const key in prevStyle) {
+                for (const key in prevStyleRef.current) {
                     ref.current.style[key as keyof AffixStyles] =
-                        prevStyle[key as keyof AffixStyles]
+                        prevStyleRef.current[key as keyof AffixStyles]
                 }
             }
         }

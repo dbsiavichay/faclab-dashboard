@@ -21,7 +21,7 @@ export interface TimeInputRangeProps extends CommonProps {
     id?: string
     invalid?: boolean
     name?: string
-    nextRef?: RefObject<HTMLInputElement>
+    nextRef?: RefObject<HTMLInputElement | null>
     onChange?: (value: Value) => void
     pmLabel?: string
     prefix?: string | ReactNode
@@ -128,7 +128,7 @@ const TimeInputRange = (props: TimeInputRangeProps) => {
                     unstyle
                     value={_value[0]}
                     name={name}
-                    nextRef={toTimeRef as RefObject<HTMLInputElement>}
+                    nextRef={toTimeRef}
                     id={uuid}
                     clearable={false}
                     suffix={null}

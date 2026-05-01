@@ -4,7 +4,7 @@ import useResponsive from '@/utils/hooks/useResponsive'
 import NavToggle from '@/components/shared/NavToggle'
 import type { CommonProps } from '@/@types/common'
 
-const _SideNavToggle = ({ className }: CommonProps) => {
+const SideNavToggle = ({ className }: CommonProps) => {
     const sideNavCollapse = useThemeStore(
         (state) => state.layout.sideNavCollapse
     )
@@ -29,6 +29,6 @@ const _SideNavToggle = ({ className }: CommonProps) => {
     )
 }
 
-const SideNavToggle = withHeaderItem(_SideNavToggle)
+const SideNavToggleHeader = withHeaderItem(SideNavToggle)
 
-export default SideNavToggle
+export default SideNavToggleHeader

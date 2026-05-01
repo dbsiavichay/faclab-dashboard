@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useState } from 'react'
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import { Input } from '../Input'
@@ -135,29 +135,28 @@ const BasePicker = (props: BasePickerProps) => {
         }
     }
 
-    const referenceRef = useRef<HTMLInputElement>(null)
-    const popperRef = useRef(null)
-
-    const { styles, attributes } = usePopper(
-        referenceRef.current,
-        popperRef.current,
-        {
-            placement: 'bottom-start',
-            modifiers: [
-                {
-                    name: 'offset',
-                    enabled: true,
-                    options: {
-                        offset: [0, 10],
-                    },
-                },
-            ],
-        }
+    const [referenceElement, setReferenceElement] =
+        useState<HTMLInputElement | null>(null)
+    const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
+        null
     )
 
+    const { styles, attributes } = usePopper(referenceElement, popperElement, {
+        placement: 'bottom-start',
+        modifiers: [
+            {
+                name: 'offset',
+                enabled: true,
+                options: {
+                    offset: [0, 10],
+                },
+            },
+        ],
+    })
+
     useRootClose(() => closeDropdown(), {
-        triggerTarget: referenceRef,
-        overlayTarget: popperRef,
+        triggerTarget: referenceElement,
+        overlayTarget: popperElement,
         disabled: !dropdownOpened,
         listenEscape: false,
     })
@@ -165,7 +164,7 @@ const BasePicker = (props: BasePickerProps) => {
     return (
         <>
             <Input
-                ref={useMergedRef(ref ?? null, referenceRef)}
+                ref={useMergedRef(ref ?? null, setReferenceElement)}
                 form={form}
                 field={field}
                 className={className}
@@ -187,7 +186,7 @@ const BasePicker = (props: BasePickerProps) => {
                 onChange={onChange}
             />
             <div
-                ref={popperRef}
+                ref={setPopperElement}
                 className="picker"
                 style={styles.popper}
                 {...attributes.popper}

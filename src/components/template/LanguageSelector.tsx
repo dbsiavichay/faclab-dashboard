@@ -13,7 +13,7 @@ import type { CommonProps } from '@/@types/common'
 
 const languageList = [{ label: 'English', value: 'en', flag: 'us' }]
 
-const _LanguageSelector = ({ className }: CommonProps) => {
+const LanguageSelector = ({ className }: CommonProps) => {
     const [loading, setLoading] = useState(false)
     const { currentLang, setLang } = useLocaleStore()
 
@@ -84,6 +84,6 @@ const _LanguageSelector = ({ className }: CommonProps) => {
     )
 }
 
-const LanguageSelector = withHeaderItem(_LanguageSelector)
+const LanguageSelectorHeader = withHeaderItem(LanguageSelector)
 
-export default LanguageSelector
+export default LanguageSelectorHeader

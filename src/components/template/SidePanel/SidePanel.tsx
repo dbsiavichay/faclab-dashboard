@@ -8,7 +8,7 @@ import type { CommonProps } from '@/@types/common'
 
 type SidePanelProps = SidePanelContentProps & CommonProps
 
-const _SidePanel = (props: SidePanelProps) => {
+const SidePanel = (props: SidePanelProps) => {
     const { className, ...rest } = props
 
     const panelExpand = useThemeStore((state) => state.panelExpand)
@@ -50,6 +50,6 @@ const _SidePanel = (props: SidePanelProps) => {
     )
 }
 
-const SidePanel = withHeaderItem(_SidePanel)
+const SidePanelHeader = withHeaderItem(SidePanel)
 
-export default SidePanel
+export default SidePanelHeader

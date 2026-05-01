@@ -4,7 +4,7 @@ type CreateAmPmHandlerParams = {
     amLabel: string
     pmLabel: string
     onChange(value: string): void
-    nextRef?: RefObject<HTMLInputElement>
+    nextRef?: RefObject<HTMLInputElement | null>
 }
 
 export function createAmPmHandler({

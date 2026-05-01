@@ -79,17 +79,19 @@ const ListItem = (props: {
     )
 }
 
-const _Search = ({ className }: { className?: string }) => {
+const Search = ({ className }: { className?: string }) => {
     const [searchDialogOpen, setSearchDialogOpen] = useState(false)
     const [searchResult, setSearchResult] =
         useState<SearchResult[]>(recommendedSearch)
     const [noResult, setNoResult] = useState(false)
+    const [searchTerm, setSearchTerm] = useState('')
 
     const inputRef = useRef<HTMLInputElement>(null)
 
     const handleReset = () => {
         setNoResult(false)
         setSearchResult(recommendedSearch)
+        setSearchTerm('')
     }
 
     const handleSearchOpen = () => {
@@ -120,6 +122,7 @@ const _Search = ({ className }: { className?: string }) => {
     }
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value)
         debounceFn(e.target.value)
     }
 
@@ -175,7 +178,7 @@ const _Search = ({ className }: { className?: string }) => {
                                         icon={data.icon}
                                         label={data.title}
                                         url={data.url}
-                                        keyWord={inputRef.current?.value || ''}
+                                        keyWord={searchTerm}
                                         onNavigate={handleNavigate}
                                     />
                                 ))}
@@ -186,7 +189,7 @@ const _Search = ({ className }: { className?: string }) => {
                                 <span>No results for </span>
                                 <span className="heading-text">
                                     {`'`}
-                                    {inputRef.current?.value}
+                                    {searchTerm}
                                     {`'`}
                                 </span>
                             </div>
@@ -198,6 +201,6 @@ const _Search = ({ className }: { className?: string }) => {
     )
 }
 
-const Search = withHeaderItem(_Search)
+const SearchHeader = withHeaderItem(Search)
 
-export default Search
+export default SearchHeader

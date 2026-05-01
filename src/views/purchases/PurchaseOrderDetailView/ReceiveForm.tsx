@@ -9,7 +9,7 @@ import toast from '@/components/ui/toast'
 import { useReceivePurchaseOrder } from '@/hooks/usePurchaseOrders'
 import { useLocations } from '@/hooks/useLocations'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { useForm, useFieldArray } from 'react-hook-form'
+import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { PurchaseOrderItem } from '@/services/PurchaseOrderService'
@@ -78,7 +78,6 @@ const ReceiveForm = ({
         handleSubmit,
         control,
         reset,
-        watch,
         formState: { errors },
     } = useForm<ReceiveFormValues>({
         resolver: zodResolver(receiveFormSchema),
@@ -86,7 +85,7 @@ const ReceiveForm = ({
     })
 
     const { fields } = useFieldArray({ control, name: 'items' })
-    const watchedItems = watch('items')
+    const watchedItems = useWatch({ control, name: 'items' })
 
     useEffect(() => {
         if (open) {

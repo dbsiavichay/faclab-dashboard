@@ -113,7 +113,7 @@ const NotificationToggle = ({
     )
 }
 
-const _Notification = ({ className }: { className?: string }) => {
+const Notification = ({ className }: { className?: string }) => {
     const [notificationList, setNotificationList] = useState<
         NotificationList[]
     >([])
@@ -273,6 +273,6 @@ const _Notification = ({ className }: { className?: string }) => {
     )
 }
 
-const Notification = withHeaderItem(_Notification)
+const NotificationHeader = withHeaderItem(Notification)
 
-export default Notification
+export default NotificationHeader

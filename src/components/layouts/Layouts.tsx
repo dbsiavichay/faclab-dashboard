@@ -1,4 +1,4 @@
-import { useMemo, lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import Loading from '@/components/shared/Loading'
 import { useThemeStore } from '@/stores'
 import {
@@ -23,6 +23,8 @@ const layouts = {
     [LAYOUT_TYPE_BLANK]: lazy(() => import('./BlankLayout')),
 }
 
+const AuthLayout = lazy(() => import('./AuthLayout'))
+
 const Layout = () => {
     const layoutType = useThemeStore((state) => state.layout.type)
 
@@ -32,12 +34,7 @@ const Layout = () => {
 
     useLocale()
 
-    const AppLayout = useMemo(() => {
-        if (authenticated) {
-            return layouts[layoutType]
-        }
-        return lazy(() => import('./AuthLayout'))
-    }, [layoutType, authenticated])
+    const AppLayout = authenticated ? layouts[layoutType] : AuthLayout
 
     return (
         <Suspense

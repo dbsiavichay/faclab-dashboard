@@ -28,7 +28,7 @@ export interface TimeInputProps extends CommonProps {
     id?: string
     invalid?: boolean
     name?: string
-    nextRef?: RefObject<HTMLInputElement>
+    nextRef?: RefObject<HTMLInputElement | null>
     onChange?: (value: Value) => void
     pmLabel?: string
     prefix?: string | ReactNode
@@ -112,6 +112,7 @@ const TimeInput = (props: TimeInputProps) => {
         typeof onChange === 'function' && onChange(newDate)
     }
 
+    // eslint-disable-next-line react-hooks/refs -- nextRef.current is only accessed inside the returned event handler (focus/select on overflow), never during render.
     const handleHoursChange = createTimeHandler({
         onChange: (val, carryOver) => {
             setDate({
@@ -121,10 +122,11 @@ const TimeInput = (props: TimeInputProps) => {
         },
         min: format === '12' ? 1 : 0,
         max: format === '12' ? 12 : 23,
-        nextRef: minutesRef as RefObject<HTMLInputElement>,
+        nextRef: minutesRef,
         nextMax: 59,
     })
 
+    // eslint-disable-next-line react-hooks/refs -- see note above
     const handleMinutesChange = createTimeHandler({
         onChange: (val, carryOver) => {
             setDate({
@@ -134,24 +136,18 @@ const TimeInput = (props: TimeInputProps) => {
         },
         min: 0,
         max: 59,
-        nextRef: showSeconds
-            ? (secondsRef as RefObject<HTMLInputElement>)
-            : format === '12'
-            ? (amPmRef as RefObject<HTMLInputElement>)
-            : (nextRef as RefObject<HTMLInputElement>),
+        nextRef: showSeconds ? secondsRef : format === '12' ? amPmRef : nextRef,
         nextMax: showSeconds ? 59 : undefined,
     })
 
+    // eslint-disable-next-line react-hooks/refs -- see note above
     const handleSecondsChange = createTimeHandler({
         onChange: (val) => {
             setDate({ seconds: val })
         },
         min: 0,
         max: 59,
-        nextRef:
-            format === '12'
-                ? (amPmRef as RefObject<HTMLInputElement>)
-                : (nextRef as RefObject<HTMLInputElement>),
+        nextRef: format === '12' ? amPmRef : nextRef,
     })
 
     const handleAmPmChange = createAmPmHandler({

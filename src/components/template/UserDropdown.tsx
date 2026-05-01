@@ -16,7 +16,7 @@ type DropdownList = {
 
 const dropdownItemList: DropdownList[] = []
 
-const _UserDropdown = ({ className }: CommonProps) => {
+const UserDropdown = ({ className }: CommonProps) => {
     const { signOut } = useAuth()
 
     const UserAvatar = (
@@ -83,6 +83,6 @@ const _UserDropdown = ({ className }: CommonProps) => {
     )
 }
 
-const UserDropdown = withHeaderItem(_UserDropdown)
+const UserDropdownHeader = withHeaderItem(UserDropdown)
 
-export default UserDropdown
+export default UserDropdownHeader

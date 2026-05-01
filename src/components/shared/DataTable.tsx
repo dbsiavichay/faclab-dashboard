@@ -216,6 +216,7 @@ function DataTable<T>(
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [columnsProp, selectable])
 
+    // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table v8 returns non-memoizable functions; React Compiler skip is expected.
     const table = useReactTable({
         data,
         // eslint-disable-next-line  @typescript-eslint/no-explicit-any

@@ -8,7 +8,7 @@ function allButLastDigit(value: number) {
 
 type CreateTimeHandlerParams = {
     onChange(value: string, carryOver?: string): void
-    nextRef?: RefObject<HTMLInputElement>
+    nextRef?: RefObject<HTMLInputElement | null>
     min: number
     max: number
     nextMax?: number

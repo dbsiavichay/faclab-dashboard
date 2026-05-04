@@ -1,13 +1,29 @@
-import { useState, useEffect } from 'react'
 import Input from '@/components/ui/Input'
-import Switcher from '@/components/ui/Switcher'
-import type { Warehouse, WarehouseInput } from '@/services/WarehouseService'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { ControlledSwitcher } from '@/components/ui/Form/controlled'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { warehouseSchema, type WarehouseFormValues } from '@/schemas'
+import type { Warehouse } from '@/services/WarehouseService'
 
 interface WarehouseFormProps {
     formId: string
     warehouse: Warehouse | null
     isSubmitting?: boolean
-    onSubmit: (data: WarehouseInput) => void
+    onSubmit: (data: WarehouseFormValues) => void
+}
+
+const emptyValues: WarehouseFormValues = {
+    name: '',
+    code: '',
+    address: '',
+    city: '',
+    country: '',
+    manager: '',
+    phone: '',
+    email: '',
+    isActive: true,
+    isDefault: false,
 }
 
 const WarehouseForm = ({
@@ -16,228 +32,193 @@ const WarehouseForm = ({
     isSubmitting = false,
     onSubmit,
 }: WarehouseFormProps) => {
-    const [formData, setFormData] = useState<WarehouseInput>({
-        name: '',
-        code: '',
-        address: '',
-        city: '',
-        country: '',
-        isActive: true,
-        isDefault: false,
-        manager: '',
-        phone: '',
-        email: '',
+    const defaultValues: WarehouseFormValues = warehouse
+        ? {
+              name: warehouse.name,
+              code: warehouse.code,
+              address: warehouse.address ?? '',
+              city: warehouse.city ?? '',
+              country: warehouse.country ?? '',
+              manager: warehouse.manager ?? '',
+              phone: warehouse.phone ?? '',
+              email: warehouse.email ?? '',
+              isActive: warehouse.isActive,
+              isDefault: warehouse.isDefault,
+          }
+        : emptyValues
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm<WarehouseFormValues>({
+        resolver: zodResolver(warehouseSchema),
+        defaultValues,
     })
 
-    useEffect(() => {
-        setFormData(
-            warehouse
-                ? {
-                      name: warehouse.name,
-                      code: warehouse.code,
-                      address: warehouse.address || '',
-                      city: warehouse.city || '',
-                      country: warehouse.country || '',
-                      isActive: warehouse.isActive,
-                      isDefault: warehouse.isDefault,
-                      manager: warehouse.manager || '',
-                      phone: warehouse.phone || '',
-                      email: warehouse.email || '',
-                  }
-                : {
-                      name: '',
-                      code: '',
-                      address: '',
-                      city: '',
-                      country: '',
-                      isActive: true,
-                      isDefault: false,
-                      manager: '',
-                      phone: '',
-                      email: '',
-                  }
-        )
-    }, [warehouse])
-
     return (
-        <form
-            id={formId}
-            onSubmit={(e) => {
-                e.preventDefault()
-                onSubmit(formData)
-            }}
-        >
-            <div className="space-y-4">
+        <form id={formId} onSubmit={handleSubmit(onSubmit)}>
+            <FormContainer>
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Nombre <span className="text-red-500">*</span>
-                        </label>
+                    <FormItem
+                        asterisk
+                        htmlFor="name"
+                        label="Nombre"
+                        invalid={!!errors.name}
+                        errorMessage={errors.name?.message}
+                    >
                         <Input
-                            required
-                            type="text"
+                            id="name"
                             placeholder="Ej: Bodega Principal"
-                            value={formData.name}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    name: e.target.value,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.name}
+                            {...register('name')}
                         />
-                    </div>
+                    </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Código <span className="text-red-500">*</span>
-                        </label>
+                    <FormItem
+                        asterisk
+                        htmlFor="code"
+                        label="Código"
+                        invalid={!!errors.code}
+                        errorMessage={errors.code?.message}
+                    >
                         <Input
-                            required
-                            type="text"
+                            id="code"
                             placeholder="Ej: BOD-001"
-                            value={formData.code}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    code: e.target.value,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.code}
+                            {...register('code')}
                         />
-                    </div>
+                    </FormItem>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Dirección
-                    </label>
+                <FormItem
+                    htmlFor="address"
+                    label="Dirección"
+                    invalid={!!errors.address}
+                    errorMessage={errors.address?.message}
+                >
                     <Input
-                        type="text"
+                        id="address"
                         placeholder="Dirección de la bodega"
-                        value={formData.address || ''}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                address: e.target.value,
-                            })
-                        }
+                        disabled={isSubmitting}
+                        invalid={!!errors.address}
+                        {...register('address')}
                     />
-                </div>
+                </FormItem>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Ciudad
-                        </label>
+                    <FormItem
+                        htmlFor="city"
+                        label="Ciudad"
+                        invalid={!!errors.city}
+                        errorMessage={errors.city?.message}
+                    >
                         <Input
-                            type="text"
+                            id="city"
                             placeholder="Ej: Quito"
-                            value={formData.city || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    city: e.target.value,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.city}
+                            {...register('city')}
                         />
-                    </div>
+                    </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            País
-                        </label>
+                    <FormItem
+                        htmlFor="country"
+                        label="País"
+                        invalid={!!errors.country}
+                        errorMessage={errors.country?.message}
+                    >
                         <Input
-                            type="text"
+                            id="country"
                             placeholder="Ej: Ecuador"
-                            value={formData.country || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    country: e.target.value,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.country}
+                            {...register('country')}
                         />
-                    </div>
+                    </FormItem>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Responsable
-                        </label>
+                    <FormItem
+                        htmlFor="manager"
+                        label="Responsable"
+                        invalid={!!errors.manager}
+                        errorMessage={errors.manager?.message}
+                    >
                         <Input
-                            type="text"
+                            id="manager"
                             placeholder="Nombre del responsable"
-                            value={formData.manager || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    manager: e.target.value,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.manager}
+                            {...register('manager')}
                         />
-                    </div>
+                    </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Teléfono
-                        </label>
+                    <FormItem
+                        htmlFor="phone"
+                        label="Teléfono"
+                        invalid={!!errors.phone}
+                        errorMessage={errors.phone?.message}
+                    >
                         <Input
-                            type="text"
+                            id="phone"
                             placeholder="Ej: +593 99 999 9999"
-                            value={formData.phone || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    phone: e.target.value,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.phone}
+                            {...register('phone')}
                         />
-                    </div>
+                    </FormItem>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Email
-                    </label>
+                <FormItem
+                    htmlFor="email"
+                    label="Email"
+                    invalid={!!errors.email}
+                    errorMessage={errors.email?.message}
+                >
                     <Input
+                        id="email"
                         type="email"
                         placeholder="bodega@ejemplo.com"
-                        value={formData.email || ''}
-                        onChange={(e) =>
-                            setFormData({ ...formData, email: e.target.value })
-                        }
+                        disabled={isSubmitting}
+                        invalid={!!errors.email}
+                        {...register('email')}
                     />
-                </div>
+                </FormItem>
 
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-3">
-                        <Switcher
-                            checked={formData.isActive}
+                        <ControlledSwitcher
+                            name="isActive"
+                            control={control}
                             disabled={isSubmitting}
-                            onChange={(checked) =>
-                                setFormData({ ...formData, isActive: !checked })
-                            }
                         />
-                        <label className="text-sm font-medium">Activo</label>
+                        <label
+                            htmlFor="isActive"
+                            className="text-sm font-medium"
+                        >
+                            Activo
+                        </label>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Switcher
-                            checked={formData.isDefault}
+                        <ControlledSwitcher
+                            name="isDefault"
+                            control={control}
                             disabled={isSubmitting}
-                            onChange={(checked) =>
-                                setFormData({
-                                    ...formData,
-                                    isDefault: !checked,
-                                })
-                            }
                         />
-                        <label className="text-sm font-medium">
+                        <label
+                            htmlFor="isDefault"
+                            className="text-sm font-medium"
+                        >
                             Por defecto
                         </label>
                     </div>
                 </div>
-            </div>
+            </FormContainer>
         </form>
     )
 }

@@ -1,10 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import Select from '@/components/ui/Select'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
+import { FormItem } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
+import { ControlledSelect } from '@/components/ui/Form/controlled'
+import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
     useAddAdjustmentItem,
     useUpdateAdjustmentItem,
@@ -13,11 +17,376 @@ import { useProducts } from '@/hooks/useProducts'
 import { useLocations } from '@/hooks/useLocations'
 import { useLots } from '@/hooks/useLots'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type {
-    AdjustmentItem,
-    AdjustmentItemInput,
-    AdjustmentItemUpdateInput,
-} from '@/services/AdjustmentService'
+import {
+    adjustmentItemCreateSchema,
+    adjustmentItemUpdateSchema,
+    type AdjustmentItemCreateFormValues,
+    type AdjustmentItemUpdateFormValues,
+} from '@/schemas'
+import type { AdjustmentItem } from '@/services/AdjustmentService'
+
+// ─── Create ───────────────────────────────────────────────────────────────────
+
+interface CreateFormProps {
+    open: boolean
+    onClose: () => void
+    adjustmentId: number
+    warehouseId: number
+}
+
+const AdjustmentItemCreateForm = ({
+    open,
+    onClose,
+    adjustmentId,
+    warehouseId,
+}: CreateFormProps) => {
+    const addItem = useAddAdjustmentItem()
+    const { data: productsData } = useProducts()
+    const products = productsData?.items ?? []
+
+    const { data: locationsData } = useLocations({ warehouseId, limit: 100 })
+    const locations = locationsData?.items ?? []
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        setValue,
+        formState: { errors, isSubmitting },
+    } = useForm<AdjustmentItemCreateFormValues>({
+        resolver: zodResolver(adjustmentItemCreateSchema),
+        defaultValues: {
+            productId: undefined,
+            locationId: undefined,
+            actualQuantity: 0,
+            lotId: null,
+            notes: '',
+        },
+    })
+
+    const numberRegister = makeNumberRegister(register)
+    const selectedProductId = useWatch({ control, name: 'productId' })
+
+    const { data: lotsData } = useLots(
+        selectedProductId
+            ? { productId: selectedProductId, limit: 100 }
+            : undefined
+    )
+    const lots = lotsData?.items ?? []
+
+    useEffect(() => {
+        if (open) {
+            reset({
+                productId: undefined,
+                locationId: undefined,
+                actualQuantity: 0,
+                lotId: null,
+                notes: '',
+            })
+        }
+    }, [open, adjustmentId, reset])
+
+    useEffect(() => {
+        setValue('lotId', null)
+    }, [selectedProductId, setValue])
+
+    const handleClose = () => {
+        if (!isSubmitting) onClose()
+    }
+
+    const productOptions = products.map((p) => ({
+        value: p.id,
+        label: `${p.name} (${p.sku})`,
+    }))
+
+    const locationOptions = locations.map((l) => ({
+        value: l.id,
+        label: `${l.name} (${l.code})`,
+    }))
+
+    const lotOptions: { value: number | null; label: string }[] = [
+        { value: null, label: 'Sin lote' },
+        ...lots.map((l) => ({ value: l.id, label: l.lotNumber })),
+    ]
+
+    const onSubmit = async (values: AdjustmentItemCreateFormValues) => {
+        try {
+            await addItem.mutateAsync({
+                adjustmentId,
+                data: {
+                    productId: values.productId,
+                    locationId: values.locationId,
+                    actualQuantity: values.actualQuantity,
+                    lotId: values.lotId,
+                    notes: values.notes || undefined,
+                },
+            })
+            toast.push(<Notification title="Item agregado" type="success" />, {
+                placement: 'top-center',
+            })
+            onClose()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al agregar el item')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
+    }
+
+    return (
+        <Dialog
+            isOpen={open}
+            width={600}
+            onClose={handleClose}
+            onRequestClose={handleClose}
+        >
+            <div className="flex flex-col h-full justify-between">
+                <h5 className="mb-4">Agregar Item</h5>
+                <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                        <FormItem
+                            asterisk
+                            label="Producto"
+                            invalid={!!errors.productId}
+                            errorMessage={errors.productId?.message}
+                        >
+                            <ControlledSelect
+                                name="productId"
+                                control={control}
+                                options={productOptions}
+                                placeholder="Seleccionar producto"
+                                isDisabled={isSubmitting}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            asterisk
+                            label="Ubicación"
+                            invalid={!!errors.locationId}
+                            errorMessage={errors.locationId?.message}
+                        >
+                            <ControlledSelect
+                                name="locationId"
+                                control={control}
+                                options={locationOptions}
+                                placeholder="Seleccionar ubicación"
+                                isDisabled={isSubmitting}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            asterisk
+                            label="Cantidad Actual"
+                            invalid={!!errors.actualQuantity}
+                            errorMessage={errors.actualQuantity?.message}
+                        >
+                            <Input
+                                type="number"
+                                min={0}
+                                placeholder="0"
+                                disabled={isSubmitting}
+                                invalid={!!errors.actualQuantity}
+                                {...numberRegister('actualQuantity', {
+                                    integer: true,
+                                    emptyValue: 0,
+                                })}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label="Lote (opcional)"
+                            invalid={!!errors.lotId}
+                            errorMessage={errors.lotId?.message}
+                        >
+                            <ControlledSelect
+                                name="lotId"
+                                control={control}
+                                options={lotOptions}
+                                placeholder="Seleccionar lote"
+                                isDisabled={isSubmitting || !selectedProductId}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
+                            <Input
+                                textArea
+                                placeholder="Observaciones del item"
+                                disabled={isSubmitting}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
+                            />
+                        </FormItem>
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-6">
+                        <Button
+                            type="button"
+                            variant="plain"
+                            disabled={isSubmitting}
+                            onClick={handleClose}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="solid"
+                            loading={isSubmitting}
+                        >
+                            Agregar
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </Dialog>
+    )
+}
+
+// ─── Update ───────────────────────────────────────────────────────────────────
+
+interface UpdateFormProps {
+    open: boolean
+    onClose: () => void
+    adjustmentId: number
+    item: AdjustmentItem
+}
+
+const AdjustmentItemUpdateForm = ({
+    open,
+    onClose,
+    adjustmentId,
+    item,
+}: UpdateFormProps) => {
+    const updateItem = useUpdateAdjustmentItem()
+
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<AdjustmentItemUpdateFormValues>({
+        resolver: zodResolver(adjustmentItemUpdateSchema),
+        defaultValues: {
+            actualQuantity: item.actualQuantity,
+            notes: item.notes ?? '',
+        },
+    })
+
+    const numberRegister = makeNumberRegister(register)
+
+    useEffect(() => {
+        if (open) {
+            reset({
+                actualQuantity: item.actualQuantity,
+                notes: item.notes ?? '',
+            })
+        }
+    }, [open, item, reset])
+
+    const handleClose = () => {
+        if (!isSubmitting) onClose()
+    }
+
+    const onSubmit = async (values: AdjustmentItemUpdateFormValues) => {
+        try {
+            await updateItem.mutateAsync({
+                itemId: item.id,
+                adjustmentId,
+                data: {
+                    actualQuantity: values.actualQuantity,
+                    notes: values.notes || undefined,
+                },
+            })
+            toast.push(
+                <Notification title="Item actualizado" type="success" />,
+                { placement: 'top-center' }
+            )
+            onClose()
+        } catch (error: unknown) {
+            toast.push(
+                <Notification title="Error" type="danger">
+                    {getErrorMessage(error, 'Error al actualizar el item')}
+                </Notification>,
+                { placement: 'top-center' }
+            )
+        }
+    }
+
+    return (
+        <Dialog
+            isOpen={open}
+            width={600}
+            onClose={handleClose}
+            onRequestClose={handleClose}
+        >
+            <div className="flex flex-col h-full justify-between">
+                <h5 className="mb-4">Editar Item</h5>
+                <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
+                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                        <FormItem
+                            asterisk
+                            label="Cantidad Actual"
+                            invalid={!!errors.actualQuantity}
+                            errorMessage={errors.actualQuantity?.message}
+                        >
+                            <Input
+                                type="number"
+                                min={0}
+                                placeholder="0"
+                                disabled={isSubmitting}
+                                invalid={!!errors.actualQuantity}
+                                {...numberRegister('actualQuantity', {
+                                    integer: true,
+                                    emptyValue: 0,
+                                })}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
+                            <Input
+                                textArea
+                                placeholder="Observaciones del item"
+                                disabled={isSubmitting}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
+                            />
+                        </FormItem>
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-6">
+                        <Button
+                            type="button"
+                            variant="plain"
+                            disabled={isSubmitting}
+                            onClick={handleClose}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="solid"
+                            loading={isSubmitting}
+                        >
+                            Actualizar
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </Dialog>
+    )
+}
+
+// ─── Wrapper ──────────────────────────────────────────────────────────────────
 
 interface AdjustmentItemFormProps {
     open: boolean
@@ -33,328 +402,21 @@ const AdjustmentItemForm = ({
     adjustmentId,
     warehouseId,
     item,
-}: AdjustmentItemFormProps) => {
-    const [formData, setFormData] = useState<AdjustmentItemInput>({
-        productId: 0,
-        locationId: 0,
-        actualQuantity: 0,
-        lotId: null,
-        notes: '',
-    })
-
-    const [editData, setEditData] = useState<AdjustmentItemUpdateInput>({
-        actualQuantity: 0,
-        notes: '',
-    })
-
-    const addItem = useAddAdjustmentItem()
-    const updateItem = useUpdateAdjustmentItem()
-
-    const { data: productsData } = useProducts()
-    const products = productsData?.items ?? []
-
-    const { data: locationsData } = useLocations({
-        warehouseId,
-        limit: 100,
-    })
-    const locations = locationsData?.items ?? []
-
-    const selectedProductId = item ? item.productId : formData.productId
-    const { data: lotsData } = useLots(
-        selectedProductId
-            ? { productId: selectedProductId, limit: 100 }
-            : undefined
+}: AdjustmentItemFormProps) =>
+    item ? (
+        <AdjustmentItemUpdateForm
+            open={open}
+            adjustmentId={adjustmentId}
+            item={item}
+            onClose={onClose}
+        />
+    ) : (
+        <AdjustmentItemCreateForm
+            open={open}
+            adjustmentId={adjustmentId}
+            warehouseId={warehouseId}
+            onClose={onClose}
+        />
     )
-    const lots = lotsData?.items ?? []
-
-    const isEdit = !!item
-
-    const productOptions = products.map((p) => ({
-        value: p.id.toString(),
-        label: `${p.name} (${p.sku})`,
-    }))
-
-    const locationOptions = locations.map((l) => ({
-        value: l.id.toString(),
-        label: `${l.name} (${l.code})`,
-    }))
-
-    const lotOptions = [
-        { value: '', label: 'Sin lote' },
-        ...lots.map((l) => ({
-            value: l.id.toString(),
-            label: `${l.lotNumber}`,
-        })),
-    ]
-
-    useEffect(() => {
-        if (item) {
-            setEditData({
-                actualQuantity: item.actualQuantity,
-                notes: item.notes || '',
-            })
-        } else {
-            setFormData({
-                productId: 0,
-                locationId: 0,
-                actualQuantity: 0,
-                lotId: null,
-                notes: '',
-            })
-        }
-    }, [item, open])
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        try {
-            if (isEdit && item) {
-                await updateItem.mutateAsync({
-                    itemId: item.id,
-                    adjustmentId,
-                    data: {
-                        actualQuantity: editData.actualQuantity,
-                        notes: editData.notes || undefined,
-                    },
-                })
-            } else {
-                await addItem.mutateAsync({
-                    adjustmentId,
-                    data: {
-                        productId: formData.productId,
-                        locationId: formData.locationId,
-                        actualQuantity: formData.actualQuantity,
-                        lotId: formData.lotId || undefined,
-                        notes: formData.notes || undefined,
-                    },
-                })
-            }
-
-            toast.push(
-                <Notification
-                    title={isEdit ? 'Item actualizado' : 'Item agregado'}
-                    type="success"
-                >
-                    {isEdit
-                        ? 'El item se actualizó correctamente'
-                        : 'El item se agregó correctamente'}
-                </Notification>,
-                { placement: 'top-center' }
-            )
-
-            onClose()
-        } catch (error: unknown) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    {getErrorMessage(error, 'Error al guardar el item')}
-                </Notification>,
-                { placement: 'top-center' }
-            )
-        }
-    }
-
-    const isPending = addItem.isPending || updateItem.isPending
-
-    const handleClose = () => {
-        if (!isPending) {
-            onClose()
-        }
-    }
-
-    return (
-        <Dialog
-            isOpen={open}
-            width={600}
-            onClose={handleClose}
-            onRequestClose={handleClose}
-        >
-            <div className="flex flex-col h-full justify-between">
-                <h5 className="mb-4">
-                    {isEdit ? 'Editar Item' : 'Agregar Item'}
-                </h5>
-
-                <form className="flex-1" onSubmit={handleSubmit}>
-                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                        {isEdit ? (
-                            <>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Cantidad Actual{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        required
-                                        type="number"
-                                        min={0}
-                                        placeholder="0"
-                                        value={editData.actualQuantity ?? ''}
-                                        onChange={(e) =>
-                                            setEditData({
-                                                ...editData,
-                                                actualQuantity:
-                                                    parseInt(e.target.value) ||
-                                                    0,
-                                            })
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Notas
-                                    </label>
-                                    <Input
-                                        textArea
-                                        placeholder="Observaciones del item"
-                                        value={editData.notes || ''}
-                                        onChange={(e) =>
-                                            setEditData({
-                                                ...editData,
-                                                notes: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Producto{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Select
-                                        placeholder="Seleccionar producto"
-                                        options={productOptions}
-                                        value={productOptions.find(
-                                            (o) =>
-                                                o.value ===
-                                                formData.productId.toString()
-                                        )}
-                                        onChange={(option) =>
-                                            setFormData({
-                                                ...formData,
-                                                productId: option
-                                                    ? parseInt(option.value)
-                                                    : 0,
-                                                lotId: null,
-                                            })
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Ubicación{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Select
-                                        placeholder="Seleccionar ubicación"
-                                        options={locationOptions}
-                                        value={locationOptions.find(
-                                            (o) =>
-                                                o.value ===
-                                                formData.locationId.toString()
-                                        )}
-                                        onChange={(option) =>
-                                            setFormData({
-                                                ...formData,
-                                                locationId: option
-                                                    ? parseInt(option.value)
-                                                    : 0,
-                                            })
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Cantidad Actual{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <Input
-                                        required
-                                        type="number"
-                                        min={0}
-                                        placeholder="0"
-                                        value={formData.actualQuantity || ''}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                actualQuantity:
-                                                    parseInt(e.target.value) ||
-                                                    0,
-                                            })
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Lote (opcional)
-                                    </label>
-                                    <Select
-                                        placeholder="Seleccionar lote"
-                                        options={lotOptions}
-                                        value={lotOptions.find(
-                                            (o) =>
-                                                o.value ===
-                                                (formData.lotId?.toString() ||
-                                                    '')
-                                        )}
-                                        onChange={(option) =>
-                                            setFormData({
-                                                ...formData,
-                                                lotId:
-                                                    option && option.value
-                                                        ? parseInt(option.value)
-                                                        : null,
-                                            })
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-2">
-                                        Notas
-                                    </label>
-                                    <Input
-                                        textArea
-                                        placeholder="Observaciones del item"
-                                        value={formData.notes || ''}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                notes: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
-                            </>
-                        )}
-                    </div>
-
-                    <div className="flex justify-end gap-2 mt-6">
-                        <Button
-                            type="button"
-                            variant="plain"
-                            disabled={isPending}
-                            onClick={handleClose}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            type="submit"
-                            variant="solid"
-                            loading={isPending}
-                        >
-                            {isEdit ? 'Actualizar' : 'Agregar'}
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </Dialog>
-    )
-}
 
 export default AdjustmentItemForm

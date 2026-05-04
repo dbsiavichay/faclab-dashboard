@@ -1,6 +1,279 @@
-import { useState, useEffect } from 'react'
 import Input from '@/components/ui/Input'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import {
+    lotCreateSchema,
+    lotUpdateSchema,
+    type LotCreateFormValues,
+    type LotUpdateFormValues,
+} from '@/schemas'
 import type { Lot, LotInput, LotUpdateInput } from '@/services/LotService'
+
+// ─── LotCreateForm ────────────────────────────────────────────────────────────
+
+interface LotCreateFormProps {
+    formId: string
+    isSubmitting?: boolean
+    onSubmit: (data: LotInput) => void
+}
+
+const LotCreateForm = ({
+    formId,
+    isSubmitting = false,
+    onSubmit,
+}: LotCreateFormProps) => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LotCreateFormValues>({
+        resolver: zodResolver(lotCreateSchema),
+        defaultValues: {
+            lotNumber: '',
+            initialQuantity: 1,
+            manufactureDate: '',
+            expirationDate: '',
+            notes: '',
+        },
+    })
+
+    const numberRegister = makeNumberRegister(register)
+
+    const onFormSubmit = (values: LotCreateFormValues) => {
+        onSubmit({
+            lotNumber: values.lotNumber,
+            productId: values.productId,
+            initialQuantity: values.initialQuantity,
+            manufactureDate: values.manufactureDate || undefined,
+            expirationDate: values.expirationDate || undefined,
+            notes: values.notes || undefined,
+        })
+    }
+
+    return (
+        <form id={formId} onSubmit={handleSubmit(onFormSubmit)}>
+            <FormContainer>
+                <div className="grid grid-cols-2 gap-4">
+                    <FormItem
+                        asterisk
+                        htmlFor="lotNumber"
+                        label="Número de Lote"
+                        invalid={!!errors.lotNumber}
+                        errorMessage={errors.lotNumber?.message}
+                    >
+                        <Input
+                            id="lotNumber"
+                            placeholder="Ej: LOT-001"
+                            disabled={isSubmitting}
+                            invalid={!!errors.lotNumber}
+                            {...register('lotNumber')}
+                        />
+                    </FormItem>
+
+                    <FormItem
+                        asterisk
+                        htmlFor="productId"
+                        label="ID Producto"
+                        invalid={!!errors.productId}
+                        errorMessage={errors.productId?.message}
+                    >
+                        <Input
+                            id="productId"
+                            type="number"
+                            min={1}
+                            placeholder="ID del producto"
+                            disabled={isSubmitting}
+                            invalid={!!errors.productId}
+                            {...numberRegister('productId', { integer: true })}
+                        />
+                    </FormItem>
+                </div>
+
+                <FormItem
+                    asterisk
+                    htmlFor="initialQuantity"
+                    label="Cantidad Inicial"
+                    invalid={!!errors.initialQuantity}
+                    errorMessage={errors.initialQuantity?.message}
+                >
+                    <Input
+                        id="initialQuantity"
+                        type="number"
+                        min={1}
+                        placeholder="1"
+                        disabled={isSubmitting}
+                        invalid={!!errors.initialQuantity}
+                        {...numberRegister('initialQuantity', {
+                            integer: true,
+                        })}
+                    />
+                </FormItem>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <FormItem
+                        htmlFor="manufactureDate"
+                        label="Fecha de Manufactura"
+                        invalid={!!errors.manufactureDate}
+                        errorMessage={errors.manufactureDate?.message}
+                    >
+                        <Input
+                            id="manufactureDate"
+                            type="date"
+                            disabled={isSubmitting}
+                            {...register('manufactureDate')}
+                        />
+                    </FormItem>
+
+                    <FormItem
+                        htmlFor="expirationDate"
+                        label="Fecha de Vencimiento"
+                        invalid={!!errors.expirationDate}
+                        errorMessage={errors.expirationDate?.message}
+                    >
+                        <Input
+                            id="expirationDate"
+                            type="date"
+                            disabled={isSubmitting}
+                            {...register('expirationDate')}
+                        />
+                    </FormItem>
+                </div>
+
+                <FormItem
+                    htmlFor="notes"
+                    label="Notas"
+                    invalid={!!errors.notes}
+                    errorMessage={errors.notes?.message}
+                >
+                    <Input
+                        textArea
+                        id="notes"
+                        placeholder="Notas adicionales sobre el lote"
+                        disabled={isSubmitting}
+                        {...register('notes')}
+                    />
+                </FormItem>
+            </FormContainer>
+        </form>
+    )
+}
+
+// ─── LotUpdateForm ────────────────────────────────────────────────────────────
+
+interface LotUpdateFormProps {
+    formId: string
+    lot: Lot
+    isSubmitting?: boolean
+    onSubmit: (data: LotUpdateInput) => void
+}
+
+const LotUpdateForm = ({
+    formId,
+    lot,
+    isSubmitting = false,
+    onSubmit,
+}: LotUpdateFormProps) => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LotUpdateFormValues>({
+        resolver: zodResolver(lotUpdateSchema),
+        defaultValues: {
+            currentQuantity: lot.currentQuantity,
+            manufactureDate: lot.manufactureDate || '',
+            expirationDate: lot.expirationDate || '',
+            notes: lot.notes || '',
+        },
+    })
+
+    const numberRegister = makeNumberRegister(register)
+
+    const onFormSubmit = (values: LotUpdateFormValues) => {
+        onSubmit({
+            currentQuantity: values.currentQuantity,
+            manufactureDate: values.manufactureDate || undefined,
+            expirationDate: values.expirationDate || undefined,
+            notes: values.notes || undefined,
+        })
+    }
+
+    return (
+        <form id={formId} onSubmit={handleSubmit(onFormSubmit)}>
+            <FormContainer>
+                <FormItem
+                    asterisk
+                    htmlFor="currentQuantity"
+                    label="Cantidad Actual"
+                    invalid={!!errors.currentQuantity}
+                    errorMessage={errors.currentQuantity?.message}
+                >
+                    <Input
+                        id="currentQuantity"
+                        type="number"
+                        min={0}
+                        placeholder="0"
+                        disabled={isSubmitting}
+                        invalid={!!errors.currentQuantity}
+                        {...numberRegister('currentQuantity', {
+                            integer: true,
+                            emptyValue: 0,
+                        })}
+                    />
+                </FormItem>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <FormItem
+                        htmlFor="manufactureDate"
+                        label="Fecha de Manufactura"
+                        invalid={!!errors.manufactureDate}
+                        errorMessage={errors.manufactureDate?.message}
+                    >
+                        <Input
+                            id="manufactureDate"
+                            type="date"
+                            disabled={isSubmitting}
+                            {...register('manufactureDate')}
+                        />
+                    </FormItem>
+
+                    <FormItem
+                        htmlFor="expirationDate"
+                        label="Fecha de Vencimiento"
+                        invalid={!!errors.expirationDate}
+                        errorMessage={errors.expirationDate?.message}
+                    >
+                        <Input
+                            id="expirationDate"
+                            type="date"
+                            disabled={isSubmitting}
+                            {...register('expirationDate')}
+                        />
+                    </FormItem>
+                </div>
+
+                <FormItem
+                    htmlFor="notes"
+                    label="Notas"
+                    invalid={!!errors.notes}
+                    errorMessage={errors.notes?.message}
+                >
+                    <Input
+                        textArea
+                        id="notes"
+                        placeholder="Notas adicionales sobre el lote"
+                        disabled={isSubmitting}
+                        {...register('notes')}
+                    />
+                </FormItem>
+            </FormContainer>
+        </form>
+    )
+}
+
+// ─── LotForm (wrapper) ────────────────────────────────────────────────────────
 
 interface LotFormProps {
     formId: string
@@ -9,263 +282,20 @@ interface LotFormProps {
     onSubmit: (data: LotInput | LotUpdateInput) => void
 }
 
-const LotForm = ({ formId, lot, onSubmit }: LotFormProps) => {
-    const [formData, setFormData] = useState<LotInput>({
-        lotNumber: '',
-        productId: 0,
-        initialQuantity: 1,
-        manufactureDate: '',
-        expirationDate: '',
-        notes: '',
-    })
-
-    const [editData, setEditData] = useState<LotUpdateInput>({
-        currentQuantity: 0,
-        manufactureDate: '',
-        expirationDate: '',
-        notes: '',
-    })
-
-    const isEdit = !!lot
-
-    useEffect(() => {
-        if (lot) {
-            setEditData({
-                currentQuantity: lot.currentQuantity,
-                manufactureDate: lot.manufactureDate || '',
-                expirationDate: lot.expirationDate || '',
-                notes: lot.notes || '',
-            })
-        } else {
-            setFormData({
-                lotNumber: '',
-                productId: 0,
-                initialQuantity: 1,
-                manufactureDate: '',
-                expirationDate: '',
-                notes: '',
-            })
-        }
-    }, [lot])
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        if (isEdit) {
-            const submitData: LotUpdateInput = {
-                currentQuantity: editData.currentQuantity,
-                manufactureDate: editData.manufactureDate || undefined,
-                expirationDate: editData.expirationDate || undefined,
-                notes: editData.notes || undefined,
-            }
-            onSubmit(submitData)
-        } else {
-            const submitData: LotInput = {
-                ...formData,
-                manufactureDate: formData.manufactureDate || undefined,
-                expirationDate: formData.expirationDate || undefined,
-                notes: formData.notes || undefined,
-            }
-            onSubmit(submitData)
-        }
-    }
-
-    return (
-        <form id={formId} onSubmit={handleSubmit}>
-            <div className="space-y-4">
-                {isEdit ? (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Cantidad Actual{' '}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                required
-                                type="number"
-                                min={0}
-                                placeholder="0"
-                                value={editData.currentQuantity ?? ''}
-                                onChange={(e) =>
-                                    setEditData({
-                                        ...editData,
-                                        currentQuantity:
-                                            parseInt(e.target.value) || 0,
-                                    })
-                                }
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Fecha de Manufactura
-                                </label>
-                                <Input
-                                    type="date"
-                                    value={editData.manufactureDate || ''}
-                                    onChange={(e) =>
-                                        setEditData({
-                                            ...editData,
-                                            manufactureDate: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Fecha de Vencimiento
-                                </label>
-                                <Input
-                                    type="date"
-                                    value={editData.expirationDate || ''}
-                                    onChange={(e) =>
-                                        setEditData({
-                                            ...editData,
-                                            expirationDate: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Notas
-                            </label>
-                            <Input
-                                textArea
-                                placeholder="Notas adicionales sobre el lote"
-                                value={editData.notes || ''}
-                                onChange={(e) =>
-                                    setEditData({
-                                        ...editData,
-                                        notes: e.target.value,
-                                    })
-                                }
-                            />
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Número de Lote{' '}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <Input
-                                    required
-                                    type="text"
-                                    placeholder="Ej: LOT-001"
-                                    value={formData.lotNumber}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            lotNumber: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    ID Producto{' '}
-                                    <span className="text-red-500">*</span>
-                                </label>
-                                <Input
-                                    required
-                                    type="number"
-                                    min={1}
-                                    placeholder="ID del producto"
-                                    value={formData.productId || ''}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            productId:
-                                                parseInt(e.target.value) || 0,
-                                        })
-                                    }
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Cantidad Inicial{' '}
-                                <span className="text-red-500">*</span>
-                            </label>
-                            <Input
-                                required
-                                type="number"
-                                min={1}
-                                placeholder="1"
-                                value={formData.initialQuantity || ''}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        initialQuantity:
-                                            parseInt(e.target.value) || 0,
-                                    })
-                                }
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Fecha de Manufactura
-                                </label>
-                                <Input
-                                    type="date"
-                                    value={formData.manufactureDate || ''}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            manufactureDate: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Fecha de Vencimiento
-                                </label>
-                                <Input
-                                    type="date"
-                                    value={formData.expirationDate || ''}
-                                    onChange={(e) =>
-                                        setFormData({
-                                            ...formData,
-                                            expirationDate: e.target.value,
-                                        })
-                                    }
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Notas
-                            </label>
-                            <Input
-                                textArea
-                                placeholder="Notas adicionales sobre el lote"
-                                value={formData.notes || ''}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        notes: e.target.value,
-                                    })
-                                }
-                            />
-                        </div>
-                    </>
-                )}
-            </div>
-        </form>
+const LotForm = ({ formId, lot, isSubmitting, onSubmit }: LotFormProps) =>
+    lot ? (
+        <LotUpdateForm
+            formId={formId}
+            lot={lot}
+            isSubmitting={isSubmitting}
+            onSubmit={onSubmit}
+        />
+    ) : (
+        <LotCreateForm
+            formId={formId}
+            isSubmitting={isSubmitting}
+            onSubmit={onSubmit}
+        />
     )
-}
 
 export default LotForm

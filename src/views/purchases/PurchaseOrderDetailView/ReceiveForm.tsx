@@ -9,6 +9,7 @@ import toast from '@/components/ui/toast'
 import { useReceivePurchaseOrder } from '@/hooks/usePurchaseOrders'
 import { useLocations } from '@/hooks/useLocations'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { dateToIsoStartOfDay } from '@/utils/dateToIsoStartOfDay'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -143,9 +144,7 @@ const ReceiveForm = ({
                 data: {
                     items: filteredItems,
                     notes: values.notes || undefined,
-                    receivedAt: values.receivedAt
-                        ? `${values.receivedAt}T00:00:00Z`
-                        : undefined,
+                    receivedAt: dateToIsoStartOfDay(values.receivedAt),
                 },
             })
 

@@ -1,5 +1,6 @@
 import Input from '@/components/ui/Input'
 import { FormItem, FormContainer } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
 import {
     ControlledSelect,
     ControlledSwitcher,
@@ -93,27 +94,7 @@ const ProductForm = ({
         defaultValues,
     })
 
-    const numberRegister = (
-        name:
-            | 'purchasePrice'
-            | 'salePrice'
-            | 'minStock'
-            | 'maxStock'
-            | 'reorderPoint'
-            | 'leadTimeDays',
-        opts: { integer?: boolean; emptyValue?: number | undefined } = {}
-    ) => {
-        const { integer = false, emptyValue = undefined } = opts
-        return register(name, {
-            setValueAs: (v) => {
-                if (v === '' || v === null || v === undefined) return emptyValue
-                const parsed = integer
-                    ? parseInt(String(v), 10)
-                    : parseFloat(String(v))
-                return Number.isNaN(parsed) ? emptyValue : parsed
-            },
-        })
-    }
+    const numberRegister = makeNumberRegister(register)
 
     return (
         <form id={formId} onSubmit={handleSubmit(onSubmit)}>

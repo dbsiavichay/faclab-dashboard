@@ -20,3 +20,4 @@ export {
     type SerialNumberFormValues,
 } from './serialNumber.schema'
 export { locationSchema, type LocationFormValues } from './location.schema'
+export { contactSchema, type ContactFormValues } from './contact.schema'

@@ -14,6 +14,7 @@ import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCrudOperations } from '@/hooks'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import type { Warehouse, WarehouseInput } from '@/services/WarehouseService'
+import type { WarehouseFormValues } from '@/schemas'
 import WarehouseForm from './WarehouseForm'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
@@ -30,12 +31,12 @@ const WarehousesView = () => {
     const updateWarehouse = useUpdateWarehouse()
     const isPending = createWarehouse.isPending || updateWarehouse.isPending
 
-    const handleFormSubmit = async (formData: WarehouseInput) => {
+    const handleFormSubmit = async (formData: WarehouseFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
                 await updateWarehouse.mutateAsync({
                     id: crud.selectedItem.id,
-                    data: formData,
+                    data: formData as WarehouseInput,
                 })
                 toast.push(
                     <Notification title="Bodega actualizada" type="success">
@@ -44,7 +45,7 @@ const WarehousesView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await createWarehouse.mutateAsync(formData)
+                await createWarehouse.mutateAsync(formData as WarehouseInput)
                 toast.push(
                     <Notification title="Bodega creada" type="success">
                         La bodega se creó correctamente

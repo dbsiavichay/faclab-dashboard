@@ -1,16 +1,23 @@
-import { useState, useEffect } from 'react'
 import Input from '@/components/ui/Input'
-import Switcher from '@/components/ui/Switcher'
-import type {
-    UnitOfMeasure,
-    UnitOfMeasureInput,
-} from '@/services/UnitOfMeasureService'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { ControlledSwitcher } from '@/components/ui/Form/controlled'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { unitOfMeasureSchema, type UnitOfMeasureFormValues } from '@/schemas'
+import type { UnitOfMeasure } from '@/services/UnitOfMeasureService'
 
 interface UnitOfMeasureFormProps {
     formId: string
     unitOfMeasure: UnitOfMeasure | null
     isSubmitting?: boolean
-    onSubmit: (data: UnitOfMeasureInput) => void
+    onSubmit: (data: UnitOfMeasureFormValues) => void
+}
+
+const emptyValues: UnitOfMeasureFormValues = {
+    name: '',
+    symbol: '',
+    description: '',
+    isActive: true,
 }
 
 const UnitOfMeasureForm = ({
@@ -19,97 +26,88 @@ const UnitOfMeasureForm = ({
     isSubmitting = false,
     onSubmit,
 }: UnitOfMeasureFormProps) => {
-    const [formData, setFormData] = useState<UnitOfMeasureInput>({
-        name: '',
-        symbol: '',
-        description: '',
-        isActive: true,
+    const defaultValues: UnitOfMeasureFormValues = unitOfMeasure
+        ? {
+              name: unitOfMeasure.name,
+              symbol: unitOfMeasure.symbol,
+              description: unitOfMeasure.description ?? '',
+              isActive: unitOfMeasure.isActive,
+          }
+        : emptyValues
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm<UnitOfMeasureFormValues>({
+        resolver: zodResolver(unitOfMeasureSchema),
+        defaultValues,
     })
 
-    useEffect(() => {
-        setFormData(
-            unitOfMeasure
-                ? {
-                      name: unitOfMeasure.name,
-                      symbol: unitOfMeasure.symbol,
-                      description: unitOfMeasure.description || '',
-                      isActive: unitOfMeasure.isActive,
-                  }
-                : { name: '', symbol: '', description: '', isActive: true }
-        )
-    }, [unitOfMeasure])
-
     return (
-        <form
-            id={formId}
-            onSubmit={(e) => {
-                e.preventDefault()
-                onSubmit(formData)
-            }}
-        >
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Nombre <span className="text-red-500">*</span>
-                    </label>
+        <form id={formId} onSubmit={handleSubmit(onSubmit)}>
+            <FormContainer>
+                <FormItem
+                    asterisk
+                    htmlFor="name"
+                    label="Nombre"
+                    invalid={!!errors.name}
+                    errorMessage={errors.name?.message}
+                >
                     <Input
-                        required
-                        type="text"
+                        id="name"
                         placeholder="Ej: Kilogramo"
-                        value={formData.name}
                         disabled={isSubmitting}
-                        onChange={(e) =>
-                            setFormData({ ...formData, name: e.target.value })
-                        }
+                        invalid={!!errors.name}
+                        {...register('name')}
                     />
-                </div>
+                </FormItem>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Símbolo <span className="text-red-500">*</span>
-                    </label>
+                <FormItem
+                    asterisk
+                    htmlFor="symbol"
+                    label="Símbolo"
+                    invalid={!!errors.symbol}
+                    errorMessage={errors.symbol?.message}
+                >
                     <Input
-                        required
-                        type="text"
+                        id="symbol"
                         placeholder="Ej: kg"
-                        value={formData.symbol}
                         disabled={isSubmitting}
-                        onChange={(e) =>
-                            setFormData({ ...formData, symbol: e.target.value })
-                        }
+                        invalid={!!errors.symbol}
+                        {...register('symbol')}
                     />
-                </div>
+                </FormItem>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Descripción
-                    </label>
+                <FormItem
+                    htmlFor="description"
+                    label="Descripción"
+                    invalid={!!errors.description}
+                    errorMessage={errors.description?.message}
+                >
                     <Input
                         textArea
+                        id="description"
                         placeholder="Descripción de la unidad"
-                        value={formData.description || ''}
                         style={{ minHeight: '80px' }}
                         disabled={isSubmitting}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                description: e.target.value,
-                            })
-                        }
+                        invalid={!!errors.description}
+                        {...register('description')}
                     />
-                </div>
+                </FormItem>
 
                 <div className="flex items-center gap-3">
-                    <Switcher
-                        checked={formData.isActive}
+                    <ControlledSwitcher
+                        name="isActive"
+                        control={control}
                         disabled={isSubmitting}
-                        onChange={(checked) =>
-                            setFormData({ ...formData, isActive: checked })
-                        }
                     />
-                    <label className="text-sm font-medium">Activo</label>
+                    <label htmlFor="isActive" className="text-sm font-medium">
+                        Activo
+                    </label>
                 </div>
-            </div>
+            </FormContainer>
         </form>
     )
 }

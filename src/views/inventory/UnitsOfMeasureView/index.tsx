@@ -14,6 +14,7 @@ import type {
     UnitOfMeasure,
     UnitOfMeasureInput,
 } from '@/services/UnitOfMeasureService'
+import type { UnitOfMeasureFormValues } from '@/schemas'
 import UnitOfMeasureForm from './UnitOfMeasureForm'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import toast from '@/components/ui/toast'
@@ -36,12 +37,12 @@ const UnitsOfMeasureView = () => {
     const updateUnit = useUpdateUnitOfMeasure()
     const isPending = createUnit.isPending || updateUnit.isPending
 
-    const handleFormSubmit = async (formData: UnitOfMeasureInput) => {
+    const handleFormSubmit = async (formData: UnitOfMeasureFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
                 await updateUnit.mutateAsync({
                     id: crud.selectedItem.id,
-                    data: formData,
+                    data: formData as UnitOfMeasureInput,
                 })
                 toast.push(
                     <Notification title="Unidad actualizada" type="success">
@@ -50,7 +51,7 @@ const UnitsOfMeasureView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await createUnit.mutateAsync(formData)
+                await createUnit.mutateAsync(formData as UnitOfMeasureInput)
                 toast.push(
                     <Notification title="Unidad creada" type="success">
                         La unidad de medida se creó correctamente

@@ -9,6 +9,7 @@ import toast from '@/components/ui/toast'
 import { useCreatePurchaseOrder } from '@/hooks/usePurchaseOrders'
 import { useSuppliers } from '@/hooks/useSuppliers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { dateToIsoStartOfDay } from '@/utils/dateToIsoStartOfDay'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -77,9 +78,7 @@ const PurchaseOrderForm = ({
             const order = await createOrder.mutateAsync({
                 supplierId: values.supplierId,
                 notes: values.notes || undefined,
-                expectedDate: values.expectedDate
-                    ? `${values.expectedDate}T00:00:00Z`
-                    : undefined,
+                expectedDate: dateToIsoStartOfDay(values.expectedDate),
             })
 
             toast.push(

@@ -1,15 +1,10 @@
 import { z } from 'zod'
-
-const optionalEmail = z
-    .union([z.email('Email inválido'), z.literal('')])
-    .optional()
+import { optionalEmail, taxTypeSchema } from './common'
 
 export const customerSchema = z.object({
     name: z.string().min(1, 'Nombre requerido'),
     taxId: z.string().min(1, 'Identificación requerida'),
-    taxType: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)], {
-        error: 'Tipo de identificación requerido',
-    }),
+    taxType: taxTypeSchema,
     email: optionalEmail,
     phone: z.string().optional(),
     address: z.string().optional(),

@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react'
 import Input from '@/components/ui/Input'
-import Select from '@/components/ui/Select'
-import Switcher from '@/components/ui/Switcher'
-import Notification from '@/components/ui/Notification'
-import toast from '@/components/ui/toast'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import {
+    ControlledSelect,
+    ControlledSwitcher,
+} from '@/components/ui/Form/controlled'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useWarehouses } from '@/hooks/useWarehouses'
+import { locationSchema, type LocationFormValues } from '@/schemas'
 import type {
     Location,
     LocationInput,
@@ -18,7 +21,7 @@ interface LocationFormProps {
     onSubmit: (data: LocationInput) => void
 }
 
-const LOCATION_TYPES: { value: LocationType; label: string }[] = [
+const locationTypeOptions: { value: LocationType; label: string }[] = [
     { value: 'STORAGE', label: 'Almacenamiento' },
     { value: 'RECEIVING', label: 'Recepción' },
     { value: 'SHIPPING', label: 'Despacho' },
@@ -31,15 +34,6 @@ const LocationForm = ({
     isSubmitting = false,
     onSubmit,
 }: LocationFormProps) => {
-    const [formData, setFormData] = useState<LocationInput>({
-        warehouseId: 0,
-        name: '',
-        code: '',
-        type: 'STORAGE',
-        isActive: true,
-        capacity: null,
-    })
-
     const { data: warehousesData } = useWarehouses({ isActive: true })
     const warehouses = warehousesData?.items ?? []
     const warehouseOptions = warehouses.map((w) => ({
@@ -47,162 +41,141 @@ const LocationForm = ({
         label: w.name,
     }))
 
-    useEffect(() => {
-        setFormData(
-            location
-                ? {
-                      warehouseId: location.warehouseId,
-                      name: location.name,
-                      code: location.code,
-                      type: location.type,
-                      isActive: location.isActive,
-                      capacity: location.capacity ?? null,
-                  }
-                : {
-                      warehouseId: 0,
-                      name: '',
-                      code: '',
-                      type: 'STORAGE',
-                      isActive: true,
-                      capacity: null,
-                  }
-        )
-    }, [location])
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm<LocationFormValues>({
+        resolver: zodResolver(locationSchema),
+        defaultValues: location
+            ? {
+                  warehouseId: location.warehouseId,
+                  name: location.name,
+                  code: location.code,
+                  type: location.type,
+                  isActive: location.isActive,
+                  capacity: location.capacity ?? null,
+              }
+            : {
+                  name: '',
+                  code: '',
+                  type: 'STORAGE',
+                  isActive: true,
+                  capacity: null,
+              },
+    })
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!formData.warehouseId) {
-            toast.push(
-                <Notification title="Error" type="danger">
-                    Debe seleccionar una bodega
-                </Notification>,
-                { placement: 'top-center' }
-            )
-            return
-        }
-        onSubmit({ ...formData, capacity: formData.capacity || null })
+    const onFormSubmit = (values: LocationFormValues) => {
+        onSubmit(values as LocationInput)
     }
 
     return (
-        <form id={formId} onSubmit={handleSubmit}>
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Bodega <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                        placeholder="Seleccione una bodega"
-                        value={
-                            warehouseOptions.find(
-                                (opt) => opt.value === formData.warehouseId
-                            ) || null
-                        }
+        <form id={formId} onSubmit={handleSubmit(onFormSubmit)}>
+            <FormContainer>
+                <FormItem
+                    asterisk
+                    htmlFor="warehouseId"
+                    label="Bodega"
+                    invalid={!!errors.warehouseId}
+                    errorMessage={errors.warehouseId?.message}
+                >
+                    <ControlledSelect
+                        name="warehouseId"
+                        control={control}
                         options={warehouseOptions}
-                        onChange={(option) =>
-                            setFormData({
-                                ...formData,
-                                warehouseId: option?.value || 0,
-                            })
-                        }
+                        isDisabled={isSubmitting}
+                        placeholder="Seleccione una bodega"
                     />
-                </div>
+                </FormItem>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Nombre <span className="text-red-500">*</span>
-                        </label>
+                    <FormItem
+                        asterisk
+                        htmlFor="name"
+                        label="Nombre"
+                        invalid={!!errors.name}
+                        errorMessage={errors.name?.message}
+                    >
                         <Input
-                            required
-                            type="text"
+                            id="name"
                             placeholder="Ej: Estante A1"
-                            value={formData.name}
                             disabled={isSubmitting}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    name: e.target.value,
-                                })
-                            }
+                            invalid={!!errors.name}
+                            {...register('name')}
                         />
-                    </div>
+                    </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Código <span className="text-red-500">*</span>
-                        </label>
+                    <FormItem
+                        asterisk
+                        htmlFor="code"
+                        label="Código"
+                        invalid={!!errors.code}
+                        errorMessage={errors.code?.message}
+                    >
                         <Input
-                            required
-                            type="text"
+                            id="code"
                             placeholder="Ej: EST-A1"
-                            value={formData.code}
                             disabled={isSubmitting}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    code: e.target.value,
-                                })
-                            }
+                            invalid={!!errors.code}
+                            {...register('code')}
                         />
-                    </div>
+                    </FormItem>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Tipo <span className="text-red-500">*</span>
-                        </label>
-                        <Select
+                    <FormItem
+                        asterisk
+                        htmlFor="type"
+                        label="Tipo"
+                        invalid={!!errors.type}
+                        errorMessage={errors.type?.message}
+                    >
+                        <ControlledSelect
+                            name="type"
+                            control={control}
+                            options={locationTypeOptions}
+                            isDisabled={isSubmitting}
                             placeholder="Seleccione un tipo"
-                            value={
-                                LOCATION_TYPES.find(
-                                    (opt) => opt.value === formData.type
-                                ) || null
-                            }
-                            options={LOCATION_TYPES}
-                            onChange={(option) =>
-                                setFormData({
-                                    ...formData,
-                                    type:
-                                        (option?.value as LocationType) ||
-                                        'STORAGE',
-                                })
-                            }
                         />
-                    </div>
+                    </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Capacidad
-                        </label>
+                    <FormItem
+                        htmlFor="capacity"
+                        label="Capacidad"
+                        invalid={!!errors.capacity}
+                        errorMessage={errors.capacity?.message}
+                    >
                         <Input
+                            id="capacity"
                             type="number"
+                            min={0}
                             placeholder="Ej: 100"
-                            value={formData.capacity ?? ''}
                             disabled={isSubmitting}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    capacity: e.target.value
-                                        ? Number(e.target.value)
-                                        : null,
-                                })
-                            }
+                            invalid={!!errors.capacity}
+                            {...register('capacity', {
+                                setValueAs: (v) => {
+                                    if (
+                                        v === '' ||
+                                        v === null ||
+                                        v === undefined
+                                    )
+                                        return null
+                                    const parsed = parseInt(String(v), 10)
+                                    return Number.isNaN(parsed) ? null : parsed
+                                },
+                            })}
                         />
-                    </div>
+                    </FormItem>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <Switcher
-                        checked={formData.isActive}
-                        disabled={isSubmitting}
-                        onChange={(checked) =>
-                            setFormData({ ...formData, isActive: !checked })
-                        }
-                    />
-                    <label className="text-sm font-medium">Activo</label>
+                    <ControlledSwitcher name="isActive" control={control} />
+                    <label htmlFor="isActive" className="text-sm font-medium">
+                        Activo
+                    </label>
                 </div>
-            </div>
+            </FormContainer>
         </form>
     )
 }

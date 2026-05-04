@@ -1,5 +1,9 @@
-import { useState, useEffect } from 'react'
 import Input from '@/components/ui/Input'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { serialNumberSchema, type SerialNumberFormValues } from '@/schemas'
 import type { SerialNumberInput } from '@/services/SerialNumberService'
 
 interface SerialNumberFormProps {
@@ -8,113 +12,105 @@ interface SerialNumberFormProps {
     onSubmit: (data: SerialNumberInput) => void
 }
 
-const SerialNumberForm = ({ formId, onSubmit }: SerialNumberFormProps) => {
-    const [formData, setFormData] = useState<SerialNumberInput>({
-        serialNumber: '',
-        productId: 0,
-        lotId: undefined,
-        notes: '',
+const SerialNumberForm = ({
+    formId,
+    isSubmitting = false,
+    onSubmit,
+}: SerialNumberFormProps) => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<SerialNumberFormValues>({
+        resolver: zodResolver(serialNumberSchema),
+        defaultValues: {
+            serialNumber: '',
+            notes: '',
+        },
     })
 
-    useEffect(() => {
-        setFormData({
-            serialNumber: '',
-            productId: 0,
-            lotId: undefined,
-            notes: '',
-        })
-    }, [formId])
+    const numberRegister = makeNumberRegister(register)
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
+    const onFormSubmit = (values: SerialNumberFormValues) => {
         onSubmit({
-            serialNumber: formData.serialNumber,
-            productId: formData.productId,
-            lotId: formData.lotId || undefined,
-            notes: formData.notes || undefined,
+            serialNumber: values.serialNumber,
+            productId: values.productId,
+            lotId: values.lotId,
+            notes: values.notes || undefined,
         })
     }
 
     return (
-        <form id={formId} onSubmit={handleSubmit}>
-            <div className="space-y-4">
+        <form id={formId} onSubmit={handleSubmit(onFormSubmit)}>
+            <FormContainer>
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            Número de Serie{' '}
-                            <span className="text-red-500">*</span>
-                        </label>
+                    <FormItem
+                        asterisk
+                        htmlFor="serialNumber"
+                        label="Número de Serie"
+                        invalid={!!errors.serialNumber}
+                        errorMessage={errors.serialNumber?.message}
+                    >
                         <Input
-                            required
-                            type="text"
+                            id="serialNumber"
                             placeholder="Ej: SN-001-2024"
-                            value={formData.serialNumber}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    serialNumber: e.target.value,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.serialNumber}
+                            {...register('serialNumber')}
                         />
-                    </div>
+                    </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-2">
-                            ID Producto <span className="text-red-500">*</span>
-                        </label>
+                    <FormItem
+                        asterisk
+                        htmlFor="productId"
+                        label="ID Producto"
+                        invalid={!!errors.productId}
+                        errorMessage={errors.productId?.message}
+                    >
                         <Input
-                            required
+                            id="productId"
                             type="number"
                             min={1}
                             placeholder="ID del producto"
-                            value={formData.productId || ''}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    productId: parseInt(e.target.value) || 0,
-                                })
-                            }
+                            disabled={isSubmitting}
+                            invalid={!!errors.productId}
+                            {...numberRegister('productId', { integer: true })}
                         />
-                    </div>
+                    </FormItem>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        ID Lote
-                    </label>
+                <FormItem
+                    htmlFor="lotId"
+                    label="ID Lote"
+                    invalid={!!errors.lotId}
+                    errorMessage={errors.lotId?.message}
+                >
                     <Input
+                        id="lotId"
                         type="number"
                         min={1}
                         placeholder="ID del lote (opcional)"
-                        value={formData.lotId || ''}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                lotId: e.target.value
-                                    ? parseInt(e.target.value)
-                                    : undefined,
-                            })
-                        }
+                        disabled={isSubmitting}
+                        invalid={!!errors.lotId}
+                        {...numberRegister('lotId', { integer: true })}
                     />
-                </div>
+                </FormItem>
 
-                <div>
-                    <label className="block text-sm font-medium mb-2">
-                        Notas
-                    </label>
+                <FormItem
+                    htmlFor="notes"
+                    label="Notas"
+                    invalid={!!errors.notes}
+                    errorMessage={errors.notes?.message}
+                >
                     <Input
                         textArea
+                        id="notes"
                         placeholder="Notas adicionales"
-                        value={formData.notes || ''}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                notes: e.target.value,
-                            })
-                        }
+                        disabled={isSubmitting}
+                        {...register('notes')}
                     />
-                </div>
-            </div>
+                </FormItem>
+            </FormContainer>
         </form>
     )
 }

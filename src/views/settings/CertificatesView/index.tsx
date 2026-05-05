@@ -237,7 +237,9 @@ const CertificatesView = () => {
                     <h5 className="mb-4">Subir Certificado Digital</h5>
                     <form
                         className="flex-1"
-                        onSubmit={handleSubmit(onUploadSubmit)}
+                        onSubmit={(e) => {
+                            void handleSubmit(onUploadSubmit)(e)
+                        }}
                     >
                         <div className="space-y-4">
                             <FormItem

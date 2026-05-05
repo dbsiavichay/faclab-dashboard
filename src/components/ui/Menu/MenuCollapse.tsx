@@ -1,5 +1,6 @@
-import { useState, useEffect, useContext } from 'react'
+import { useContext } from 'react'
 import { useConfig } from '../ConfigProvider'
+import useControllableState from '../hooks/useControllableState'
 import { CollapseContextProvider } from './context/collapseContext'
 import classNames from 'classnames'
 import { motion } from 'framer-motion'
@@ -20,27 +21,22 @@ const MenuCollapse = (props: MenuCollapseProps) => {
         children,
         className,
         eventKey,
-        expanded = false,
+        expanded,
         label = null,
         onToggle,
     } = props
-
-    const [isExpanded, setIsExpanded] = useState(expanded)
 
     const { variant, sideCollapsed, defaultExpandedKeys } =
         useContext(MenuContext)
 
     const { direction } = useConfig()
 
-    useEffect(() => {
-        if ((defaultExpandedKeys as string[]).includes(eventKey as string)) {
-            setIsExpanded(true)
-        }
-        if (expanded !== isExpanded) {
-            setIsExpanded(true)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [expanded, onToggle, eventKey, defaultExpandedKeys])
+    const [isExpanded, setIsExpanded] = useControllableState({
+        prop: expanded,
+        defaultProp:
+            (defaultExpandedKeys as string[])?.includes(eventKey as string) ||
+            false,
+    })
 
     const toggleCollapse = (e: MouseEvent<HTMLDivElement>) => {
         if (typeof onToggle === 'function') {
@@ -76,7 +72,7 @@ const MenuCollapse = (props: MenuCollapseProps) => {
                     {sideCollapsed ? null : <HiChevronDown />}
                 </motion.span>
             </div>
-            <CollapseContextProvider value={isExpanded}>
+            <CollapseContextProvider value={isExpanded ?? false}>
                 <motion.ul
                     className={direction === 'rtl' ? 'mr-5' : 'ml-5'}
                     initial={{ opacity: 0, height: 0, overflow: 'hidden' }}

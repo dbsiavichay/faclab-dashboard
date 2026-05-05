@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useMemo, useCallback } from 'react'
+import useControllableState from '../hooks/useControllableState'
 import Pager from './Pagers'
 import Prev from './Prev'
 import Next from './Next'
@@ -25,17 +26,14 @@ const Pagination = (props: PaginationProps) => {
         total = 5,
     } = props
 
-    const [paginationTotal, setPaginationTotal] = useState(total)
-    const [internalPageSize, setInternalPageSize] = useState(pageSize)
-
     const { themeColor, primaryColorLevel } = useConfig()
 
     const getInternalPageCount = useMemo(() => {
-        if (typeof paginationTotal === 'number') {
-            return Math.ceil(paginationTotal / internalPageSize)
+        if (typeof total === 'number') {
+            return Math.ceil(total / pageSize)
         }
         return null
-    }, [paginationTotal, internalPageSize])
+    }, [total, pageSize])
 
     const getValidCurrentPage = useCallback(
         (count: number | string) => {
@@ -67,41 +65,26 @@ const Pagination = (props: PaginationProps) => {
         [getInternalPageCount]
     )
 
-    const [internalCurrentPage, setInternalCurrentPage] = useState(
-        currentPage ? getValidCurrentPage(currentPage) : 1
-    )
-
-    useEffect(() => {
-        if (total !== paginationTotal) {
-            setPaginationTotal(total)
-        }
-
-        if (pageSize !== internalPageSize) {
-            setInternalPageSize(pageSize)
-        }
-
-        if (currentPage !== internalCurrentPage) {
-            setInternalCurrentPage(currentPage)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [total, pageSize, currentPage])
+    const [internalCurrentPage, setInternalCurrentPage] =
+        useControllableState<number>({
+            prop: currentPage,
+            defaultProp: getValidCurrentPage(currentPage),
+            onChange,
+        })
 
     const onPaginationChange = (val: number) => {
         setInternalCurrentPage(getValidCurrentPage(val))
-        onChange?.(getValidCurrentPage(val))
     }
 
     const onPrev = useCallback(() => {
-        const newPage = internalCurrentPage - 1
+        const newPage = (internalCurrentPage ?? 1) - 1
         setInternalCurrentPage(getValidCurrentPage(newPage))
-        onChange?.(getValidCurrentPage(newPage))
-    }, [onChange, internalCurrentPage, getValidCurrentPage])
+    }, [internalCurrentPage, getValidCurrentPage, setInternalCurrentPage])
 
     const onNext = useCallback(() => {
-        const newPage = internalCurrentPage + 1
+        const newPage = (internalCurrentPage ?? 1) + 1
         setInternalCurrentPage(getValidCurrentPage(newPage))
-        onChange?.(getValidCurrentPage(newPage))
-    }, [onChange, internalCurrentPage, getValidCurrentPage])
+    }, [internalCurrentPage, getValidCurrentPage, setInternalCurrentPage])
 
     const pagerClass = {
         default: 'pagination-pager',
@@ -116,18 +99,18 @@ const Pagination = (props: PaginationProps) => {
         <div className={paginationClass}>
             {displayTotal && <Total total={total} />}
             <Prev
-                currentPage={internalCurrentPage}
+                currentPage={internalCurrentPage ?? 1}
                 pagerClass={pagerClass}
                 onPrev={onPrev}
             />
             <Pager
                 pageCount={getInternalPageCount as number}
-                currentPage={internalCurrentPage}
+                currentPage={internalCurrentPage ?? 1}
                 pagerClass={pagerClass}
                 onChange={onPaginationChange}
             />
             <Next
-                currentPage={internalCurrentPage}
+                currentPage={internalCurrentPage ?? 1}
                 pageCount={getInternalPageCount as number}
                 pagerClass={pagerClass}
                 onNext={onNext}

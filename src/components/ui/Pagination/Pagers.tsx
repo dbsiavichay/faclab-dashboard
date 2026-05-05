@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import classNames from 'classnames'
 import {
     HiOutlineChevronDoubleLeft,
@@ -78,28 +78,15 @@ type PagersProps = {
 const Pagers = (props: PagersProps) => {
     const { pageCount, currentPage, onChange, pagerClass } = props
 
-    const [showPrevMore, setShowPrevMore] = useState(false)
-    const [showNextMore, setShowNextMore] = useState(false)
-
-    useEffect(() => {
-        if (pageCount > PAGER_COUNT) {
-            if (currentPage > PAGER_COUNT - 2) {
-                setShowPrevMore(true)
-            }
-            if (currentPage < pageCount - 2) {
-                setShowNextMore(true)
-            }
-            if (currentPage >= pageCount - 3 && currentPage <= pageCount) {
-                setShowNextMore(false)
-            }
-            if (currentPage >= 1 && currentPage <= 4) {
-                setShowPrevMore(false)
-            }
-        } else {
-            setShowPrevMore(false)
-            setShowNextMore(false)
-        }
-    }, [currentPage, pageCount])
+    let showPrevMore = false
+    let showNextMore = false
+    if (pageCount > PAGER_COUNT) {
+        if (currentPage > PAGER_COUNT - 2) showPrevMore = true
+        if (currentPage < pageCount - 2) showNextMore = true
+        if (currentPage >= pageCount - 3 && currentPage <= pageCount)
+            showNextMore = false
+        if (currentPage >= 1 && currentPage <= 4) showPrevMore = false
+    }
 
     const onPagerClick = (
         value: number,

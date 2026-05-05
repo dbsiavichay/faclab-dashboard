@@ -63,3 +63,7 @@ export {
     companyConfigSchema,
     type CompanyConfigFormValues,
 } from './companyConfig.schema'
+export {
+    certificateUploadSchema,
+    type CertificateUploadFormValues,
+} from './certificateUpload.schema'

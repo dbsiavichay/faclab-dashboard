@@ -1,9 +1,12 @@
 import { useState, useRef } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
+import { FormItem } from '@/components/ui/Form'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import {
@@ -14,6 +17,10 @@ import {
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import type { Certificate } from '@/services/InvoicingService'
 import { HiOutlineTrash, HiOutlineUpload } from 'react-icons/hi'
+import {
+    certificateUploadSchema,
+    type CertificateUploadFormValues,
+} from '@/schemas'
 
 const CertificatesView = () => {
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
@@ -21,44 +28,51 @@ const CertificatesView = () => {
         open: boolean
         cert: Certificate | null
     }>({ open: false, cert: null })
-    const [password, setPassword] = useState('')
-    const [selectedFile, setSelectedFile] = useState<File | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const { data: certificates = [], isLoading } = useCertificates()
     const uploadCertificate = useUploadCertificate()
     const deleteCertificate = useDeleteCertificate()
 
+    const {
+        register,
+        handleSubmit,
+        control,
+        setValue,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<CertificateUploadFormValues>({
+        resolver: zodResolver(certificateUploadSchema),
+        defaultValues: { password: '' },
+    })
+
+    const watchedFile = useWatch({ control, name: 'file' })
+
+    const closeUploadForm = () => {
+        setIsUploadDialogOpen(false)
+        reset()
+        if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+
     const handleUploadOpen = () => {
-        setSelectedFile(null)
-        setPassword('')
         setIsUploadDialogOpen(true)
     }
 
     const handleUploadClose = () => {
-        if (uploadCertificate.isPending) return
-        setIsUploadDialogOpen(false)
-        setSelectedFile(null)
-        setPassword('')
-        if (fileInputRef.current) fileInputRef.current.value = ''
+        if (isSubmitting) return
+        closeUploadForm()
     }
 
-    const handleUploadSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!selectedFile) return
-
+    const onUploadSubmit = async (values: CertificateUploadFormValues) => {
         try {
-            await uploadCertificate.mutateAsync({
-                file: selectedFile,
-                password,
-            })
+            await uploadCertificate.mutateAsync(values)
             toast.push(
                 <Notification title="Certificado subido" type="success">
                     El certificado se subió correctamente
                 </Notification>,
                 { placement: 'top-end' }
             )
-            handleUploadClose()
+            closeUploadForm()
         } catch (error: unknown) {
             toast.push(
                 <Notification title="Error" type="danger">
@@ -214,56 +228,63 @@ const CertificatesView = () => {
             {/* Upload Dialog */}
             <Dialog
                 isOpen={isUploadDialogOpen}
-                shouldCloseOnEsc={!uploadCertificate.isPending}
-                shouldCloseOnOverlayClick={!uploadCertificate.isPending}
+                shouldCloseOnEsc={!isSubmitting}
+                shouldCloseOnOverlayClick={!isSubmitting}
                 onClose={handleUploadClose}
                 onRequestClose={handleUploadClose}
             >
                 <div className="flex flex-col h-full justify-between">
                     <h5 className="mb-4">Subir Certificado Digital</h5>
-                    <form className="flex-1" onSubmit={handleUploadSubmit}>
+                    <form
+                        className="flex-1"
+                        onSubmit={handleSubmit(onUploadSubmit)}
+                    >
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Archivo .p12{' '}
-                                    <span className="text-red-500">*</span>
-                                </label>
+                            <FormItem
+                                asterisk
+                                label="Archivo .p12"
+                                invalid={!!errors.file}
+                                errorMessage={errors.file?.message}
+                            >
                                 <input
                                     ref={fileInputRef}
-                                    required
                                     type="file"
                                     accept=".p12"
-                                    disabled={uploadCertificate.isPending}
+                                    disabled={isSubmitting}
                                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                    onChange={(e) =>
-                                        setSelectedFile(
-                                            e.target.files?.[0] ?? null
-                                        )
-                                    }
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0]
+                                        setValue('file', file as File, {
+                                            shouldValidate: true,
+                                        })
+                                    }}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    Contraseña{' '}
-                                    <span className="text-red-500">*</span>
-                                </label>
+                                {watchedFile && (
+                                    <span className="text-xs text-gray-500 mt-1 block">
+                                        {watchedFile.name}
+                                    </span>
+                                )}
+                            </FormItem>
+                            <FormItem
+                                asterisk
+                                label="Contraseña"
+                                invalid={!!errors.password}
+                                errorMessage={errors.password?.message}
+                            >
                                 <Input
-                                    required
                                     type="password"
                                     placeholder="Contraseña del certificado"
-                                    value={password}
-                                    disabled={uploadCertificate.isPending}
-                                    onChange={(e) =>
-                                        setPassword(e.target.value)
-                                    }
+                                    disabled={isSubmitting}
+                                    invalid={!!errors.password}
+                                    {...register('password')}
                                 />
-                            </div>
+                            </FormItem>
                         </div>
                         <div className="flex justify-end gap-2 mt-6">
                             <Button
                                 type="button"
                                 variant="plain"
-                                disabled={uploadCertificate.isPending}
+                                disabled={isSubmitting}
                                 onClick={handleUploadClose}
                             >
                                 Cancelar
@@ -271,8 +292,8 @@ const CertificatesView = () => {
                             <Button
                                 type="submit"
                                 variant="solid"
-                                loading={uploadCertificate.isPending}
-                                disabled={!selectedFile || !password}
+                                loading={isSubmitting}
+                                disabled={!watchedFile}
                             >
                                 Subir
                             </Button>

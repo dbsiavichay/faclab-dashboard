@@ -1,4 +1,4 @@
-import { useState, useMemo, useContext, useCallback, useEffect } from 'react'
+import { useMemo, useContext, useCallback } from 'react'
 import classNames from 'classnames'
 import RadioGroupContext from './context'
 import { useConfig } from '../ConfigProvider'
@@ -21,8 +21,6 @@ export interface RadioProps
     value?: any
     vertical?: boolean
     readOnly?: boolean
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    field?: any
 }
 
 const Radio = (props: RadioProps) => {
@@ -43,7 +41,6 @@ const Radio = (props: RadioProps) => {
         color,
         defaultChecked,
         disabled = disabledContext,
-        field,
         labelRef,
         name = nameContext,
         onChange,
@@ -62,7 +59,7 @@ const Radio = (props: RadioProps) => {
             : checkedProp
     }
 
-    const [radioChecked, setRadioChecked] = useState(getChecked())
+    const radioChecked = getChecked()
 
     const radioColor =
         color || colorContext || `${themeColor}-${primaryColorLevel}`
@@ -83,25 +80,8 @@ const Radio = (props: RadioProps) => {
             onGroupChange?.(value, e)
             onChange?.(value, e)
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [
-            disabled,
-            setRadioChecked,
-            onChange,
-            value,
-            onGroupChange,
-            groupValue,
-            readOnly,
-        ]
+        [disabled, onChange, value, onGroupChange, readOnly]
     )
-
-    useEffect(() => {
-        const propChecked = getChecked()
-        if (radioChecked !== propChecked) {
-            setRadioChecked(propChecked)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value, checkedProp, groupValue])
 
     const radioDefaultClass = `radio text-${radioColor}`
     const radioColorClass = disabled && 'disabled'
@@ -128,7 +108,6 @@ const Radio = (props: RadioProps) => {
                 readOnly={readOnly}
                 onChange={onRadioChange}
                 {...controlProps}
-                {...field}
                 {...rest}
             />
             {children ? (

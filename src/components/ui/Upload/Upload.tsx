@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import classNames from 'classnames'
 import { useConfig } from '../ConfigProvider'
 import cloneDeep from 'lodash/cloneDeep'
@@ -7,6 +7,7 @@ import Button from '../Button/Button'
 import CloseButton from '../CloseButton'
 import Notification from '../Notification/Notification'
 import toast from '../toast/toast'
+import useControllableState from '../hooks/useControllableState'
 import type { CommonProps } from '../@types/common'
 import type { ReactNode, ChangeEvent, MouseEvent, Ref } from 'react'
 
@@ -23,8 +24,6 @@ export interface UploadProps extends CommonProps {
     showList?: boolean
     tip?: string | ReactNode
     uploadLimit?: number
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    field?: any
 }
 
 const filesToArray = (files: File[]) =>
@@ -37,7 +36,7 @@ const Upload = (props: UploadProps) => {
         beforeUpload,
         disabled = false,
         draggable = false,
-        fileList = [],
+        fileList,
         multiple,
         onChange,
         onFileRemove,
@@ -47,22 +46,19 @@ const Upload = (props: UploadProps) => {
         uploadLimit,
         children,
         className,
-        field,
         ...rest
     } = props
 
     const fileInputField = useRef<HTMLInputElement>(null)
-    const [files, setFiles] = useState(fileList)
+    const [files, setFiles] = useControllableState<File[]>({
+        prop: fileList,
+        defaultProp: [],
+    })
     const [dragOver, setDragOver] = useState(false)
 
     const { themeColor, primaryColorLevel } = useConfig()
 
-    useEffect(() => {
-        if (JSON.stringify(files) !== JSON.stringify(fileList)) {
-            setFiles(fileList)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fileList])
+    const safeFiles = files ?? []
 
     const triggerMessage = (msg: string | ReactNode = '') => {
         toast.push(
@@ -86,7 +82,7 @@ const Upload = (props: UploadProps) => {
     }
 
     const addNewFiles = (newFiles: FileList | null) => {
-        let file = cloneDeep(files)
+        let file = cloneDeep(safeFiles)
         if (typeof uploadLimit === 'number' && uploadLimit !== 0) {
             if (Object.keys(file).length >= uploadLimit) {
                 if (uploadLimit === 1) {
@@ -106,7 +102,7 @@ const Upload = (props: UploadProps) => {
         let result: boolean | string = true
 
         if (beforeUpload) {
-            result = beforeUpload(newFiles, files)
+            result = beforeUpload(newFiles, safeFiles)
 
             if (result === false) {
                 triggerMessage()
@@ -122,12 +118,14 @@ const Upload = (props: UploadProps) => {
         if (result) {
             const updatedFiles = addNewFiles(newFiles)
             setFiles(updatedFiles)
-            onChange?.(updatedFiles, files)
+            onChange?.(updatedFiles, safeFiles)
         }
     }
 
     const removeFile = (fileIndex: number) => {
-        const deletedFileList = files.filter((_, index) => index !== fileIndex)
+        const deletedFileList = safeFiles.filter(
+            (_, index) => index !== fileIndex
+        )
         setFiles(deletedFileList)
         onFileRemove?.(deletedFileList)
     }
@@ -213,7 +211,6 @@ const Upload = (props: UploadProps) => {
                     title=""
                     value=""
                     onChange={onNewFileUpload}
-                    {...field}
                     {...rest}
                 ></input>
                 {renderChildren()}
@@ -221,7 +218,7 @@ const Upload = (props: UploadProps) => {
             {tip}
             {showList && (
                 <div className="upload-file-list">
-                    {files.map((file, index) => (
+                    {safeFiles.map((file, index) => (
                         <FileItem key={file.name + index} file={file}>
                             <CloseButton
                                 className="upload-file-remove"

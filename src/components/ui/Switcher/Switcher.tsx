@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
 import classNames from 'classnames'
 import { Spinner } from '../Spinner'
 import { useConfig } from '../ConfigProvider'
+import useControllableState from '../hooks/useControllableState'
 import type { CommonProps } from '../@types/common'
 import type { ReactNode, ChangeEvent, Ref } from 'react'
 
@@ -18,8 +18,6 @@ export interface SwitcherProps extends CommonProps {
     readOnly?: boolean
     ref?: Ref<HTMLInputElement>
     unCheckedContent?: string | ReactNode
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    field?: any
 }
 
 const Switcher = (props: SwitcherProps) => {
@@ -37,67 +35,30 @@ const Switcher = (props: SwitcherProps) => {
         readOnly,
         ref,
         unCheckedContent,
-        field,
         ...rest
     } = props
 
     const { themeColor, primaryColorLevel } = useConfig()
 
-    const [switcherChecked, setSwitcherChecked] = useState(
-        defaultChecked || checked
+    const [switcherChecked, setSwitcherChecked] = useControllableState<boolean>(
+        {
+            prop: checked,
+            defaultProp: defaultChecked ?? false,
+        }
     )
 
-    useEffect(() => {
-        if (typeof checked !== 'undefined') {
-            setSwitcherChecked(checked)
-        }
-    }, [checked])
-
-    const getControlProps = () => {
-        let checkedValue = switcherChecked
-
-        let checked: {
-            value?: boolean
-            defaultChecked?: boolean
-            checked?: boolean
-        } = {
-            value: checkedValue,
-        }
-
-        if (field) {
-            checkedValue =
-                typeof field.value === 'boolean' ? field.value : defaultChecked
-            checked = { value: checkedValue, checked: checkedValue }
-        }
-
-        if (defaultChecked) {
-            checked.defaultChecked = defaultChecked
-        }
-        return checked
-    }
-
-    const controlProps = getControlProps()
-
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (disabled || readOnly || isLoading) return
         const nextChecked = !switcherChecked
-
-        if (disabled || readOnly || isLoading) {
-            return
-        }
-
-        if (typeof checked === 'undefined') {
-            setSwitcherChecked(nextChecked)
-            onChange?.(nextChecked, e)
-        } else {
-            onChange?.(nextChecked, e)
-        }
+        setSwitcherChecked(nextChecked)
+        onChange?.(nextChecked, e)
     }
 
     const switcherColor = color || `${themeColor}-${primaryColorLevel}`
 
     const switcherClass = classNames(
         'switcher',
-        (switcherChecked || controlProps.checked) &&
+        switcherChecked &&
             `switcher-checked bg-${switcherColor} dark:bg-${switcherColor}`,
         disabled && 'switcher-disabled',
         className
@@ -111,9 +72,8 @@ const Switcher = (props: SwitcherProps) => {
                 disabled={disabled}
                 readOnly={readOnly}
                 name={name}
+                checked={switcherChecked ?? false}
                 onChange={handleChange}
-                {...controlProps}
-                {...field}
                 {...rest}
             />
             {isLoading ? (

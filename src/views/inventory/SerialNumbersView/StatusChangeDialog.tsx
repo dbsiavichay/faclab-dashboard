@@ -1,16 +1,23 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
-import Select from '@/components/ui/Select'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
+import { FormItem } from '@/components/ui/Form'
+import { ControlledSelect } from '@/components/ui/Form/controlled'
 import { useChangeSerialNumberStatus } from '@/hooks/useSerialNumbers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type { SerialNumber, SerialStatus } from '@/services/SerialNumberService'
 import {
     SERIAL_STATUS_LABELS,
     VALID_TRANSITIONS,
 } from '@/services/SerialNumberService'
+import type { SerialNumber, SerialStatus } from '@/services/SerialNumberService'
+import {
+    serialStatusChangeSchema,
+    type SerialStatusChangeFormValues,
+} from '@/schemas'
 
 interface StatusChangeDialogProps {
     open: boolean
@@ -23,7 +30,6 @@ const StatusChangeDialog = ({
     onClose,
     serialNumber,
 }: StatusChangeDialogProps) => {
-    const [newStatus, setNewStatus] = useState<SerialStatus | ''>('')
     const changeStatus = useChangeSerialNumberStatus()
 
     const validTargets = serialNumber
@@ -35,27 +41,40 @@ const StatusChangeDialog = ({
         label: SERIAL_STATUS_LABELS[s],
     }))
 
+    const noTransitions = validTargets.length === 0
+
+    const {
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<SerialStatusChangeFormValues>({
+        resolver: zodResolver(serialStatusChangeSchema),
+        defaultValues: { status: validTargets[0] ?? '' },
+    })
+
     useEffect(() => {
         if (serialNumber) {
             const targets = VALID_TRANSITIONS[serialNumber.status]
-            setNewStatus(targets.length > 0 ? targets[0] : '')
+            reset({ status: targets[0] ?? '' })
         } else {
-            setNewStatus('')
+            reset({ status: '' })
         }
-    }, [serialNumber, open])
+    }, [serialNumber, open, reset])
 
-    const handleSubmit = async () => {
-        if (!serialNumber || !newStatus) return
+    const onSubmit = async (data: SerialStatusChangeFormValues) => {
+        if (!serialNumber) return
 
         try {
             await changeStatus.mutateAsync({
                 id: serialNumber.id,
-                status: newStatus,
+                status: data.status as SerialStatus,
             })
 
             toast.push(
                 <Notification title="Estado actualizado" type="success">
-                    El estado se cambió a {SERIAL_STATUS_LABELS[newStatus]}
+                    El estado se cambió a{' '}
+                    {SERIAL_STATUS_LABELS[data.status as SerialStatus]}
                 </Notification>,
                 { placement: 'top-end' }
             )
@@ -82,8 +101,6 @@ const StatusChangeDialog = ({
         }
     }
 
-    const noTransitions = validTargets.length === 0
-
     return (
         <Dialog
             isOpen={open}
@@ -109,41 +126,40 @@ const StatusChangeDialog = ({
                     transiciones.
                 </p>
             ) : (
-                <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">
-                        Nuevo Estado
-                    </label>
-                    <Select
-                        options={statusOptions}
-                        value={statusOptions.find((o) => o.value === newStatus)}
-                        onChange={(option) =>
-                            setNewStatus(
-                                (option as { value: SerialStatus })?.value || ''
-                            )
-                        }
-                    />
-                </div>
-            )}
-
-            <div className="flex justify-end gap-2">
-                <Button
-                    variant="plain"
-                    disabled={changeStatus.isPending}
-                    onClick={handleClose}
-                >
-                    Cancelar
-                </Button>
-                {!noTransitions && (
-                    <Button
-                        variant="solid"
-                        loading={changeStatus.isPending}
-                        disabled={!newStatus}
-                        onClick={handleSubmit}
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <FormItem
+                        label="Nuevo Estado"
+                        invalid={!!errors.status}
+                        errorMessage={errors.status?.message}
                     >
-                        Cambiar Estado
-                    </Button>
-                )}
-            </div>
+                        <ControlledSelect
+                            name="status"
+                            control={control}
+                            options={statusOptions}
+                            isDisabled={isSubmitting}
+                            placeholder="Seleccione un estado"
+                        />
+                    </FormItem>
+
+                    <div className="flex justify-end gap-2 mt-6">
+                        <Button
+                            type="button"
+                            variant="plain"
+                            disabled={changeStatus.isPending}
+                            onClick={handleClose}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="solid"
+                            loading={changeStatus.isPending}
+                        >
+                            Cambiar Estado
+                        </Button>
+                    </div>
+                </form>
+            )}
         </Dialog>
     )
 }

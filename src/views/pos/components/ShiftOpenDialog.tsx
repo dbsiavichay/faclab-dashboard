@@ -1,24 +1,39 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { useOpenShift } from '@/hooks/usePOS'
 import { useSession } from '@/stores/useAuthStore'
+import { shiftOpenSchema, type ShiftOpenFormValues } from '@/schemas'
 
 const ShiftOpenDialog = () => {
     const navigate = useNavigate()
     const session = useSession()
     const openShift = useOpenShift()
 
-    const [cashierName, setCashierName] = useState(session?.username || '')
-    const [openingBalance, setOpeningBalance] = useState<string>('0')
-    const [notes, setNotes] = useState('')
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<ShiftOpenFormValues>({
+        resolver: zodResolver(shiftOpenSchema),
+        defaultValues: {
+            cashierName: session?.username || '',
+            openingBalance: 0,
+            notes: '',
+        },
+    })
 
-    const handleSubmit = async () => {
+    const numberRegister = makeNumberRegister(register)
+
+    const onSubmit = async (data: ShiftOpenFormValues) => {
         await openShift.mutateAsync({
-            cashierName,
-            openingBalance: Number(openingBalance),
-            notes: notes || undefined,
+            cashierName: data.cashierName,
+            openingBalance: data.openingBalance,
+            notes: data.notes || undefined,
         })
     }
 
@@ -32,60 +47,72 @@ const ShiftOpenDialog = () => {
                     Debe abrir un turno para usar el POS
                 </p>
 
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Nombre del cajero
-                        </label>
-                        <Input
-                            value={cashierName}
-                            placeholder="Nombre del cajero"
-                            onChange={(e) => setCashierName(e.target.value)}
-                        />
-                    </div>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <FormContainer>
+                        <FormItem
+                            asterisk
+                            label="Nombre del cajero"
+                            invalid={!!errors.cashierName}
+                            errorMessage={errors.cashierName?.message}
+                        >
+                            <Input
+                                placeholder="Nombre del cajero"
+                                disabled={isSubmitting}
+                                invalid={!!errors.cashierName}
+                                {...register('cashierName')}
+                            />
+                        </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Saldo inicial
-                        </label>
-                        <Input
-                            type="number"
-                            value={openingBalance}
-                            prefix="$"
-                            onChange={(e) => setOpeningBalance(e.target.value)}
-                        />
-                    </div>
+                        <FormItem
+                            asterisk
+                            label="Saldo inicial"
+                            invalid={!!errors.openingBalance}
+                            errorMessage={errors.openingBalance?.message}
+                        >
+                            <Input
+                                type="number"
+                                prefix="$"
+                                disabled={isSubmitting}
+                                invalid={!!errors.openingBalance}
+                                {...numberRegister('openingBalance', {
+                                    emptyValue: 0,
+                                })}
+                            />
+                        </FormItem>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Notas (opcional)
-                        </label>
-                        <Input
-                            value={notes}
-                            placeholder="Notas opcionales"
-                            onChange={(e) => setNotes(e.target.value)}
-                        />
-                    </div>
-                </div>
+                        <FormItem
+                            label="Notas (opcional)"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
+                            <Input
+                                placeholder="Notas opcionales"
+                                disabled={isSubmitting}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
+                            />
+                        </FormItem>
+                    </FormContainer>
 
-                <div className="flex gap-3 mt-8">
-                    <Button
-                        block
-                        variant="default"
-                        onClick={() => navigate('/home')}
-                    >
-                        Volver al Dashboard
-                    </Button>
-                    <Button
-                        block
-                        variant="solid"
-                        loading={openShift.isPending}
-                        disabled={!cashierName}
-                        onClick={handleSubmit}
-                    >
-                        Abrir Turno
-                    </Button>
-                </div>
+                    <div className="flex gap-3 mt-8">
+                        <Button
+                            block
+                            type="button"
+                            variant="default"
+                            onClick={() => navigate('/home')}
+                        >
+                            Volver al Dashboard
+                        </Button>
+                        <Button
+                            block
+                            type="submit"
+                            variant="solid"
+                            loading={openShift.isPending}
+                        >
+                            Abrir Turno
+                        </Button>
+                    </div>
+                </form>
             </div>
         </div>
     )

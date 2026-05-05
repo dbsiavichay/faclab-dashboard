@@ -59,3 +59,7 @@ export {
     serialStatusChangeSchema,
     type SerialStatusChangeFormValues,
 } from './serialStatusChange.schema'
+export {
+    companyConfigSchema,
+    type CompanyConfigFormValues,
+} from './companyConfig.schema'

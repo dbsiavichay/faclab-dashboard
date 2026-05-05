@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
+import { FormItem } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { useAddCashMovement } from '@/hooks/usePOS'
 import { useShift } from './useShift'
-import type { CashMovementType } from '@/services/pos/POSTypes'
+import { cashMovementSchema, type CashMovementFormValues } from '@/schemas'
 
 interface CashMovementDialogProps {
     isOpen: boolean
@@ -17,28 +20,40 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
     const shift = useShift()
     const addCashMovement = useAddCashMovement()
 
-    const [type, setType] = useState<CashMovementType>('IN')
-    const [amount, setAmount] = useState<string>('')
-    const [reason, setReason] = useState('')
+    const {
+        register,
+        handleSubmit,
+        control,
+        setValue,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<CashMovementFormValues>({
+        resolver: zodResolver(cashMovementSchema),
+        defaultValues: {
+            type: 'IN',
+            amount: undefined,
+            reason: '',
+        },
+    })
 
-    const handleSubmit = async () => {
-        const numAmount = Number(amount)
-        if (numAmount <= 0) return
+    const numberRegister = makeNumberRegister(register)
+    const type = useWatch({ control, name: 'type' })
 
+    const onSubmit = async (data: CashMovementFormValues) => {
         try {
             await addCashMovement.mutateAsync({
                 shiftId: shift.id,
                 data: {
-                    type,
-                    amount: numAmount,
-                    reason: reason || undefined,
+                    type: data.type,
+                    amount: data.amount,
+                    reason: data.reason || undefined,
                 },
             })
             toast.push(
                 <Notification type="success" title="Movimiento registrado" />,
                 { placement: 'top-end' }
             )
-            resetForm()
+            reset()
             onClose()
         } catch {
             toast.push(
@@ -51,14 +66,8 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
         }
     }
 
-    const resetForm = () => {
-        setType('IN')
-        setAmount('')
-        setReason('')
-    }
-
     const handleClose = () => {
-        resetForm()
+        reset()
         onClose()
     }
 
@@ -71,79 +80,86 @@ const CashMovementDialog = ({ isOpen, onClose }: CashMovementDialogProps) => {
         >
             <h4 className="text-lg font-bold mb-4">Movimiento de Caja</h4>
 
-            <div className="flex gap-2 mb-4">
-                <Button
-                    block
-                    variant={type === 'IN' ? 'solid' : 'default'}
-                    className={
-                        type === 'IN'
-                            ? '!bg-emerald-500 !border-emerald-500 text-white'
-                            : ''
-                    }
-                    onClick={() => setType('IN')}
-                >
-                    Entrada
-                </Button>
-                <Button
-                    block
-                    variant={type === 'OUT' ? 'solid' : 'default'}
-                    className={
-                        type === 'OUT'
-                            ? '!bg-red-500 !border-red-500 text-white'
-                            : ''
-                    }
-                    onClick={() => setType('OUT')}
-                >
-                    Salida
-                </Button>
-            </div>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="flex gap-2 mb-4">
+                    <Button
+                        block
+                        type="button"
+                        variant={type === 'IN' ? 'solid' : 'default'}
+                        className={
+                            type === 'IN'
+                                ? '!bg-emerald-500 !border-emerald-500 text-white'
+                                : ''
+                        }
+                        onClick={() => setValue('type', 'IN')}
+                    >
+                        Entrada
+                    </Button>
+                    <Button
+                        block
+                        type="button"
+                        variant={type === 'OUT' ? 'solid' : 'default'}
+                        className={
+                            type === 'OUT'
+                                ? '!bg-red-500 !border-red-500 text-white'
+                                : ''
+                        }
+                        onClick={() => setValue('type', 'OUT')}
+                    >
+                        Salida
+                    </Button>
+                </div>
 
-            <div>
-                <label
-                    htmlFor="cash-amount"
-                    className="block text-sm font-medium mb-1"
+                <FormItem
+                    asterisk
+                    label="Monto"
+                    invalid={!!errors.amount}
+                    errorMessage={errors.amount?.message}
                 >
-                    Monto
-                </label>
-                <Input
-                    id="cash-amount"
-                    type="number"
-                    prefix="$"
-                    value={amount}
-                    placeholder="0.00"
-                    onChange={(e) => setAmount(e.target.value)}
-                />
-            </div>
+                    <Input
+                        type="number"
+                        prefix="$"
+                        placeholder="0.00"
+                        disabled={isSubmitting}
+                        invalid={!!errors.amount}
+                        {...numberRegister('amount')}
+                    />
+                </FormItem>
 
-            <div className="mt-3">
-                <label
-                    htmlFor="cash-reason"
-                    className="block text-sm font-medium mb-1"
-                >
-                    Razon (opcional)
-                </label>
-                <Input
-                    id="cash-reason"
-                    value={reason}
-                    placeholder="Razon del movimiento"
-                    onChange={(e) => setReason(e.target.value)}
-                />
-            </div>
+                <div className="mt-3">
+                    <FormItem
+                        label="Razón (opcional)"
+                        invalid={!!errors.reason}
+                        errorMessage={errors.reason?.message}
+                    >
+                        <Input
+                            placeholder="Razón del movimiento"
+                            disabled={isSubmitting}
+                            invalid={!!errors.reason}
+                            {...register('reason')}
+                        />
+                    </FormItem>
+                </div>
 
-            <div className="flex gap-2 mt-6">
-                <Button block variant="default" onClick={handleClose}>
-                    Cancelar
-                </Button>
-                <Button
-                    block
-                    variant="solid"
-                    loading={addCashMovement.isPending}
-                    disabled={!amount || Number(amount) <= 0}
-                    onClick={handleSubmit}
-                >
-                    Registrar
-                </Button>
-            </div>
+                <div className="flex gap-2 mt-6">
+                    <Button
+                        block
+                        type="button"
+                        variant="default"
+                        onClick={handleClose}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        block
+                        type="submit"
+                        variant="solid"
+                        loading={addCashMovement.isPending}
+                    >
+                        Registrar
+                    </Button>
+                </div>
+            </form>
         </Dialog>
     )
 }

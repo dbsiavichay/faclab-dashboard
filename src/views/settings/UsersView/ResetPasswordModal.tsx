@@ -8,7 +8,7 @@ import { useResetUserPassword } from '@/hooks/useAdminUsers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { resetPasswordSchema, type ResetPasswordFormValues } from '@/schemas'
 import type { AdminUserResponse } from '@/@types/auth'
 
 interface ResetPasswordModalProps {
@@ -23,12 +23,6 @@ const generatePassword = () =>
     Array.from(crypto.getRandomValues(new Uint8Array(12)))
         .map((b) => CHARS[b % CHARS.length])
         .join('')
-
-const resetPasswordSchema = z.object({
-    password: z.string().min(8, 'Mínimo 8 caracteres'),
-})
-
-type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
 
 const ResetPasswordModal = ({
     open,

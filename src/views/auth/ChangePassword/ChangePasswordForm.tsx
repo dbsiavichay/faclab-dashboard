@@ -9,25 +9,9 @@ import { isApiError } from '@/utils/errors/ApiError'
 import { ROLE } from '@/constants/roles.constant'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { changePasswordSchema, type ChangePasswordFormValues } from '@/schemas'
 import { useNavigate } from 'react-router-dom'
 import appConfig from '@/configs/app.config'
-
-const changePasswordSchema = z
-    .object({
-        currentPassword: z.string().min(1, 'Ingresa tu contraseña actual'),
-        newPassword: z
-            .string()
-            .min(8, 'La nueva contraseña debe tener al menos 8 caracteres')
-            .max(128, 'La contraseña es demasiado larga'),
-        confirmNewPassword: z.string().min(1, 'Confirma tu nueva contraseña'),
-    })
-    .refine((data) => data.confirmNewPassword === data.newPassword, {
-        message: 'Las contraseñas no coinciden',
-        path: ['confirmNewPassword'],
-    })
-
-type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>
 
 const ChangePasswordForm = () => {
     const navigate = useNavigate()

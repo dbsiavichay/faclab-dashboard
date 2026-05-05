@@ -17,8 +17,6 @@ export interface CheckboxProps extends CommonProps {
     readOnly?: boolean
     ref?: Ref<HTMLInputElement>
     value?: CheckboxValue
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    field?: any
 }
 
 const Checkbox = (props: CheckboxProps) => {
@@ -42,7 +40,6 @@ const Checkbox = (props: CheckboxProps) => {
         checked: controlledChecked,
         labelRef,
         ref,
-        field,
         ...rest
     } = props
 
@@ -58,28 +55,14 @@ const Checkbox = (props: CheckboxProps) => {
     const [checkboxChecked, setCheckboxChecked] = useState(isChecked())
 
     const getControlProps = () => {
-        let checkedValue = checkboxChecked
-
-        let groupChecked = { checked: checkedValue }
-        let singleChecked: {
-            value: boolean
+        let groupChecked = { checked: checkboxChecked }
+        const singleChecked: {
             defaultChecked?: boolean
             checked?: boolean
-        } = {
-            value: checkedValue as boolean,
-        }
+        } = {}
 
         if (typeof controlledChecked !== 'undefined') {
             singleChecked.checked = controlledChecked
-        }
-
-        if (field) {
-            checkedValue =
-                typeof field.value === 'boolean' ? field.value : defaultChecked
-            singleChecked = {
-                value: checkedValue as boolean,
-                checked: checkedValue,
-            }
         }
 
         if (typeof groupValue !== 'undefined') {
@@ -149,7 +132,6 @@ const Checkbox = (props: CheckboxProps) => {
                 name={name}
                 onChange={onCheckboxChange}
                 {...controlProps}
-                {...field}
                 {...rest}
             />
             {children ? (

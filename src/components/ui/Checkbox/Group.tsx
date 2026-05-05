@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useCallback, useMemo } from 'react'
 import classNames from 'classnames'
 import { CheckboxGroupContextProvider } from './context'
 import cloneDeep from 'lodash/cloneDeep'
 import remove from 'lodash/remove'
 import shallowEqual from '../utils/shallowEqual'
+import useControllableState from '../hooks/useControllableState'
 import type { CommonProps } from '../@types/common'
 import type { CheckboxGroupValue, CheckboxValue } from './context'
 import type { Ref, SyntheticEvent } from 'react'
@@ -30,7 +31,10 @@ const Group = (props: CheckboxGroupProps) => {
         ...rest
     } = props
 
-    const [value, setValue] = useState(valueProp)
+    const [value, setValue] = useControllableState<CheckboxGroupValue>({
+        prop: valueProp,
+        defaultProp: [],
+    })
 
     const onCheckboxGroupChange = useCallback(
         (
@@ -50,10 +54,6 @@ const Group = (props: CheckboxGroupProps) => {
         },
         [onChange, setValue, value]
     )
-
-    useEffect(() => {
-        setValue(valueProp)
-    }, [valueProp])
 
     const checkboxGroupDefaultClass = `inline-flex ${
         vertical ? 'flex-col gap-y-2' : ''

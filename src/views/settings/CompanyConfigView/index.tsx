@@ -1,7 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { FormItem } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
+import {
+    ControlledSelect,
+    ControlledSwitcher,
+} from '@/components/ui/Form/controlled'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import {
@@ -10,9 +18,17 @@ import {
     useCertificates,
 } from '@/hooks/useInvoicing'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { companyConfigSchema, type CompanyConfigFormValues } from '@/schemas'
 import type { CompanyConfigInput } from '@/services/InvoicingService'
 
-const emptyForm: CompanyConfigInput = {
+type CertOption = { value: string | null | undefined; label: string }
+
+const environmentOptions: { value: 1 | 2; label: string }[] = [
+    { value: 1, label: '1 - Pruebas (Testing)' },
+    { value: 2, label: '2 - Producción' },
+]
+
+const emptyValues: CompanyConfigFormValues = {
     taxId: '',
     name: '',
     tradeName: '',
@@ -26,19 +42,40 @@ const emptyForm: CompanyConfigInput = {
     environment: 1,
     emissionType: 1,
     invoiceSequence: undefined,
-    signingCertId: '',
+    signingCertId: undefined,
 }
 
 const CompanyConfigView = () => {
-    const [formData, setFormData] = useState<CompanyConfigInput>(emptyForm)
-
     const { data: config, isLoading } = useCompanyConfig()
     const { data: certificates = [] } = useCertificates()
     const updateConfig = useUpdateCompanyConfig()
 
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<CompanyConfigFormValues>({
+        resolver: zodResolver(companyConfigSchema),
+        defaultValues: emptyValues,
+    })
+
+    const numberRegister = makeNumberRegister(register)
+
+    const certOptions: CertOption[] = [
+        { value: null, label: '— Sin certificado —' },
+        ...certificates.map((cert) => ({
+            value: cert.id,
+            label: `${cert.fileName} (${new Date(
+                cert.validTo
+            ).toLocaleDateString('es-EC')})`,
+        })),
+    ]
+
     useEffect(() => {
         if (config) {
-            setFormData({
+            reset({
                 taxId: config.taxId,
                 name: config.name,
                 tradeName: config.tradeName,
@@ -52,38 +89,24 @@ const CompanyConfigView = () => {
                     config.withholdingAgentResolution ?? '',
                 accountingRequired: config.accountingRequired,
                 environment: config.environment,
-                emissionType: config.emissionType,
-                invoiceSequence: config.invoiceSequence,
-                signingCertId: config.signingCertId ?? '',
+                emissionType: 1,
+                invoiceSequence: config.invoiceSequence ?? undefined,
+                signingCertId: config.signingCertId ?? null,
             })
         }
-    }, [config])
+    }, [config, reset])
 
-    const set =
-        (field: keyof CompanyConfigInput) =>
-        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-            const value =
-                e.target.type === 'checkbox'
-                    ? (e.target as HTMLInputElement).checked
-                    : e.target.value
-            setFormData((prev) => ({ ...prev, [field]: value }))
-        }
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const onSubmit = async (values: CompanyConfigFormValues) => {
         try {
             const payload: CompanyConfigInput = {
-                ...formData,
-                environment: Number(formData.environment) as 1 | 2,
+                ...values,
                 emissionType: 1,
-                invoiceSequence: formData.invoiceSequence
-                    ? Number(formData.invoiceSequence)
-                    : undefined,
+                invoiceSequence: values.invoiceSequence ?? undefined,
+                signingCertId: values.signingCertId || undefined,
                 specialTaxpayerResolution:
-                    formData.specialTaxpayerResolution || undefined,
+                    values.specialTaxpayerResolution || undefined,
                 withholdingAgentResolution:
-                    formData.withholdingAgentResolution || undefined,
-                signingCertId: formData.signingCertId || undefined,
+                    values.withholdingAgentResolution || undefined,
             }
             await updateConfig.mutateAsync(payload)
             toast.push(
@@ -128,7 +151,7 @@ const CompanyConfigView = () => {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="space-y-6">
                         {/* Datos de la empresa */}
                         <section>
@@ -136,46 +159,46 @@ const CompanyConfigView = () => {
                                 Datos de la Empresa
                             </h5>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        RUC{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
+                                <FormItem
+                                    asterisk
+                                    label="RUC"
+                                    invalid={!!errors.taxId}
+                                    errorMessage={errors.taxId?.message}
+                                >
                                     <Input
-                                        required
                                         placeholder="1792141001001"
                                         maxLength={13}
-                                        value={formData.taxId}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('taxId')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.taxId}
+                                        {...register('taxId')}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Razón Social{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
+                                </FormItem>
+                                <FormItem
+                                    asterisk
+                                    label="Razón Social"
+                                    invalid={!!errors.name}
+                                    errorMessage={errors.name?.message}
+                                >
                                     <Input
-                                        required
                                         placeholder="ACME SOLUTIONS S.A."
-                                        value={formData.name}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('name')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.name}
+                                        {...register('name')}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Nombre Comercial{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
+                                </FormItem>
+                                <FormItem
+                                    asterisk
+                                    label="Nombre Comercial"
+                                    invalid={!!errors.tradeName}
+                                    errorMessage={errors.tradeName?.message}
+                                >
                                     <Input
-                                        required
                                         placeholder="ACME"
-                                        value={formData.tradeName}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('tradeName')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.tradeName}
+                                        {...register('tradeName')}
                                     />
-                                </div>
+                                </FormItem>
                             </div>
                         </section>
 
@@ -185,32 +208,32 @@ const CompanyConfigView = () => {
                                 Dirección
                             </h5>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Dirección Matriz{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
+                                <FormItem
+                                    asterisk
+                                    label="Dirección Matriz"
+                                    invalid={!!errors.mainAddress}
+                                    errorMessage={errors.mainAddress?.message}
+                                >
                                     <Input
-                                        required
                                         placeholder="Av. Principal 123, Quito"
-                                        value={formData.mainAddress}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('mainAddress')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.mainAddress}
+                                        {...register('mainAddress')}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Dirección Sucursal{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
+                                </FormItem>
+                                <FormItem
+                                    asterisk
+                                    label="Dirección Sucursal"
+                                    invalid={!!errors.branchAddress}
+                                    errorMessage={errors.branchAddress?.message}
+                                >
                                     <Input
-                                        required
                                         placeholder="Av. Secundaria 456, Quito"
-                                        value={formData.branchAddress}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('branchAddress')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.branchAddress}
+                                        {...register('branchAddress')}
                                     />
-                                </div>
+                                </FormItem>
                             </div>
                         </section>
 
@@ -220,111 +243,113 @@ const CompanyConfigView = () => {
                                 Configuración SRI
                             </h5>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Código Establecimiento{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
+                                <FormItem
+                                    asterisk
+                                    label="Código Establecimiento"
+                                    invalid={!!errors.branchCode}
+                                    errorMessage={errors.branchCode?.message}
+                                >
                                     <Input
-                                        required
                                         placeholder="001"
                                         maxLength={4}
-                                        value={formData.branchCode}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('branchCode')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.branchCode}
+                                        {...register('branchCode')}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Punto de Emisión{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
+                                </FormItem>
+                                <FormItem
+                                    asterisk
+                                    label="Punto de Emisión"
+                                    invalid={!!errors.salePointCode}
+                                    errorMessage={errors.salePointCode?.message}
+                                >
                                     <Input
-                                        required
                                         placeholder="001"
                                         maxLength={4}
-                                        value={formData.salePointCode}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('salePointCode')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.salePointCode}
+                                        {...register('salePointCode')}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Ambiente{' '}
-                                        <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        required
-                                        className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        value={formData.environment}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('environment')}
-                                    >
-                                        <option value={1}>
-                                            1 - Pruebas (Testing)
-                                        </option>
-                                        <option value={2}>
-                                            2 - Producción
-                                        </option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Secuencia de Factura
-                                    </label>
+                                </FormItem>
+                                <FormItem
+                                    asterisk
+                                    label="Ambiente"
+                                    invalid={!!errors.environment}
+                                    errorMessage={errors.environment?.message}
+                                >
+                                    <ControlledSelect
+                                        name="environment"
+                                        control={control}
+                                        options={environmentOptions}
+                                        isDisabled={isSubmitting}
+                                        placeholder="Seleccione el ambiente"
+                                    />
+                                </FormItem>
+                                <FormItem
+                                    label="Secuencia de Factura"
+                                    invalid={!!errors.invoiceSequence}
+                                    errorMessage={
+                                        errors.invoiceSequence?.message
+                                    }
+                                >
                                     <Input
                                         type="number"
                                         placeholder="1"
-                                        value={formData.invoiceSequence ?? ''}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('invoiceSequence')}
+                                        disabled={isSubmitting}
+                                        invalid={!!errors.invoiceSequence}
+                                        {...numberRegister('invoiceSequence', {
+                                            integer: true,
+                                        })}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Resolución Contrib. Especial
-                                    </label>
+                                </FormItem>
+                                <FormItem
+                                    label="Resolución Contrib. Especial"
+                                    invalid={!!errors.specialTaxpayerResolution}
+                                    errorMessage={
+                                        errors.specialTaxpayerResolution
+                                            ?.message
+                                    }
+                                >
                                     <Input
                                         placeholder="Opcional"
-                                        value={
-                                            formData.specialTaxpayerResolution
+                                        disabled={isSubmitting}
+                                        invalid={
+                                            !!errors.specialTaxpayerResolution
                                         }
-                                        disabled={updateConfig.isPending}
-                                        onChange={set(
+                                        {...register(
                                             'specialTaxpayerResolution'
                                         )}
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Resolución Agente Retención
-                                    </label>
+                                </FormItem>
+                                <FormItem
+                                    label="Resolución Agente Retención"
+                                    invalid={
+                                        !!errors.withholdingAgentResolution
+                                    }
+                                    errorMessage={
+                                        errors.withholdingAgentResolution
+                                            ?.message
+                                    }
+                                >
                                     <Input
                                         placeholder="Opcional"
-                                        value={
-                                            formData.withholdingAgentResolution
+                                        disabled={isSubmitting}
+                                        invalid={
+                                            !!errors.withholdingAgentResolution
                                         }
-                                        disabled={updateConfig.isPending}
-                                        onChange={set(
+                                        {...register(
                                             'withholdingAgentResolution'
                                         )}
                                     />
-                                </div>
-                                <div className="flex items-center gap-2 pt-6">
-                                    <input
-                                        id="accountingRequired"
-                                        type="checkbox"
-                                        className="w-4 h-4 rounded text-indigo-600"
-                                        checked={formData.accountingRequired}
-                                        disabled={updateConfig.isPending}
-                                        onChange={set('accountingRequired')}
+                                </FormItem>
+                                <div className="flex items-center gap-3 pt-6">
+                                    <ControlledSwitcher
+                                        name="accountingRequired"
+                                        control={control}
                                     />
-                                    <label
-                                        htmlFor="accountingRequired"
-                                        className="text-sm font-medium cursor-pointer"
-                                    >
+                                    <span className="text-sm font-medium">
                                         Obligado a llevar contabilidad
-                                    </label>
+                                    </span>
                                 </div>
                             </div>
                         </section>
@@ -335,28 +360,23 @@ const CompanyConfigView = () => {
                                 Certificado de Firma
                             </h5>
                             <div className="max-w-md">
-                                <label className="block text-sm font-medium mb-1">
-                                    Certificado Digital (.p12)
-                                </label>
-                                <select
-                                    className="w-full h-10 px-3 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                    value={formData.signingCertId ?? ''}
-                                    disabled={updateConfig.isPending}
-                                    onChange={set('signingCertId')}
+                                <FormItem
+                                    label="Certificado Digital (.p12)"
+                                    invalid={!!errors.signingCertId}
+                                    errorMessage={errors.signingCertId?.message}
                                 >
-                                    <option value="">
-                                        — Sin certificado —
-                                    </option>
-                                    {certificates.map((cert) => (
-                                        <option key={cert.id} value={cert.id}>
-                                            {cert.fileName} (
-                                            {new Date(
-                                                cert.validTo
-                                            ).toLocaleDateString('es-EC')}
-                                            )
-                                        </option>
-                                    ))}
-                                </select>
+                                    <ControlledSelect<
+                                        CompanyConfigFormValues,
+                                        'signingCertId',
+                                        CertOption
+                                    >
+                                        name="signingCertId"
+                                        control={control}
+                                        options={certOptions}
+                                        isDisabled={isSubmitting}
+                                        placeholder="— Sin certificado —"
+                                    />
+                                </FormItem>
                                 {certificates.length === 0 && (
                                     <p className="text-xs text-gray-400 mt-1">
                                         No hay certificados disponibles. Sube

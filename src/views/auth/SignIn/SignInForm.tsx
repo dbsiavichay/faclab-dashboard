@@ -7,25 +7,12 @@ import useTimeOutMessage from '@/utils/hooks/useTimeOutMessage'
 import useAuth from '@/utils/hooks/useAuth'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { signInSchema, type SignInFormValues } from '@/schemas'
 import type { CommonProps } from '@/@types/common'
 
 interface SignInFormProps extends CommonProps {
     disableSubmit?: boolean
 }
-
-const signInSchema = z.object({
-    username: z
-        .string()
-        .min(1, 'Ingresa tu usuario')
-        .max(64, 'El usuario es demasiado largo'),
-    password: z
-        .string()
-        .min(1, 'Ingresa tu contraseña')
-        .max(128, 'La contraseña es demasiado larga'),
-})
-
-type SignInFormValues = z.infer<typeof signInSchema>
 
 const SignInForm = (props: SignInFormProps) => {
     const { disableSubmit = false, className } = props

@@ -12,24 +12,13 @@ import { getErrorMessage } from '@/utils/getErrorMessage'
 import { dateToIsoStartOfDay } from '@/utils/dateToIsoStartOfDay'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { purchaseOrderSchema, type PurchaseOrderFormValues } from '@/schemas'
 
 interface PurchaseOrderFormProps {
     open: boolean
     onClose: () => void
     onCreated?: (id: number) => void
 }
-
-const purchaseOrderFormSchema = z.object({
-    supplierId: z
-        .number({ error: 'Selecciona un proveedor' })
-        .int()
-        .positive('Selecciona un proveedor'),
-    notes: z.string().optional(),
-    expectedDate: z.string().optional(),
-})
-
-type PurchaseOrderFormValues = z.infer<typeof purchaseOrderFormSchema>
 
 const PurchaseOrderForm = ({
     open,
@@ -51,7 +40,7 @@ const PurchaseOrderForm = ({
         reset,
         formState: { errors, isSubmitting },
     } = useForm<PurchaseOrderFormValues>({
-        resolver: zodResolver(purchaseOrderFormSchema),
+        resolver: zodResolver(purchaseOrderSchema),
         defaultValues: {
             supplierId: 0,
             notes: '',

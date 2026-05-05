@@ -12,7 +12,7 @@ import { getErrorMessage } from '@/utils/getErrorMessage'
 import { dateToIsoStartOfDay } from '@/utils/dateToIsoStartOfDay'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { receiveFormSchema, type ReceiveFormValues } from '@/schemas'
 import type { PurchaseOrderItem } from '@/services/PurchaseOrderService'
 
 const { Tr, Th, Td, THead, TBody } = Table
@@ -24,36 +24,6 @@ interface ReceiveFormProps {
     items: PurchaseOrderItem[]
     getProductName: (productId: number) => string
 }
-
-const receiveItemSchema = z
-    .object({
-        purchaseOrderItemId: z.number(),
-        productId: z.number(),
-        quantityOrdered: z.number(),
-        quantityReceived: z.number(),
-        quantityPending: z.number(),
-        quantityToReceive: z.number().min(0, 'Mínimo 0'),
-        locationId: z.number().nullable(),
-        lotNumber: z.string(),
-        serialNumbers: z.string(),
-    })
-    .refine((d) => d.quantityToReceive <= d.quantityPending, {
-        message: 'Excede pendiente',
-        path: ['quantityToReceive'],
-    })
-
-const receiveFormSchema = z
-    .object({
-        items: z.array(receiveItemSchema),
-        notes: z.string(),
-        receivedAt: z.string(),
-    })
-    .refine((d) => d.items.some((i) => i.quantityToReceive > 0), {
-        message: 'Debe recibir al menos un item',
-        path: ['items'],
-    })
-
-type ReceiveFormValues = z.infer<typeof receiveFormSchema>
 
 const ReceiveForm = ({
     open,

@@ -43,3 +43,10 @@ export {
     type AdjustmentItemCreateFormValues,
     type AdjustmentItemUpdateFormValues,
 } from './adjustmentItem.schema'
+export { movementSchema, type MovementFormValues } from './movement.schema'
+export { transferSchema, type TransferFormValues } from './transfer.schema'
+export {
+    adjustmentReasons,
+    adjustmentSchema,
+    type AdjustmentFormValues,
+} from './adjustment.schema'

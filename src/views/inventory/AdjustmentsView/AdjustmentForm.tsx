@@ -1,18 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
-import Select from '@/components/ui/Select'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { ControlledSelect } from '@/components/ui/Form/controlled'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateAdjustment } from '@/hooks/useAdjustments'
 import { useWarehouses } from '@/hooks/useWarehouses'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { ADJUSTMENT_REASON_LABELS } from '@/services/AdjustmentService'
 import {
-    ADJUSTMENT_REASON_LABELS,
-    type AdjustmentInput,
-    type AdjustmentReason,
-} from '@/services/AdjustmentService'
+    adjustmentReasons,
+    adjustmentSchema,
+    type AdjustmentFormValues,
+} from '@/schemas'
 
 interface AdjustmentFormProps {
     open: boolean
@@ -20,64 +24,52 @@ interface AdjustmentFormProps {
     onCreated?: (id: number) => void
 }
 
-const reasonOptions = Object.entries(ADJUSTMENT_REASON_LABELS).map(
-    ([value, label]) => ({
-        value,
-        label,
-    })
-)
+const reasonOptions = adjustmentReasons.map((value) => ({
+    value,
+    label: ADJUSTMENT_REASON_LABELS[value],
+}))
 
 const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
-    const [formData, setFormData] = useState<AdjustmentInput>({
-        warehouseId: 0,
-        reason: 'physical_count',
-        notes: '',
-        adjustedBy: '',
-    })
-
     const createAdjustment = useCreateAdjustment()
     const { data: warehousesData } = useWarehouses({ limit: 100 })
     const warehouses = warehousesData?.items ?? []
 
     const warehouseOptions = warehouses.map((w) => ({
-        value: w.id.toString(),
+        value: w.id,
         label: `${w.name} (${w.code})`,
     }))
 
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<AdjustmentFormValues>({
+        resolver: zodResolver(adjustmentSchema),
+        defaultValues: { reason: 'physical_count', notes: '', adjustedBy: '' },
+    })
+
     useEffect(() => {
-        if (open) {
-            setFormData({
-                warehouseId: 0,
-                reason: 'physical_count',
-                notes: '',
-                adjustedBy: '',
-            })
-        }
-    }, [open])
+        if (open) reset({ reason: 'physical_count', notes: '', adjustedBy: '' })
+    }, [open, reset])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
+    const onSubmit = async (values: AdjustmentFormValues) => {
         try {
-            const submitData: AdjustmentInput = {
-                warehouseId: formData.warehouseId,
-                reason: formData.reason,
-                notes: formData.notes || undefined,
-                adjustedBy: formData.adjustedBy || undefined,
-            }
-            const adjustment = await createAdjustment.mutateAsync(submitData)
-
+            const adjustment = await createAdjustment.mutateAsync({
+                warehouseId: values.warehouseId,
+                reason: values.reason,
+                notes: values.notes || undefined,
+                adjustedBy: values.adjustedBy || undefined,
+            })
             toast.push(
                 <Notification title="Ajuste creado" type="success">
                     El ajuste se creó correctamente
                 </Notification>,
                 { placement: 'top-center' }
             )
-
             onClose()
-            if (onCreated) {
-                onCreated(adjustment.id)
-            }
+            onCreated?.(adjustment.id)
         } catch (error: unknown) {
             toast.push(
                 <Notification title="Error" type="danger">
@@ -88,12 +80,8 @@ const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
         }
     }
 
-    const isPending = createAdjustment.isPending
-
     const handleClose = () => {
-        if (!isPending) {
-            onClose()
-        }
+        if (!isSubmitting) onClose()
     }
 
     return (
@@ -105,92 +93,72 @@ const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
         >
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">Nuevo Ajuste de Inventario</h5>
-
-                <form className="flex-1" onSubmit={handleSubmit}>
-                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Almacén <span className="text-red-500">*</span>
-                            </label>
-                            <Select
-                                placeholder="Seleccionar almacén"
+                <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
+                    <FormContainer>
+                        <FormItem
+                            asterisk
+                            label="Almacén"
+                            invalid={!!errors.warehouseId}
+                            errorMessage={errors.warehouseId?.message}
+                        >
+                            <ControlledSelect
+                                name="warehouseId"
+                                control={control}
                                 options={warehouseOptions}
-                                value={warehouseOptions.find(
-                                    (o) =>
-                                        o.value ===
-                                        formData.warehouseId.toString()
-                                )}
-                                onChange={(option) =>
-                                    setFormData({
-                                        ...formData,
-                                        warehouseId: option
-                                            ? parseInt(option.value)
-                                            : 0,
-                                    })
-                                }
+                                isDisabled={isSubmitting}
+                                placeholder="Seleccionar almacén"
                             />
-                        </div>
+                        </FormItem>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Motivo <span className="text-red-500">*</span>
-                            </label>
-                            <Select
-                                placeholder="Seleccionar motivo"
+                        <FormItem
+                            asterisk
+                            label="Motivo"
+                            invalid={!!errors.reason}
+                            errorMessage={errors.reason?.message}
+                        >
+                            <ControlledSelect
+                                name="reason"
+                                control={control}
                                 options={reasonOptions}
-                                value={reasonOptions.find(
-                                    (o) => o.value === formData.reason
-                                )}
-                                onChange={(option) =>
-                                    setFormData({
-                                        ...formData,
-                                        reason: (option?.value ||
-                                            'physical_count') as AdjustmentReason,
-                                    })
-                                }
+                                isDisabled={isSubmitting}
+                                placeholder="Seleccionar motivo"
                             />
-                        </div>
+                        </FormItem>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Responsable
-                            </label>
+                        <FormItem
+                            label="Responsable"
+                            invalid={!!errors.adjustedBy}
+                            errorMessage={errors.adjustedBy?.message}
+                        >
                             <Input
                                 type="text"
                                 placeholder="Nombre del responsable"
-                                value={formData.adjustedBy || ''}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        adjustedBy: e.target.value,
-                                    })
-                                }
+                                disabled={isSubmitting}
+                                invalid={!!errors.adjustedBy}
+                                {...register('adjustedBy')}
                             />
-                        </div>
+                        </FormItem>
 
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Notas
-                            </label>
+                        <FormItem
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
                             <Input
                                 textArea
                                 placeholder="Observaciones del ajuste"
-                                value={formData.notes || ''}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        notes: e.target.value,
-                                    })
-                                }
+                                disabled={isSubmitting}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
                             />
-                        </div>
-                    </div>
+                        </FormItem>
+                    </FormContainer>
 
                     <div className="flex justify-end gap-2 mt-6">
                         <Button
                             type="button"
                             variant="plain"
-                            disabled={isPending}
+                            disabled={isSubmitting}
                             onClick={handleClose}
                         >
                             Cancelar
@@ -198,8 +166,7 @@ const AdjustmentForm = ({ open, onClose, onCreated }: AdjustmentFormProps) => {
                         <Button
                             type="submit"
                             variant="solid"
-                            loading={isPending}
-                            disabled={!formData.warehouseId}
+                            loading={isSubmitting}
                         >
                             Crear
                         </Button>

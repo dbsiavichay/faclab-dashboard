@@ -1,148 +1,77 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Select from '@/components/ui/Select'
+import { FormItem, FormContainer } from '@/components/ui/Form'
+import { ControlledSelect } from '@/components/ui/Form/controlled'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useCreateMovement } from '@/hooks/useMovements'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type { MovementInput, MovementType } from '@/services/MovementService'
+import { movementSchema, type MovementFormValues } from '@/schemas'
 
 interface MovementFormProps {
     open: boolean
     onClose: () => void
 }
 
-const MovementForm = ({ open, onClose }: MovementFormProps) => {
-    const [formData, setFormData] = useState<MovementInput>({
-        productId: 0,
-        quantity: 0,
-        type: 'in',
-        reason: '',
-        date: '',
-    })
+const typeOptions = [
+    { value: 'in' as const, label: 'Entrada' },
+    { value: 'out' as const, label: 'Salida' },
+]
 
+const MovementForm = ({ open, onClose }: MovementFormProps) => {
     const createMovement = useCreateMovement()
 
-    const typeOptions = [
-        { value: 'in', label: 'Entrada' },
-        { value: 'out', label: 'Salida' },
-    ]
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors, isSubmitting },
+    } = useForm<MovementFormValues>({
+        resolver: zodResolver(movementSchema),
+        defaultValues: { type: 'in', reason: '', date: '' },
+    })
+
+    const numberRegister = makeNumberRegister(register)
 
     useEffect(() => {
-        if (open) {
-            // Reset form when opening
-            setFormData({
-                productId: 0,
-                quantity: 0,
-                type: 'in',
-                reason: '',
-                date: '',
-            })
-        }
-    }, [open])
+        if (open) reset({ type: 'in', reason: '', date: '' })
+    }, [open, reset])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        // Client-side validation
-        if (formData.productId <= 0) {
-            toast.push(
-                <Notification title="Error de validación" type="warning">
-                    El ID del producto debe ser mayor a 0
-                </Notification>,
-                { placement: 'top-end' }
-            )
-            return
-        }
-
-        if (formData.quantity === 0) {
-            toast.push(
-                <Notification title="Error de validación" type="warning">
-                    La cantidad no puede ser cero
-                </Notification>,
-                { placement: 'top-end' }
-            )
-            return
-        }
-
-        // Validate type and quantity relationship
-        if (formData.type === 'in' && formData.quantity < 0) {
-            toast.push(
-                <Notification title="Error de validación" type="warning">
-                    Para movimientos de entrada, la cantidad debe ser positiva
-                </Notification>,
-                { placement: 'top-end' }
-            )
-            return
-        }
-
-        if (formData.type === 'out' && formData.quantity > 0) {
-            toast.push(
-                <Notification title="Error de validación" type="warning">
-                    Para movimientos de salida, la cantidad debe ser negativa
-                </Notification>,
-                { placement: 'top-end' }
-            )
-            return
-        }
-
+    const onSubmit = async (values: MovementFormValues) => {
+        const signedQuantity =
+            Math.abs(values.quantity) * (values.type === 'in' ? 1 : -1)
         try {
-            await createMovement.mutateAsync(formData)
-
+            await createMovement.mutateAsync({
+                ...values,
+                quantity: signedQuantity,
+                reason: values.reason || undefined,
+                date: values.date || undefined,
+            })
             toast.push(
                 <Notification title="Movimiento creado" type="success">
                     El movimiento se registró correctamente
                 </Notification>,
                 { placement: 'top-end' }
             )
-
             onClose()
         } catch (error: unknown) {
-            const errorMessage = getErrorMessage(
-                error,
-                'Error al crear el movimiento'
-            )
-
             toast.push(
                 <Notification title="Error" type="danger">
-                    {errorMessage}
+                    {getErrorMessage(error, 'Error al crear el movimiento')}
                 </Notification>,
                 { placement: 'top-end' }
             )
-
-            console.error('Error creating movement:', error)
         }
     }
 
     const handleClose = () => {
-        if (!createMovement.isPending) {
-            onClose()
-        }
-    }
-
-    const handleTypeChange = (
-        option: { value: string; label: string } | null
-    ) => {
-        const newType = option?.value as MovementType
-        setFormData({
-            ...formData,
-            type: newType,
-            // Auto-adjust quantity sign based on type
-            quantity: Math.abs(formData.quantity) * (newType === 'in' ? 1 : -1),
-        })
-    }
-
-    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = parseInt(e.target.value) || 0
-        // Ensure quantity has correct sign based on type
-        if (formData.type === 'out' && value > 0) {
-            value = -value
-        } else if (formData.type === 'in' && value < 0) {
-            value = Math.abs(value)
-        }
-        setFormData({ ...formData, quantity: value })
+        if (!isSubmitting) onClose()
     }
 
     return (
@@ -153,120 +82,91 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
         >
             <div className="flex flex-col h-full justify-between">
                 <h5 className="mb-4">Nuevo Movimiento</h5>
-
-                <form className="flex-1" onSubmit={handleSubmit}>
-                    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-                        {/* Product ID */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                ID Producto{' '}
-                                <span className="text-red-500">*</span>
-                            </label>
+                <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
+                    <FormContainer>
+                        <FormItem
+                            asterisk
+                            label="ID Producto"
+                            invalid={!!errors.productId}
+                            errorMessage={errors.productId?.message}
+                        >
                             <Input
-                                required
                                 type="number"
                                 placeholder="ID del producto"
-                                value={formData.productId || ''}
-                                min="1"
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        productId:
-                                            parseInt(e.target.value) || 0,
-                                    })
-                                }
+                                disabled={isSubmitting}
+                                invalid={!!errors.productId}
+                                {...numberRegister('productId', {
+                                    integer: true,
+                                })}
                             />
-                        </div>
+                        </FormItem>
 
-                        {/* Type */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Tipo <span className="text-red-500">*</span>
-                            </label>
-                            <Select
-                                value={typeOptions.find(
-                                    (opt) => opt.value === formData.type
-                                )}
+                        <FormItem
+                            asterisk
+                            label="Tipo"
+                            invalid={!!errors.type}
+                            errorMessage={errors.type?.message}
+                        >
+                            <ControlledSelect
+                                name="type"
+                                control={control}
                                 options={typeOptions}
-                                onChange={handleTypeChange}
+                                isDisabled={isSubmitting}
+                                placeholder="Seleccionar tipo"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                {formData.type === 'in'
-                                    ? 'Entrada: suma al inventario (cantidad positiva)'
-                                    : 'Salida: resta del inventario (cantidad negativa)'}
-                            </p>
-                        </div>
+                        </FormItem>
 
-                        {/* Quantity */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Cantidad <span className="text-red-500">*</span>
-                            </label>
+                        <FormItem
+                            asterisk
+                            label="Cantidad"
+                            invalid={!!errors.quantity}
+                            errorMessage={errors.quantity?.message}
+                        >
                             <Input
-                                required
                                 type="number"
-                                placeholder={
-                                    formData.type === 'in'
-                                        ? 'Ej: 100'
-                                        : 'Ej: -50'
-                                }
-                                value={formData.quantity || ''}
-                                onChange={handleQuantityChange}
+                                placeholder="Ej: 100"
+                                disabled={isSubmitting}
+                                invalid={!!errors.quantity}
+                                {...numberRegister('quantity', {
+                                    integer: true,
+                                })}
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                {formData.type === 'in'
-                                    ? 'Ingrese una cantidad positiva'
-                                    : 'Ingrese una cantidad negativa'}
-                            </p>
-                        </div>
+                        </FormItem>
 
-                        {/* Reason */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Motivo
-                            </label>
+                        <FormItem
+                            label="Motivo"
+                            invalid={!!errors.reason}
+                            errorMessage={errors.reason?.message}
+                        >
                             <Input
                                 textArea
                                 placeholder="Motivo del movimiento (opcional)"
-                                value={formData.reason}
                                 style={{ minHeight: '80px' }}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        reason: e.target.value,
-                                    })
-                                }
+                                disabled={isSubmitting}
+                                invalid={!!errors.reason}
+                                {...register('reason')}
                             />
-                        </div>
+                        </FormItem>
 
-                        {/* Date */}
-                        <div>
-                            <label className="block text-sm font-medium mb-2">
-                                Fecha
-                            </label>
+                        <FormItem
+                            label="Fecha"
+                            invalid={!!errors.date}
+                            errorMessage={errors.date?.message}
+                        >
                             <Input
                                 type="datetime-local"
-                                value={formData.date}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        date: e.target.value,
-                                    })
-                                }
+                                disabled={isSubmitting}
+                                invalid={!!errors.date}
+                                {...register('date')}
                             />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Opcional: si no se especifica, se usará la fecha
-                                actual
-                            </p>
-                        </div>
-                    </div>
+                        </FormItem>
+                    </FormContainer>
 
-                    {/* Buttons */}
                     <div className="flex justify-end gap-2 mt-6">
                         <Button
                             type="button"
                             variant="plain"
-                            disabled={createMovement.isPending}
+                            disabled={isSubmitting}
                             onClick={handleClose}
                         >
                             Cancelar
@@ -274,7 +174,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                         <Button
                             type="submit"
                             variant="solid"
-                            loading={createMovement.isPending}
+                            loading={isSubmitting}
                         >
                             Crear
                         </Button>

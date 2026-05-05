@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Menu from '@/components/ui/Menu'
 import AuthorityCheck from '@/components/shared/AuthorityCheck'
 import VerticalSingleMenuItem from './VerticalSingleMenuItem'
@@ -39,16 +39,11 @@ const VerticalMenuContent = (props: VerticalMenuContentProps) => {
 
     const { t } = useTranslation()
 
-    const [defaulExpandKey, setDefaulExpandKey] = useState<string[]>([])
-
     const { activedRoute } = useMenuActive(navigationTree, routeKey)
 
-    useEffect(() => {
-        if (defaulExpandKey.length === 0 && activedRoute?.parentKey) {
-            setDefaulExpandKey([activedRoute?.parentKey])
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activedRoute?.parentKey])
+    const [defaulExpandKey] = useState<string[]>(() =>
+        activedRoute?.parentKey ? [activedRoute.parentKey] : []
+    )
 
     const handleLinkClick = () => {
         onMenuItemClick?.()

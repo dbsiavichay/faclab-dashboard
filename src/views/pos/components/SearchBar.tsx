@@ -16,6 +16,7 @@ const SearchBar = () => {
     }, [localTerm, setSearchTerm])
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLocalTerm(searchTerm)
     }, [searchTerm])
 

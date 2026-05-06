@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -24,20 +24,23 @@ const DiscountDialog = ({ isOpen, onClose }: DiscountDialogProps) => {
         clearDiscount,
     } = usePOSStore()
 
-    const [type, setType] = useState<DiscountType>('PERCENTAGE')
-    const [value, setValue] = useState<string>('')
-
     const hasExistingDiscount = currentType !== null && currentValue > 0
 
-    useEffect(() => {
-        if (isOpen && currentType !== null && currentValue > 0) {
-            setType(currentType)
-            setValue(currentValue.toString())
-        } else if (isOpen) {
-            setType('PERCENTAGE')
-            setValue('')
+    const [type, setType] = useState<DiscountType>(() =>
+        isOpen && hasExistingDiscount ? currentType! : 'PERCENTAGE'
+    )
+    const [value, setValue] = useState<string>(() =>
+        isOpen && hasExistingDiscount ? currentValue.toString() : ''
+    )
+
+    const [prevIsOpen, setPrevIsOpen] = useState(isOpen)
+    if (prevIsOpen !== isOpen) {
+        setPrevIsOpen(isOpen)
+        if (isOpen) {
+            setType(hasExistingDiscount ? currentType! : 'PERCENTAGE')
+            setValue(hasExistingDiscount ? currentValue.toString() : '')
         }
-    }, [isOpen, currentType, currentValue])
+    }
 
     const numValue = Number(value) || 0
 

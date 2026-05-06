@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -6,6 +6,7 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useResetUserPassword } from '@/hooks/useAdminUsers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import generatePassword from '@/utils/generatePassword'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { resetPasswordSchema, type ResetPasswordFormValues } from '@/schemas'
@@ -15,19 +16,14 @@ interface ResetPasswordModalProps {
     open: boolean
     onClose: () => void
     user: AdminUserResponse | null
+    defaultPassword: string
 }
-
-const CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#%'
-
-const generatePassword = () =>
-    Array.from(crypto.getRandomValues(new Uint8Array(12)))
-        .map((b) => CHARS[b % CHARS.length])
-        .join('')
 
 const ResetPasswordModal = ({
     open,
     user,
     onClose,
+    defaultPassword,
 }: ResetPasswordModalProps) => {
     const [done, setDone] = useState(false)
     const resetPassword = useResetUserPassword()
@@ -37,21 +33,13 @@ const ResetPasswordModal = ({
         handleSubmit,
         control,
         setValue,
-        reset,
         formState: { errors },
     } = useForm<ResetPasswordFormValues>({
         resolver: zodResolver(resetPasswordSchema),
-        defaultValues: { password: '' },
+        defaultValues: { password: defaultPassword },
     })
 
     const password = useWatch({ control, name: 'password' })
-
-    useEffect(() => {
-        if (open) {
-            reset({ password: generatePassword() })
-            setDone(false)
-        }
-    }, [open, reset])
 
     const handleClose = () => {
         if (!resetPassword.isPending) {

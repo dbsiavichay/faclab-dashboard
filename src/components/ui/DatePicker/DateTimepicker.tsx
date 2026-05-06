@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import dayjs from 'dayjs'
 import useControllableState from '../hooks/useControllableState'
 import useMergedRef from '../hooks/useMergeRef'
@@ -115,6 +115,12 @@ const DateTimepicker = (props: DateTimepickerProps) => {
             : ''
     )
 
+    const displayValue = focused
+        ? inputState
+        : _value instanceof Date
+        ? dayjs(_value).locale(finalLocale).format(dateFormat)
+        : ''
+
     const closeDropdown = () => {
         setDropdownOpened(false)
         onDropdownClose?.()
@@ -124,17 +130,6 @@ const DateTimepicker = (props: DateTimepickerProps) => {
         setDropdownOpened(true)
         onDropdownOpen?.()
     }
-
-    useEffect(() => {
-        if (value === null && !focused) {
-            setInputState('')
-        }
-
-        if (value instanceof Date && !focused) {
-            setInputState(dayjs(value).locale(finalLocale).format(dateFormat))
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value, focused])
 
     const handleValueChange = (date: Date) => {
         if (_value) {
@@ -244,7 +239,7 @@ const DateTimepicker = (props: DateTimepickerProps) => {
             setDropdownOpened={setDropdownOpened}
             className={className}
             name={name}
-            inputLabel={inputState}
+            inputLabel={displayValue}
             clearable={clearable && !!_value && !disabled}
             disabled={disabled}
             size={size}

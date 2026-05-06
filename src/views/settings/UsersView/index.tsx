@@ -20,6 +20,7 @@ import { HiPlus } from 'react-icons/hi'
 import { useCrudOperations } from '@/hooks'
 import CreateUserModal from './CreateUserModal'
 import ResetPasswordModal from './ResetPasswordModal'
+import generatePassword from '@/utils/generatePassword'
 
 const roleOptions = ALL_ROLES.map((role) => ({
     value: role,
@@ -52,9 +53,11 @@ const UsersView = () => {
     const [resetDialog, setResetDialog] = useState<{
         open: boolean
         user: AdminUserResponse | null
+        defaultPassword: string
     }>({
         open: false,
         user: null,
+        defaultPassword: '',
     })
     const [deactivateDialog, setDeactivateDialog] = useState<{
         open: boolean
@@ -236,7 +239,13 @@ const UsersView = () => {
                         <Button
                             size="xs"
                             variant="plain"
-                            onClick={() => setResetDialog({ open: true, user })}
+                            onClick={() =>
+                                setResetDialog({
+                                    open: true,
+                                    user,
+                                    defaultPassword: generatePassword(),
+                                })
+                            }
                         >
                             Resetear
                         </Button>
@@ -345,11 +354,20 @@ const UsersView = () => {
 
             <CreateUserModal open={crud.isCreateOpen} onClose={crud.closeAll} />
 
-            <ResetPasswordModal
-                open={resetDialog.open}
-                user={resetDialog.user}
-                onClose={() => setResetDialog({ open: false, user: null })}
-            />
+            {resetDialog.open && (
+                <ResetPasswordModal
+                    open={resetDialog.open}
+                    user={resetDialog.user}
+                    defaultPassword={resetDialog.defaultPassword}
+                    onClose={() =>
+                        setResetDialog({
+                            open: false,
+                            user: null,
+                            defaultPassword: '',
+                        })
+                    }
+                />
+            )}
 
             <ConfirmDialog
                 isOpen={deactivateDialog.open}

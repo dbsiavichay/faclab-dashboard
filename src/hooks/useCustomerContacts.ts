@@ -1,16 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import CustomerContactService, {
-    CustomerContactInput,
+import {
+    getCustomerContacts,
+    getCustomerContact,
+    createCustomerContact,
+    updateCustomerContact,
+    deleteCustomerContact,
 } from '@/services/CustomerContactService'
+import type { CustomerContactInput } from '@/services/CustomerContactService'
 
 export function useCustomerContacts(customerId: number) {
     return useQuery({
         queryKey: ['customerContacts', customerId],
         queryFn: async () => {
-            const response = await CustomerContactService.getCustomerContacts(
-                customerId
-            )
-            return response.data.data
+            const body = await getCustomerContacts(customerId)
+            return body.data
         },
         enabled: customerId > 0,
     })
@@ -20,8 +23,8 @@ export function useCustomerContact(id: number) {
     return useQuery({
         queryKey: ['customerContacts', 'detail', id],
         queryFn: async () => {
-            const response = await CustomerContactService.getCustomerContact(id)
-            return response.data.data
+            const body = await getCustomerContact(id)
+            return body.data
         },
         enabled: id > 0,
     })
@@ -38,11 +41,8 @@ export function useCreateCustomerContact() {
             customerId: number
             contact: CustomerContactInput
         }) => {
-            const response = await CustomerContactService.createCustomerContact(
-                customerId,
-                contact
-            )
-            return response.data.data
+            const body = await createCustomerContact(customerId, contact)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -63,11 +63,8 @@ export function useUpdateCustomerContact() {
             id: number
             contact: CustomerContactInput
         }) => {
-            const response = await CustomerContactService.updateCustomerContact(
-                id,
-                contact
-            )
-            return response.data.data
+            const body = await updateCustomerContact(id, contact)
+            return body.data
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({
@@ -85,7 +82,7 @@ export function useDeleteCustomerContact() {
 
     return useMutation({
         mutationFn: async ({ id }: { id: number; customerId: number }) => {
-            await CustomerContactService.deleteCustomerContact(id)
+            await deleteCustomerContact(id)
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({

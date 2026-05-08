@@ -1,10 +1,12 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type {
     DataResponse,
     PaginatedResponse,
     PaginationParams,
 } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export interface ValuationItem {
     productId: number
@@ -82,68 +84,26 @@ export interface SummaryParams {
     warehouseId?: number
 }
 
-class ReportService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000/api/admin',
-    }
+export const getValuation = (params?: ValuationParams) =>
+    httpClient.get<DataResponse<InventoryValuation>>(
+        `${HOST}/reports/inventory/valuation`,
+        { params }
+    )
 
-    private buildUrl(path: string, params: Record<string, string>): string {
-        const queryParams = new URLSearchParams(params)
-        const queryString = queryParams.toString()
-        const base = `${this.config.host}/reports/inventory/${path}`
-        return queryString ? `${base}?${queryString}` : base
-    }
+export const getRotation = (params?: RotationParams) =>
+    httpClient.get<DataResponse<ProductRotation[]>>(
+        `${HOST}/reports/inventory/rotation`,
+        { params }
+    )
 
-    async getValuation(params?: ValuationParams) {
-        const query: Record<string, string> = {}
-        if (params?.warehouseId !== undefined)
-            query.warehouseId = params.warehouseId.toString()
-        if (params?.asOfDate) query.asOfDate = params.asOfDate
-        return ApiService.fetchData<DataResponse<InventoryValuation>>({
-            url: this.buildUrl('valuation', query),
-            method: 'get',
-        })
-    }
+export const getMovementHistory = (params?: MovementHistoryParams) =>
+    httpClient.get<PaginatedResponse<MovementHistoryItem>>(
+        `${HOST}/reports/inventory/movements`,
+        { params }
+    )
 
-    async getRotation(params?: RotationParams) {
-        const query: Record<string, string> = {}
-        if (params?.fromDate) query.fromDate = params.fromDate
-        if (params?.toDate) query.toDate = params.toDate
-        if (params?.warehouseId !== undefined)
-            query.warehouseId = params.warehouseId.toString()
-        return ApiService.fetchData<DataResponse<ProductRotation[]>>({
-            url: this.buildUrl('rotation', query),
-            method: 'get',
-        })
-    }
-
-    async getMovementHistory(params?: MovementHistoryParams) {
-        const query: Record<string, string> = {}
-        if (params?.limit !== undefined) query.limit = params.limit.toString()
-        if (params?.offset !== undefined)
-            query.offset = params.offset.toString()
-        if (params?.productId !== undefined)
-            query.productId = params.productId.toString()
-        if (params?.type) query.type = params.type
-        if (params?.fromDate) query.fromDate = params.fromDate
-        if (params?.toDate) query.toDate = params.toDate
-        if (params?.warehouseId !== undefined)
-            query.warehouseId = params.warehouseId.toString()
-        return ApiService.fetchData<PaginatedResponse<MovementHistoryItem>>({
-            url: this.buildUrl('movements', query),
-            method: 'get',
-        })
-    }
-
-    async getWarehouseSummary(params?: SummaryParams) {
-        const query: Record<string, string> = {}
-        if (params?.warehouseId !== undefined)
-            query.warehouseId = params.warehouseId.toString()
-        return ApiService.fetchData<DataResponse<WarehouseSummary[]>>({
-            url: this.buildUrl('summary', query),
-            method: 'get',
-        })
-    }
-}
-
-export default new ReportService()
+export const getWarehouseSummary = (params?: SummaryParams) =>
+    httpClient.get<DataResponse<WarehouseSummary[]>>(
+        `${HOST}/reports/inventory/summary`,
+        { params }
+    )

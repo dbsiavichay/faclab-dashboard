@@ -4,8 +4,13 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import UnitOfMeasureService, {
-    UnitOfMeasureInput,
+import {
+    getUnitsOfMeasure,
+    getUnitOfMeasureById,
+    createUnitOfMeasure,
+    updateUnitOfMeasure,
+    deleteUnitOfMeasure,
+    type UnitOfMeasureInput,
     type UnitOfMeasureQueryParams,
 } from '@/services/UnitOfMeasureService'
 
@@ -13,10 +18,7 @@ export function useUnitsOfMeasure(params?: UnitOfMeasureQueryParams) {
     return useQuery({
         queryKey: ['units-of-measure', params],
         queryFn: async () => {
-            const response = await UnitOfMeasureService.getUnitsOfMeasure(
-                params
-            )
-            const body = response.data
+            const body = await getUnitsOfMeasure(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -27,8 +29,8 @@ export function useUnitOfMeasure(id: number) {
     return useQuery({
         queryKey: ['units-of-measure', id],
         queryFn: async () => {
-            const response = await UnitOfMeasureService.getUnitOfMeasureById(id)
-            return response.data.data
+            const body = await getUnitOfMeasureById(id)
+            return body.data
         },
         enabled: !!id,
     })
@@ -39,10 +41,8 @@ export function useCreateUnitOfMeasure() {
 
     return useMutation({
         mutationFn: async (data: UnitOfMeasureInput) => {
-            const response = await UnitOfMeasureService.createUnitOfMeasure(
-                data
-            )
-            return response.data.data
+            const body = await createUnitOfMeasure(data)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['units-of-measure'] })
@@ -61,11 +61,8 @@ export function useUpdateUnitOfMeasure() {
             id: number
             data: Partial<UnitOfMeasureInput>
         }) => {
-            const response = await UnitOfMeasureService.updateUnitOfMeasure(
-                id,
-                data
-            )
-            return response.data.data
+            const body = await updateUnitOfMeasure(id, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -80,8 +77,7 @@ export function useDeleteUnitOfMeasure() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (id: number) =>
-            UnitOfMeasureService.deleteUnitOfMeasure(id),
+        mutationFn: (id: number) => deleteUnitOfMeasure(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['units-of-measure'] })
         },

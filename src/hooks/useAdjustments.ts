@@ -4,7 +4,18 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import AdjustmentService, {
+import {
+    getAdjustments,
+    getAdjustment,
+    createAdjustment,
+    updateAdjustment,
+    deleteAdjustment,
+    confirmAdjustment,
+    cancelAdjustment,
+    getAdjustmentItems,
+    addAdjustmentItem,
+    updateAdjustmentItem,
+    deleteAdjustmentItem,
     type AdjustmentInput,
     type AdjustmentUpdateInput,
     type AdjustmentQueryParams,
@@ -18,8 +29,7 @@ export function useAdjustments(params?: AdjustmentQueryParams) {
     return useQuery({
         queryKey: ['adjustments', params],
         queryFn: async () => {
-            const response = await AdjustmentService.getAdjustments(params)
-            const body = response.data
+            const body = await getAdjustments(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -30,8 +40,8 @@ export function useAdjustment(id: number) {
     return useQuery({
         queryKey: ['adjustments', id],
         queryFn: async () => {
-            const response = await AdjustmentService.getAdjustment(id)
-            return response.data.data
+            const body = await getAdjustment(id)
+            return body.data
         },
         enabled: id > 0,
     })
@@ -42,8 +52,8 @@ export function useCreateAdjustment() {
 
     return useMutation({
         mutationFn: async (data: AdjustmentInput) => {
-            const response = await AdjustmentService.createAdjustment(data)
-            return response.data.data
+            const body = await createAdjustment(data)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['adjustments'] })
@@ -62,8 +72,8 @@ export function useUpdateAdjustment() {
             id: number
             data: AdjustmentUpdateInput
         }) => {
-            const response = await AdjustmentService.updateAdjustment(id, data)
-            return response.data.data
+            const body = await updateAdjustment(id, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -78,7 +88,7 @@ export function useDeleteAdjustment() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (id: number) => AdjustmentService.deleteAdjustment(id),
+        mutationFn: (id: number) => deleteAdjustment(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['adjustments'] })
         },
@@ -90,8 +100,8 @@ export function useConfirmAdjustment() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await AdjustmentService.confirmAdjustment(id)
-            return response.data.data
+            const body = await confirmAdjustment(id)
+            return body.data
         },
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({
@@ -107,8 +117,8 @@ export function useCancelAdjustment() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await AdjustmentService.cancelAdjustment(id)
-            return response.data.data
+            const body = await cancelAdjustment(id)
+            return body.data
         },
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({
@@ -125,10 +135,8 @@ export function useAdjustmentItems(adjustmentId: number) {
     return useQuery({
         queryKey: ['adjustmentItems', adjustmentId],
         queryFn: async () => {
-            const response = await AdjustmentService.getAdjustmentItems(
-                adjustmentId
-            )
-            return response.data.data
+            const body = await getAdjustmentItems(adjustmentId)
+            return body.data
         },
         enabled: adjustmentId > 0,
     })
@@ -145,11 +153,8 @@ export function useAddAdjustmentItem() {
             adjustmentId: number
             data: AdjustmentItemInput
         }) => {
-            const response = await AdjustmentService.addAdjustmentItem(
-                adjustmentId,
-                data
-            )
-            return response.data.data
+            const body = await addAdjustmentItem(adjustmentId, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -171,11 +176,8 @@ export function useUpdateAdjustmentItem() {
             adjustmentId: number
             data: AdjustmentItemUpdateInput
         }) => {
-            const response = await AdjustmentService.updateAdjustmentItem(
-                itemId,
-                data
-            )
-            return response.data.data
+            const body = await updateAdjustmentItem(itemId, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -195,7 +197,7 @@ export function useDeleteAdjustmentItem() {
             itemId: number
             adjustmentId: number
         }) => {
-            await AdjustmentService.deleteAdjustmentItem(itemId)
+            await deleteAdjustmentItem(itemId)
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({

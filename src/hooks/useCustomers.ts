@@ -1,4 +1,14 @@
-import CustomerService, { CustomerInput } from '@/services/CustomerService'
+import {
+    getCustomers,
+    getCustomer,
+    searchCustomerByTaxId,
+    createCustomer,
+    updateCustomer,
+    deleteCustomer,
+    activateCustomer,
+    deactivateCustomer,
+} from '@/services/CustomerService'
+import type { CustomerInput } from '@/services/CustomerService'
 import {
     useMutation,
     useQuery,
@@ -11,8 +21,7 @@ export function useCustomers(params?: PaginationParams) {
     return useQuery({
         queryKey: ['customers', params],
         queryFn: async () => {
-            const response = await CustomerService.getCustomers(params)
-            const body = response.data
+            const body = await getCustomers(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -23,8 +32,8 @@ export function useCustomer(id: number) {
     return useQuery({
         queryKey: ['customers', id],
         queryFn: async () => {
-            const response = await CustomerService.getCustomer(id)
-            return response.data.data
+            const body = await getCustomer(id)
+            return body.data
         },
         enabled: id > 0,
     })
@@ -34,8 +43,8 @@ export function useSearchCustomerByTaxId(taxId: string) {
     return useQuery({
         queryKey: ['customers', 'search', taxId],
         queryFn: async () => {
-            const response = await CustomerService.searchCustomerByTaxId(taxId)
-            return response.data.data
+            const body = await searchCustomerByTaxId(taxId)
+            return body.data
         },
         enabled: !!taxId,
     })
@@ -46,8 +55,8 @@ export function useCreateCustomer() {
 
     return useMutation({
         mutationFn: async (customer: CustomerInput) => {
-            const response = await CustomerService.createCustomer(customer)
-            return response.data.data
+            const body = await createCustomer(customer)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -66,8 +75,8 @@ export function useUpdateCustomer() {
             id: number
             data: CustomerInput
         }) => {
-            const response = await CustomerService.updateCustomer(id, data)
-            return response.data.data
+            const body = await updateCustomer(id, data)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -80,7 +89,7 @@ export function useDeleteCustomer() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            await CustomerService.deleteCustomer(id)
+            await deleteCustomer(id)
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -93,8 +102,8 @@ export function useActivateCustomer() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await CustomerService.activateCustomer(id)
-            return response.data.data
+            const body = await activateCustomer(id)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })
@@ -107,8 +116,8 @@ export function useDeactivateCustomer() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await CustomerService.deactivateCustomer(id)
-            return response.data.data
+            const body = await deactivateCustomer(id)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['customers'] })

@@ -1,53 +1,37 @@
-import ApiService from '@/services/ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type { DataResponse } from '@/@types/api'
 import type { XReport, ZReport, DailyReport, CashSummary } from './POSTypes'
 
-class POSReportService {
-    private host = appConfig.posApiHost || 'http://localhost:3000/api/pos'
+const HOST = appConfig.posApiHost || 'http://localhost:3000/api/pos'
 
-    async getCashSummary(shiftId: number) {
-        return ApiService.fetchData<DataResponse<CashSummary>>({
-            url: `${this.host}/shifts/${shiftId}/cash-summary`,
-            method: 'get',
-        })
-    }
+export const getCashSummary = (shiftId: number) =>
+    httpClient.get<DataResponse<CashSummary>>(
+        `${HOST}/shifts/${shiftId}/cash-summary`
+    )
 
-    async getXReport(shiftId: number) {
-        return ApiService.fetchData<DataResponse<XReport>>({
-            url: `${this.host}/reports/x-report?shiftId=${shiftId}`,
-            method: 'get',
-        })
-    }
+export const getXReport = (shiftId: number) =>
+    httpClient.get<DataResponse<XReport>>(`${HOST}/reports/x-report`, {
+        params: { shiftId },
+    })
 
-    async getZReport(shiftId: number) {
-        return ApiService.fetchData<DataResponse<ZReport>>({
-            url: `${this.host}/reports/z-report?shiftId=${shiftId}`,
-            method: 'get',
-        })
-    }
+export const getZReport = (shiftId: number) =>
+    httpClient.get<DataResponse<ZReport>>(`${HOST}/reports/z-report`, {
+        params: { shiftId },
+    })
 
-    async getDailyReport(date: string) {
-        return ApiService.fetchData<DataResponse<DailyReport>>({
-            url: `${this.host}/reports/daily?date=${date}`,
-            method: 'get',
-        })
-    }
+export const getDailyReport = (date: string) =>
+    httpClient.get<DataResponse<DailyReport>>(`${HOST}/reports/daily`, {
+        params: { date },
+    })
 
-    async getByPaymentMethod(fromDate: string, toDate: string) {
-        return ApiService.fetchData<
-            DataResponse<
-                {
-                    paymentMethod: string
-                    count: number
-                    total: number
-                }[]
-            >
-        >({
-            url: `${this.host}/reports/by-payment-method?fromDate=${fromDate}&toDate=${toDate}`,
-            method: 'get',
-        })
-    }
-}
-
-export default new POSReportService()
+export const getByPaymentMethod = (fromDate: string, toDate: string) =>
+    httpClient.get<
+        DataResponse<
+            {
+                paymentMethod: string
+                count: number
+                total: number
+            }[]
+        >
+    >(`${HOST}/reports/by-payment-method`, { params: { fromDate, toDate } })

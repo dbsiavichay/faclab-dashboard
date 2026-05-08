@@ -4,7 +4,11 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import SerialNumberService, {
+import {
+    getSerialNumbers,
+    getSerialNumber,
+    createSerialNumber,
+    changeStatus,
     type SerialNumberInput,
     type SerialNumberQueryParams,
     type SerialStatus,
@@ -14,8 +18,7 @@ export function useSerialNumbers(params?: SerialNumberQueryParams) {
     return useQuery({
         queryKey: ['serialNumbers', params],
         queryFn: async () => {
-            const response = await SerialNumberService.getSerialNumbers(params)
-            const body = response.data
+            const body = await getSerialNumbers(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -26,8 +29,8 @@ export function useSerialNumber(id: number) {
     return useQuery({
         queryKey: ['serialNumbers', id],
         queryFn: async () => {
-            const response = await SerialNumberService.getSerialNumber(id)
-            return response.data.data
+            const body = await getSerialNumber(id)
+            return body.data
         },
         enabled: id > 0,
     })
@@ -38,10 +41,8 @@ export function useCreateSerialNumber() {
 
     return useMutation({
         mutationFn: async (serialNumber: SerialNumberInput) => {
-            const response = await SerialNumberService.createSerialNumber(
-                serialNumber
-            )
-            return response.data.data
+            const body = await createSerialNumber(serialNumber)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['serialNumbers'] })
@@ -60,8 +61,8 @@ export function useChangeSerialNumberStatus() {
             id: number
             status: SerialStatus
         }) => {
-            const response = await SerialNumberService.changeStatus(id, status)
-            return response.data.data
+            const body = await changeStatus(id, status)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['serialNumbers'] })

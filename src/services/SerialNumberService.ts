@@ -1,10 +1,12 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type {
     PaginatedResponse,
     DataResponse,
     PaginationParams,
 } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export type SerialStatus =
     | 'available'
@@ -55,60 +57,18 @@ export interface SerialNumberQueryParams extends PaginationParams {
     status?: SerialStatus
 }
 
-class SerialNumberService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
-    }
+export const getSerialNumbers = (params?: SerialNumberQueryParams) =>
+    httpClient.get<PaginatedResponse<SerialNumber>>(`${HOST}/serials`, {
+        params,
+    })
 
-    async getSerialNumbers(params?: SerialNumberQueryParams) {
-        const queryParams = new URLSearchParams()
+export const getSerialNumber = (id: number) =>
+    httpClient.get<DataResponse<SerialNumber>>(`${HOST}/serials/${id}`)
 
-        if (params?.productId) {
-            queryParams.append('productId', params.productId.toString())
-        }
-        if (params?.status) {
-            queryParams.append('status', params.status)
-        }
-        if (params?.limit !== undefined) {
-            queryParams.append('limit', params.limit.toString())
-        }
-        if (params?.offset !== undefined) {
-            queryParams.append('offset', params.offset.toString())
-        }
+export const createSerialNumber = (serialNumber: SerialNumberInput) =>
+    httpClient.post<DataResponse<SerialNumber>>(`${HOST}/serials`, serialNumber)
 
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/serials?${queryString}`
-            : `${this.config.host}/serials`
-
-        return ApiService.fetchData<PaginatedResponse<SerialNumber>>({
-            url,
-            method: 'get',
-        })
-    }
-
-    async getSerialNumber(id: number) {
-        return ApiService.fetchData<DataResponse<SerialNumber>>({
-            url: `${this.config.host}/serials/${id}`,
-            method: 'get',
-        })
-    }
-
-    async createSerialNumber(serialNumber: SerialNumberInput) {
-        return ApiService.fetchData<DataResponse<SerialNumber>>({
-            url: `${this.config.host}/serials`,
-            method: 'post',
-            data: serialNumber,
-        })
-    }
-
-    async changeStatus(id: number, status: SerialStatus) {
-        return ApiService.fetchData<DataResponse<SerialNumber>>({
-            url: `${this.config.host}/serials/${id}/status`,
-            method: 'put',
-            data: { status },
-        })
-    }
-}
-
-export default new SerialNumberService()
+export const changeStatus = (id: number, status: SerialStatus) =>
+    httpClient.put<DataResponse<SerialNumber>>(`${HOST}/serials/${id}/status`, {
+        status,
+    })

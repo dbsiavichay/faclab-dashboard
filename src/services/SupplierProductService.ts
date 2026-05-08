@@ -1,5 +1,5 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type { DataResponse } from '@/@types/api'
 
 export interface SupplierProduct {
@@ -22,50 +22,40 @@ export interface SupplierProductInput {
     isPreferred?: boolean
 }
 
-class SupplierProductService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
-    }
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
-    async getSupplierProducts(supplierId: number) {
-        return ApiService.fetchData<DataResponse<SupplierProduct[]>>({
-            url: `${this.config.host}/suppliers/${supplierId}/products`,
-            method: 'get',
-        })
-    }
-
-    async createSupplierProduct(
-        supplierId: number,
-        product: SupplierProductInput
-    ) {
-        return ApiService.fetchData<DataResponse<SupplierProduct>>({
-            url: `${this.config.host}/suppliers/${supplierId}/products`,
-            method: 'post',
-            data: product,
-        })
-    }
-
-    async updateSupplierProduct(id: number, product: SupplierProductInput) {
-        return ApiService.fetchData<DataResponse<SupplierProduct>>({
-            url: `${this.config.host}/supplier-products/${id}`,
-            method: 'put',
-            data: product,
-        })
-    }
-
-    async deleteSupplierProduct(id: number) {
-        return ApiService.fetchData<void>({
-            url: `${this.config.host}/supplier-products/${id}`,
-            method: 'delete',
-        })
-    }
-
-    async getSupplierProductsByProduct(productId: number) {
-        return ApiService.fetchData<DataResponse<SupplierProduct[]>>({
-            url: `${this.config.host}/supplier-products/by-product/${productId}`,
-            method: 'get',
-        })
-    }
+export async function getSupplierProducts(supplierId: number) {
+    return httpClient.get<DataResponse<SupplierProduct[]>>(
+        `${HOST}/suppliers/${supplierId}/products`
+    )
 }
 
-export default new SupplierProductService()
+export async function createSupplierProduct(
+    supplierId: number,
+    product: SupplierProductInput
+) {
+    return httpClient.post<DataResponse<SupplierProduct>>(
+        `${HOST}/suppliers/${supplierId}/products`,
+        product
+    )
+}
+
+export async function updateSupplierProduct(
+    id: number,
+    product: SupplierProductInput
+) {
+    return httpClient.put<DataResponse<SupplierProduct>>(
+        `${HOST}/supplier-products/${id}`,
+        product
+    )
+}
+
+export async function deleteSupplierProduct(id: number) {
+    return httpClient.delete<void>(`${HOST}/supplier-products/${id}`)
+}
+
+export async function getSupplierProductsByProduct(productId: number) {
+    return httpClient.get<DataResponse<SupplierProduct[]>>(
+        `${HOST}/supplier-products/by-product/${productId}`
+    )
+}

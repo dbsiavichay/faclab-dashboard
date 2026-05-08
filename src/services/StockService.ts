@@ -1,6 +1,8 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type { PaginatedResponse } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export interface Stock {
     id: number
@@ -15,34 +17,5 @@ export interface StockQueryParams {
     offset?: number
 }
 
-class StockService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
-    }
-
-    async getStock(params?: StockQueryParams) {
-        const queryParams = new URLSearchParams()
-
-        if (params?.productId) {
-            queryParams.append('productId', params.productId.toString())
-        }
-        if (params?.limit !== undefined) {
-            queryParams.append('limit', params.limit.toString())
-        }
-        if (params?.offset !== undefined) {
-            queryParams.append('offset', params.offset.toString())
-        }
-
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/stock?${queryString}`
-            : `${this.config.host}/stock`
-
-        return ApiService.fetchData<PaginatedResponse<Stock>>({
-            url,
-            method: 'get',
-        })
-    }
-}
-
-export default new StockService()
+export const getStock = (params?: StockQueryParams) =>
+    httpClient.get<PaginatedResponse<Stock>>(`${HOST}/stock`, { params })

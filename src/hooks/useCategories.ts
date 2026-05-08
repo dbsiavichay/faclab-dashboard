@@ -4,15 +4,21 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import CategoryService, { CategoryInput } from '@/services/CategoryService'
+import {
+    getCategories,
+    getCategoryById,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+} from '@/services/CategoryService'
+import type { CategoryInput } from '@/services/CategoryService'
 import type { PaginationParams } from '@/@types/api'
 
 export function useCategories(params?: PaginationParams) {
     return useQuery({
         queryKey: ['categories', params],
         queryFn: async () => {
-            const response = await CategoryService.getCategories(params)
-            const body = response.data
+            const body = await getCategories(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -23,8 +29,8 @@ export function useCategory(id: number) {
     return useQuery({
         queryKey: ['categories', id],
         queryFn: async () => {
-            const response = await CategoryService.getCategoryById(id)
-            return response.data.data
+            const body = await getCategoryById(id)
+            return body.data
         },
         enabled: !!id,
     })
@@ -35,8 +41,8 @@ export function useCreateCategory() {
 
     return useMutation({
         mutationFn: async (category: CategoryInput) => {
-            const response = await CategoryService.createCategory(category)
-            return response.data.data
+            const body = await createCategory(category)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] })
@@ -55,8 +61,8 @@ export function useUpdateCategory() {
             id: number
             data: Partial<CategoryInput>
         }) => {
-            const response = await CategoryService.updateCategory(id, data)
-            return response.data.data
+            const body = await updateCategory(id, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -71,7 +77,7 @@ export function useDeleteCategory() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (id: number) => CategoryService.deleteCategory(id),
+        mutationFn: (id: number) => deleteCategory(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] })
         },

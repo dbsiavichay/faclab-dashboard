@@ -1,5 +1,7 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export type AlertType =
     | 'low_stock'
@@ -49,62 +51,14 @@ interface AlertsResponse {
     data: StockAlert[]
 }
 
-class AlertService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000/api/admin',
-    }
+export const getLowStock = (params?: StockAlertQueryParams) =>
+    httpClient.get<AlertsResponse>(`${HOST}/alerts/low-stock`, { params })
 
-    async getLowStock(params?: StockAlertQueryParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.warehouseId !== undefined) {
-            queryParams.append('warehouseId', params.warehouseId.toString())
-        }
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/alerts/low-stock?${queryString}`
-            : `${this.config.host}/alerts/low-stock`
+export const getOutOfStock = (params?: StockAlertQueryParams) =>
+    httpClient.get<AlertsResponse>(`${HOST}/alerts/out-of-stock`, { params })
 
-        return ApiService.fetchData<AlertsResponse>({ url, method: 'get' })
-    }
+export const getReorderPoint = (params?: StockAlertQueryParams) =>
+    httpClient.get<AlertsResponse>(`${HOST}/alerts/reorder-point`, { params })
 
-    async getOutOfStock(params?: StockAlertQueryParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.warehouseId !== undefined) {
-            queryParams.append('warehouseId', params.warehouseId.toString())
-        }
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/alerts/out-of-stock?${queryString}`
-            : `${this.config.host}/alerts/out-of-stock`
-
-        return ApiService.fetchData<AlertsResponse>({ url, method: 'get' })
-    }
-
-    async getReorderPoint(params?: StockAlertQueryParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.warehouseId !== undefined) {
-            queryParams.append('warehouseId', params.warehouseId.toString())
-        }
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/alerts/reorder-point?${queryString}`
-            : `${this.config.host}/alerts/reorder-point`
-
-        return ApiService.fetchData<AlertsResponse>({ url, method: 'get' })
-    }
-
-    async getExpiringLots(params?: ExpiringLotsQueryParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.days !== undefined) {
-            queryParams.append('days', params.days.toString())
-        }
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/alerts/expiring-lots?${queryString}`
-            : `${this.config.host}/alerts/expiring-lots`
-
-        return ApiService.fetchData<AlertsResponse>({ url, method: 'get' })
-    }
-}
-
-export default new AlertService()
+export const getExpiringLots = (params?: ExpiringLotsQueryParams) =>
+    httpClient.get<AlertsResponse>(`${HOST}/alerts/expiring-lots`, { params })

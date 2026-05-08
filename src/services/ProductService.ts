@@ -1,10 +1,12 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type {
     PaginatedResponse,
     DataResponse,
     PaginationParams,
 } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export interface Product {
     id: number
@@ -45,76 +47,17 @@ export interface ProductQueryParams extends PaginationParams {
     categoryId?: number
 }
 
-export interface ProductServiceConfig {
-    host: string
-}
+export const getProducts = (params?: ProductQueryParams) =>
+    httpClient.get<PaginatedResponse<Product>>(`${HOST}/products`, { params })
 
-class ProductService {
-    private config: ProductServiceConfig = {
-        host: '',
-    }
+export const getProductById = (id: number) =>
+    httpClient.get<DataResponse<Product>>(`${HOST}/products/${id}`)
 
-    constructor() {
-        this.config.host = appConfig.enableMock
-            ? appConfig.apiPrefix
-            : appConfig.inventoryApiHost || ''
-    }
+export const createProduct = (product: ProductInput) =>
+    httpClient.post<DataResponse<Product>>(`${HOST}/products`, product)
 
-    setConfig(config: Partial<ProductServiceConfig>) {
-        this.config = { ...this.config, ...config }
-        return this
-    }
+export const updateProduct = (id: number, product: Partial<ProductInput>) =>
+    httpClient.put<DataResponse<Product>>(`${HOST}/products/${id}`, product)
 
-    async getProducts(params?: ProductQueryParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.limit !== undefined)
-            queryParams.append('limit', params.limit.toString())
-        if (params?.offset !== undefined)
-            queryParams.append('offset', params.offset.toString())
-        if (params?.categoryId !== undefined)
-            queryParams.append('categoryId', params.categoryId.toString())
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/products?${queryString}`
-            : `${this.config.host}/products`
-        return ApiService.fetchData<PaginatedResponse<Product>>({
-            url,
-            method: 'get',
-        })
-    }
-
-    async getProductById(id: number) {
-        return ApiService.fetchData<DataResponse<Product>>({
-            url: `${this.config.host}/products/${id}`,
-            method: 'get',
-        })
-    }
-
-    async createProduct(product: ProductInput) {
-        return ApiService.fetchData<DataResponse<Product>, ProductInput>({
-            url: `${this.config.host}/products`,
-            method: 'post',
-            data: product,
-        })
-    }
-
-    async updateProduct(id: number, product: Partial<ProductInput>) {
-        return ApiService.fetchData<
-            DataResponse<Product>,
-            Partial<ProductInput>
-        >({
-            url: `${this.config.host}/products/${id}`,
-            method: 'put',
-            data: product,
-        })
-    }
-
-    async deleteProduct(id: number) {
-        return ApiService.fetchData({
-            url: `${this.config.host}/products/${id}`,
-            method: 'delete',
-        })
-    }
-}
-
-export default new ProductService()
+export const deleteProduct = (id: number) =>
+    httpClient.delete(`${HOST}/products/${id}`)

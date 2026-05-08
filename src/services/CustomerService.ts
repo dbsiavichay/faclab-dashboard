@@ -1,10 +1,12 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type {
     PaginatedResponse,
     DataResponse,
     PaginationParams,
 } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export type TaxType = 1 | 2 | 3 | 4
 
@@ -46,77 +48,31 @@ export interface CustomerInput {
     isActive?: boolean
 }
 
-class CustomerService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
-    }
+export const getCustomers = (params?: PaginationParams) =>
+    httpClient.get<PaginatedResponse<Customer>>(`${HOST}/customers`, { params })
 
-    async getCustomers(params?: PaginationParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.limit !== undefined)
-            queryParams.append('limit', params.limit.toString())
-        if (params?.offset !== undefined)
-            queryParams.append('offset', params.offset.toString())
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/customers?${queryString}`
-            : `${this.config.host}/customers`
-        return ApiService.fetchData<PaginatedResponse<Customer>>({
-            url,
-            method: 'get',
-        })
-    }
+export const getCustomer = (id: number) =>
+    httpClient.get<DataResponse<Customer>>(`${HOST}/customers/${id}`)
 
-    async getCustomer(id: number) {
-        return ApiService.fetchData<DataResponse<Customer>>({
-            url: `${this.config.host}/customers/${id}`,
-            method: 'get',
-        })
-    }
+export const searchCustomerByTaxId = (taxId: string) =>
+    httpClient.get<DataResponse<Customer>>(
+        `${HOST}/customers/search/by-tax-id`,
+        { params: { tax_id: taxId } }
+    )
 
-    async searchCustomerByTaxId(taxId: string) {
-        return ApiService.fetchData<DataResponse<Customer>>({
-            url: `${this.config.host}/customers/search/by-tax-id?tax_id=${taxId}`,
-            method: 'get',
-        })
-    }
+export const createCustomer = (customer: CustomerInput) =>
+    httpClient.post<DataResponse<Customer>>(`${HOST}/customers`, customer)
 
-    async createCustomer(customer: CustomerInput) {
-        return ApiService.fetchData<DataResponse<Customer>>({
-            url: `${this.config.host}/customers`,
-            method: 'post',
-            data: customer,
-        })
-    }
+export const updateCustomer = (id: number, customer: CustomerInput) =>
+    httpClient.put<DataResponse<Customer>>(`${HOST}/customers/${id}`, customer)
 
-    async updateCustomer(id: number, customer: CustomerInput) {
-        return ApiService.fetchData<DataResponse<Customer>>({
-            url: `${this.config.host}/customers/${id}`,
-            method: 'put',
-            data: customer,
-        })
-    }
+export const deleteCustomer = (id: number) =>
+    httpClient.delete(`${HOST}/customers/${id}`)
 
-    async deleteCustomer(id: number) {
-        return ApiService.fetchData<void>({
-            url: `${this.config.host}/customers/${id}`,
-            method: 'delete',
-        })
-    }
+export const activateCustomer = (id: number) =>
+    httpClient.post<DataResponse<Customer>>(`${HOST}/customers/${id}/activate`)
 
-    async activateCustomer(id: number) {
-        return ApiService.fetchData<DataResponse<Customer>>({
-            url: `${this.config.host}/customers/${id}/activate`,
-            method: 'post',
-        })
-    }
-
-    async deactivateCustomer(id: number) {
-        return ApiService.fetchData<DataResponse<Customer>>({
-            url: `${this.config.host}/customers/${id}/deactivate`,
-            method: 'post',
-        })
-    }
-}
-
-export default new CustomerService()
+export const deactivateCustomer = (id: number) =>
+    httpClient.post<DataResponse<Customer>>(
+        `${HOST}/customers/${id}/deactivate`
+    )

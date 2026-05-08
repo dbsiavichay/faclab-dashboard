@@ -1,5 +1,5 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type {
     PaginatedResponse,
     DataResponse,
@@ -98,58 +98,38 @@ interface PaymentsResponse {
     meta: { requestId: string; timestamp: string }
 }
 
-class SaleService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+
+export async function getSales(params?: SaleQueryParams) {
+    const queryParams = new URLSearchParams()
+
+    if (params?.customerId !== undefined) {
+        queryParams.append('customerId', params.customerId.toString())
+    }
+    if (params?.status) {
+        queryParams.append('status', params.status)
+    }
+    if (params?.limit !== undefined) {
+        queryParams.append('limit', params.limit.toString())
+    }
+    if (params?.offset !== undefined) {
+        queryParams.append('offset', params.offset.toString())
     }
 
-    async getSales(params?: SaleQueryParams) {
-        const queryParams = new URLSearchParams()
+    const queryString = queryParams.toString()
+    const url = queryString ? `${HOST}/sales?${queryString}` : `${HOST}/sales`
 
-        if (params?.customerId !== undefined) {
-            queryParams.append('customerId', params.customerId.toString())
-        }
-        if (params?.status) {
-            queryParams.append('status', params.status)
-        }
-        if (params?.limit !== undefined) {
-            queryParams.append('limit', params.limit.toString())
-        }
-        if (params?.offset !== undefined) {
-            queryParams.append('offset', params.offset.toString())
-        }
-
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/sales?${queryString}`
-            : `${this.config.host}/sales`
-
-        return ApiService.fetchData<PaginatedResponse<Sale>>({
-            url,
-            method: 'get',
-        })
-    }
-
-    async getSale(id: number) {
-        return ApiService.fetchData<DataResponse<Sale>>({
-            url: `${this.config.host}/sales/${id}`,
-            method: 'get',
-        })
-    }
-
-    async getSaleItems(saleId: number) {
-        return ApiService.fetchData<SaleItemsResponse>({
-            url: `${this.config.host}/sales/${saleId}/items`,
-            method: 'get',
-        })
-    }
-
-    async getSalePayments(saleId: number) {
-        return ApiService.fetchData<PaymentsResponse>({
-            url: `${this.config.host}/sales/${saleId}/payments`,
-            method: 'get',
-        })
-    }
+    return httpClient.get<PaginatedResponse<Sale>>(url)
 }
 
-export default new SaleService()
+export async function getSale(id: number) {
+    return httpClient.get<DataResponse<Sale>>(`${HOST}/sales/${id}`)
+}
+
+export async function getSaleItems(saleId: number) {
+    return httpClient.get<SaleItemsResponse>(`${HOST}/sales/${saleId}/items`)
+}
+
+export async function getSalePayments(saleId: number) {
+    return httpClient.get<PaymentsResponse>(`${HOST}/sales/${saleId}/payments`)
+}

@@ -1,10 +1,12 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type {
     PaginatedResponse,
     DataResponse,
     PaginationParams,
 } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export type LocationType = 'STORAGE' | 'RECEIVING' | 'SHIPPING' | 'RETURN'
 
@@ -33,64 +35,17 @@ export interface LocationQueryParams extends PaginationParams {
     isActive?: boolean
 }
 
-class LocationService {
-    private host: string
+export const getLocations = (params?: LocationQueryParams) =>
+    httpClient.get<PaginatedResponse<Location>>(`${HOST}/locations`, { params })
 
-    constructor() {
-        this.host = appConfig.enableMock
-            ? appConfig.apiPrefix
-            : appConfig.inventoryApiHost || ''
-    }
+export const getLocationById = (id: number) =>
+    httpClient.get<DataResponse<Location>>(`${HOST}/locations/${id}`)
 
-    async getLocations(params?: LocationQueryParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.warehouseId !== undefined)
-            queryParams.append('warehouseId', params.warehouseId.toString())
-        if (params?.isActive !== undefined)
-            queryParams.append('isActive', params.isActive.toString())
-        if (params?.limit !== undefined)
-            queryParams.append('limit', params.limit.toString())
-        if (params?.offset !== undefined)
-            queryParams.append('offset', params.offset.toString())
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.host}/locations?${queryString}`
-            : `${this.host}/locations`
-        return ApiService.fetchData<PaginatedResponse<Location>>({
-            url,
-            method: 'get',
-        })
-    }
+export const createLocation = (data: LocationInput) =>
+    httpClient.post<DataResponse<Location>>(`${HOST}/locations`, data)
 
-    async getLocationById(id: number) {
-        return ApiService.fetchData<DataResponse<Location>>({
-            url: `${this.host}/locations/${id}`,
-            method: 'get',
-        })
-    }
+export const updateLocation = (id: number, data: Partial<LocationInput>) =>
+    httpClient.put<DataResponse<Location>>(`${HOST}/locations/${id}`, data)
 
-    async createLocation(data: LocationInput) {
-        return ApiService.fetchData<DataResponse<Location>>({
-            url: `${this.host}/locations`,
-            method: 'post',
-            data,
-        })
-    }
-
-    async updateLocation(id: number, data: Partial<LocationInput>) {
-        return ApiService.fetchData<DataResponse<Location>>({
-            url: `${this.host}/locations/${id}`,
-            method: 'put',
-            data,
-        })
-    }
-
-    async deleteLocation(id: number) {
-        return ApiService.fetchData({
-            url: `${this.host}/locations/${id}`,
-            method: 'delete',
-        })
-    }
-}
-
-export default new LocationService()
+export const deleteLocation = (id: number) =>
+    httpClient.delete(`${HOST}/locations/${id}`)

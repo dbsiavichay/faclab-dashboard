@@ -4,17 +4,18 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import MovementService, {
-    MovementInput,
-    MovementQueryParams,
+import {
+    getMovements,
+    createMovement,
+    type MovementInput,
+    type MovementQueryParams,
 } from '@/services/MovementService'
 
 export function useMovements(params?: MovementQueryParams) {
     return useQuery({
         queryKey: ['movements', params],
         queryFn: async () => {
-            const response = await MovementService.getMovements(params)
-            const body = response.data
+            const body = await getMovements(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -26,8 +27,8 @@ export function useCreateMovement() {
 
     return useMutation({
         mutationFn: async (movement: MovementInput) => {
-            const response = await MovementService.createMovement(movement)
-            return response.data.data
+            const body = await createMovement(movement)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['movements'] })

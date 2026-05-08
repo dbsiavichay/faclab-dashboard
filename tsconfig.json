@@ -16,7 +16,13 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@app/*": ["./src/app/*"],
+      "@features/*": ["./src/features/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@stores/*": ["./src/stores/*"],
+      "@configs/*": ["./src/configs/*"],
+      "@legacy/*": ["./src/views/*"]
     }
   },
   "include": ["src"],

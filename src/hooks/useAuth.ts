@@ -9,6 +9,7 @@ import {
 import { navigateTo } from '@/services/navigationRef'
 import appConfig from '@/configs/app.config'
 import { tokenStorage } from '@/services/tokenStorage'
+import { refreshScheduler } from '@shared/lib/auth/refreshScheduler'
 import type {
     ChangePasswordRequest,
     LoginRequest,
@@ -17,27 +18,6 @@ import type {
 } from '@/@types/auth'
 
 export const ME_QUERY_KEY = ['auth', 'me'] as const
-
-// --- Proactive refresh scheduler ---
-
-let refreshTimer: ReturnType<typeof setTimeout> | null = null
-
-function scheduleProactiveRefresh(expiresIn: number) {
-    if (refreshTimer) clearTimeout(refreshTimer)
-    const delay = Math.max(0, (expiresIn - 60) * 1000)
-    refreshTimer = setTimeout(async () => {
-        refreshTimer = null
-        const rt = useAuthStore.getState().refreshToken
-        if (!rt) return
-        try {
-            const newTokens = await apiRefresh({ refreshToken: rt })
-            useAuthStore.getState().setTokens(newTokens)
-            scheduleProactiveRefresh(newTokens.expiresIn)
-        } catch {
-            /* reactive interceptor handles TOKEN_EXPIRED as fallback */
-        }
-    }, delay)
-}
 
 // --- Hooks ---
 
@@ -58,7 +38,7 @@ export function useMe() {
                     if (rt) {
                         const newTokens = await apiRefresh({ refreshToken: rt })
                         setTokens(newTokens)
-                        scheduleProactiveRefresh(newTokens.expiresIn)
+                        refreshScheduler.start(newTokens.expiresIn)
                     }
                 }
                 const session = await apiMe()
@@ -84,7 +64,7 @@ export function useLogin() {
         mutationFn: (body) => apiLogin(body),
         onSuccess: async (tokens) => {
             setTokens(tokens)
-            scheduleProactiveRefresh(tokens.expiresIn)
+            refreshScheduler.start(tokens.expiresIn)
             const session = await qc.fetchQuery({
                 queryKey: ME_QUERY_KEY,
                 queryFn: apiMe,
@@ -106,7 +86,7 @@ export function useChangePassword() {
             if (rt) {
                 const newTokens = await apiRefresh({ refreshToken: rt })
                 setTokens(newTokens)
-                scheduleProactiveRefresh(newTokens.expiresIn)
+                refreshScheduler.start(newTokens.expiresIn)
             }
             const session = await qc.fetchQuery({
                 queryKey: ME_QUERY_KEY,
@@ -126,10 +106,7 @@ export function useLogout() {
             /* El backend real no define logout server-side. */
         },
         onSuccess: () => {
-            if (refreshTimer) {
-                clearTimeout(refreshTimer)
-                refreshTimer = null
-            }
+            refreshScheduler.stop()
             clear()
             qc.clear()
             navigateTo(appConfig.unAuthenticatedEntryPath, { replace: true })

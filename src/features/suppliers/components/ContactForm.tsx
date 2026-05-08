@@ -7,13 +7,10 @@ import toast from '@/components/ui/toast'
 import { FormItem } from '@/components/ui/Form'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    useCreateSupplierContact,
-    useUpdateSupplierContact,
-} from '@/hooks/useSupplierContacts'
-import { getErrorMessage } from '@/utils/getErrorMessage'
 import { contactSchema, type ContactFormValues } from '@/schemas'
-import type { SupplierContact } from '@/services/SupplierContactService'
+import { getErrorMessage } from '@/utils/getErrorMessage'
+import { useSupplierContactMutations } from '../hooks/useSupplierContacts'
+import type { SupplierContact } from '../model/types'
 
 interface ContactFormProps {
     open: boolean
@@ -28,8 +25,7 @@ const ContactForm = ({
     supplierId,
     contact,
 }: ContactFormProps) => {
-    const createContact = useCreateSupplierContact()
-    const updateContact = useUpdateSupplierContact()
+    const { create, update } = useSupplierContactMutations(supplierId)
     const isEdit = !!contact
 
     const {
@@ -67,12 +63,9 @@ const ContactForm = ({
     const onSubmit = async (values: ContactFormValues) => {
         try {
             if (isEdit && contact) {
-                await updateContact.mutateAsync({
-                    id: contact.id,
-                    contact: values,
-                })
+                await update.mutateAsync({ id: contact.id, data: values })
             } else {
-                await createContact.mutateAsync({ supplierId, contact: values })
+                await create.mutateAsync(values)
             }
             toast.push(
                 <Notification

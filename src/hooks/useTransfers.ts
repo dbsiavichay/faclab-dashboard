@@ -4,7 +4,19 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import TransferService, {
+import {
+    getTransfers,
+    getTransfer,
+    createTransfer,
+    updateTransfer,
+    deleteTransfer,
+    confirmTransfer,
+    receiveTransfer,
+    cancelTransfer,
+    getTransferItems,
+    addTransferItem,
+    updateTransferItem,
+    deleteTransferItem,
     type TransferInput,
     type TransferUpdateInput,
     type TransferQueryParams,
@@ -18,8 +30,7 @@ export function useTransfers(params?: TransferQueryParams) {
     return useQuery({
         queryKey: ['transfers', params],
         queryFn: async () => {
-            const response = await TransferService.getTransfers(params)
-            const body = response.data
+            const body = await getTransfers(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -30,8 +41,8 @@ export function useTransfer(id: number) {
     return useQuery({
         queryKey: ['transfers', id],
         queryFn: async () => {
-            const response = await TransferService.getTransfer(id)
-            return response.data.data
+            const body = await getTransfer(id)
+            return body.data
         },
         enabled: id > 0,
     })
@@ -42,8 +53,8 @@ export function useCreateTransfer() {
 
     return useMutation({
         mutationFn: async (data: TransferInput) => {
-            const response = await TransferService.createTransfer(data)
-            return response.data.data
+            const body = await createTransfer(data)
+            return body.data
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['transfers'] })
@@ -62,8 +73,8 @@ export function useUpdateTransfer() {
             id: number
             data: TransferUpdateInput
         }) => {
-            const response = await TransferService.updateTransfer(id, data)
-            return response.data.data
+            const body = await updateTransfer(id, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -78,7 +89,7 @@ export function useDeleteTransfer() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (id: number) => TransferService.deleteTransfer(id),
+        mutationFn: (id: number) => deleteTransfer(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['transfers'] })
         },
@@ -90,8 +101,8 @@ export function useConfirmTransfer() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await TransferService.confirmTransfer(id)
-            return response.data.data
+            const body = await confirmTransfer(id)
+            return body.data
         },
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({
@@ -107,8 +118,8 @@ export function useReceiveTransfer() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await TransferService.receiveTransfer(id)
-            return response.data.data
+            const body = await receiveTransfer(id)
+            return body.data
         },
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({
@@ -124,8 +135,8 @@ export function useCancelTransfer() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const response = await TransferService.cancelTransfer(id)
-            return response.data.data
+            const body = await cancelTransfer(id)
+            return body.data
         },
         onSuccess: (_, id) => {
             queryClient.invalidateQueries({
@@ -142,8 +153,8 @@ export function useTransferItems(transferId: number) {
     return useQuery({
         queryKey: ['transferItems', transferId],
         queryFn: async () => {
-            const response = await TransferService.getTransferItems(transferId)
-            return response.data.data
+            const body = await getTransferItems(transferId)
+            return body.data
         },
         enabled: transferId > 0,
     })
@@ -160,11 +171,8 @@ export function useAddTransferItem() {
             transferId: number
             data: TransferItemInput
         }) => {
-            const response = await TransferService.addTransferItem(
-                transferId,
-                data
-            )
-            return response.data.data
+            const body = await addTransferItem(transferId, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -186,11 +194,8 @@ export function useUpdateTransferItem() {
             transferId: number
             data: TransferItemUpdateInput
         }) => {
-            const response = await TransferService.updateTransferItem(
-                itemId,
-                data
-            )
-            return response.data.data
+            const body = await updateTransferItem(itemId, data)
+            return body.data
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -210,7 +215,7 @@ export function useDeleteTransferItem() {
             itemId: number
             transferId: number
         }) => {
-            await TransferService.deleteTransferItem(itemId)
+            await deleteTransferItem(itemId)
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({

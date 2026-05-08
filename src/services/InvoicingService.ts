@@ -1,6 +1,8 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type { DataResponse } from '@/@types/api'
+
+const HOST = appConfig.invoicingApiHost || 'http://localhost:3173'
 
 export interface Certificate {
     id: string
@@ -81,60 +83,31 @@ interface InvoicesResponse {
     meta: { requestId: string; timestamp: string }
 }
 
-class InvoicingService {
-    private host: string
+export const getCertificates = () =>
+    httpClient.get<CertificatesResponse>(`${HOST}/api/certificates`)
 
-    constructor() {
-        this.host = appConfig.invoicingApiHost || 'http://localhost:3173'
-    }
-
-    async getCertificates() {
-        return ApiService.fetchData<CertificatesResponse>({
-            url: `${this.host}/api/certificates`,
-            method: 'get',
-        })
-    }
-
-    async uploadCertificate(file: File, password: string) {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('password', password)
-        return ApiService.fetchData<DataResponse<Certificate>, unknown>({
-            url: `${this.host}/api/certificates`,
-            method: 'post',
-            data: formData,
-            headers: { 'Content-Type': 'multipart/form-data' },
-        })
-    }
-
-    async deleteCertificate(id: string) {
-        return ApiService.fetchData({
-            url: `${this.host}/api/certificates/${id}`,
-            method: 'delete',
-        })
-    }
-
-    async getCompanyConfig() {
-        return ApiService.fetchData<DataResponse<CompanyConfig>>({
-            url: `${this.host}/api/company-config`,
-            method: 'get',
-        })
-    }
-
-    async updateCompanyConfig(data: CompanyConfigInput) {
-        return ApiService.fetchData<DataResponse<CompanyConfig>, unknown>({
-            url: `${this.host}/api/company-config`,
-            method: 'put',
-            data,
-        })
-    }
-
-    async getInvoicesBySale(saleId: string | number) {
-        return ApiService.fetchData<InvoicesResponse>({
-            url: `${this.host}/api/invoices/by-sale/${saleId}`,
-            method: 'get',
-        })
-    }
+export const uploadCertificate = (file: File, password: string) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('password', password)
+    return httpClient.post<DataResponse<Certificate>>(
+        `${HOST}/api/certificates`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+    )
 }
 
-export default new InvoicingService()
+export const deleteCertificate = (id: string) =>
+    httpClient.delete(`${HOST}/api/certificates/${id}`)
+
+export const getCompanyConfig = () =>
+    httpClient.get<DataResponse<CompanyConfig>>(`${HOST}/api/company-config`)
+
+export const updateCompanyConfig = (data: CompanyConfigInput) =>
+    httpClient.put<DataResponse<CompanyConfig>>(
+        `${HOST}/api/company-config`,
+        data
+    )
+
+export const getInvoicesBySale = (saleId: string | number) =>
+    httpClient.get<InvoicesResponse>(`${HOST}/api/invoices/by-sale/${saleId}`)

@@ -1,5 +1,5 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type {
     PaginatedResponse,
     DataResponse,
@@ -119,135 +119,113 @@ interface PurchaseReceiptsResponse {
     meta: { requestId: string; timestamp: string }
 }
 
-class PurchaseOrderService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+
+// --- Purchase Orders ---
+
+export async function getPurchaseOrders(params?: PurchaseOrderQueryParams) {
+    const queryParams = new URLSearchParams()
+
+    if (params?.status) {
+        queryParams.append('status', params.status)
+    }
+    if (params?.supplierId !== undefined) {
+        queryParams.append('supplierId', params.supplierId.toString())
+    }
+    if (params?.limit !== undefined) {
+        queryParams.append('limit', params.limit.toString())
+    }
+    if (params?.offset !== undefined) {
+        queryParams.append('offset', params.offset.toString())
     }
 
-    // --- Purchase Orders ---
+    const queryString = queryParams.toString()
+    const url = queryString
+        ? `${HOST}/purchase-orders?${queryString}`
+        : `${HOST}/purchase-orders`
 
-    async getPurchaseOrders(params?: PurchaseOrderQueryParams) {
-        const queryParams = new URLSearchParams()
-
-        if (params?.status) {
-            queryParams.append('status', params.status)
-        }
-        if (params?.supplierId !== undefined) {
-            queryParams.append('supplierId', params.supplierId.toString())
-        }
-        if (params?.limit !== undefined) {
-            queryParams.append('limit', params.limit.toString())
-        }
-        if (params?.offset !== undefined) {
-            queryParams.append('offset', params.offset.toString())
-        }
-
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/purchase-orders?${queryString}`
-            : `${this.config.host}/purchase-orders`
-
-        return ApiService.fetchData<PaginatedResponse<PurchaseOrder>>({
-            url,
-            method: 'get',
-        })
-    }
-
-    async getPurchaseOrder(id: number) {
-        return ApiService.fetchData<DataResponse<PurchaseOrder>>({
-            url: `${this.config.host}/purchase-orders/${id}`,
-            method: 'get',
-        })
-    }
-
-    async createPurchaseOrder(data: PurchaseOrderInput) {
-        return ApiService.fetchData<DataResponse<PurchaseOrder>>({
-            url: `${this.config.host}/purchase-orders`,
-            method: 'post',
-            data,
-        })
-    }
-
-    async updatePurchaseOrder(id: number, data: PurchaseOrderUpdateInput) {
-        return ApiService.fetchData<DataResponse<PurchaseOrder>>({
-            url: `${this.config.host}/purchase-orders/${id}`,
-            method: 'put',
-            data,
-        })
-    }
-
-    async deletePurchaseOrder(id: number) {
-        return ApiService.fetchData({
-            url: `${this.config.host}/purchase-orders/${id}`,
-            method: 'delete',
-        })
-    }
-
-    async sendPurchaseOrder(id: number) {
-        return ApiService.fetchData<DataResponse<PurchaseOrder>>({
-            url: `${this.config.host}/purchase-orders/${id}/send`,
-            method: 'post',
-        })
-    }
-
-    async cancelPurchaseOrder(id: number) {
-        return ApiService.fetchData<DataResponse<PurchaseOrder>>({
-            url: `${this.config.host}/purchase-orders/${id}/cancel`,
-            method: 'post',
-        })
-    }
-
-    async receivePurchaseOrder(id: number, data: ReceiveInput) {
-        return ApiService.fetchData<DataResponse<PurchaseReceipt>>({
-            url: `${this.config.host}/purchase-orders/${id}/receive`,
-            method: 'post',
-            data,
-        })
-    }
-
-    // --- Purchase Order Items ---
-
-    async getPurchaseOrderItems(orderId: number) {
-        return ApiService.fetchData<PurchaseOrderItemsResponse>({
-            url: `${this.config.host}/purchase-orders/${orderId}/items`,
-            method: 'get',
-        })
-    }
-
-    async addPurchaseOrderItem(data: PurchaseOrderItemInput) {
-        return ApiService.fetchData<DataResponse<PurchaseOrderItem>>({
-            url: `${this.config.host}/purchase-order-items`,
-            method: 'post',
-            data,
-        })
-    }
-
-    async updatePurchaseOrderItem(
-        itemId: number,
-        data: PurchaseOrderItemUpdateInput
-    ) {
-        return ApiService.fetchData<DataResponse<PurchaseOrderItem>>({
-            url: `${this.config.host}/purchase-order-items/${itemId}`,
-            method: 'put',
-            data,
-        })
-    }
-
-    async deletePurchaseOrderItem(itemId: number) {
-        return ApiService.fetchData({
-            url: `${this.config.host}/purchase-order-items/${itemId}`,
-            method: 'delete',
-        })
-    }
-
-    // --- Receipts ---
-
-    async getPurchaseOrderReceipts(orderId: number) {
-        return ApiService.fetchData<PurchaseReceiptsResponse>({
-            url: `${this.config.host}/purchase-orders/${orderId}/receipts`,
-            method: 'get',
-        })
-    }
+    return httpClient.get<PaginatedResponse<PurchaseOrder>>(url)
 }
 
-export default new PurchaseOrderService()
+export async function getPurchaseOrder(id: number) {
+    return httpClient.get<DataResponse<PurchaseOrder>>(
+        `${HOST}/purchase-orders/${id}`
+    )
+}
+
+export async function createPurchaseOrder(data: PurchaseOrderInput) {
+    return httpClient.post<DataResponse<PurchaseOrder>>(
+        `${HOST}/purchase-orders`,
+        data
+    )
+}
+
+export async function updatePurchaseOrder(
+    id: number,
+    data: PurchaseOrderUpdateInput
+) {
+    return httpClient.put<DataResponse<PurchaseOrder>>(
+        `${HOST}/purchase-orders/${id}`,
+        data
+    )
+}
+
+export async function deletePurchaseOrder(id: number) {
+    return httpClient.delete(`${HOST}/purchase-orders/${id}`)
+}
+
+export async function sendPurchaseOrder(id: number) {
+    return httpClient.post<DataResponse<PurchaseOrder>>(
+        `${HOST}/purchase-orders/${id}/send`
+    )
+}
+
+export async function cancelPurchaseOrder(id: number) {
+    return httpClient.post<DataResponse<PurchaseOrder>>(
+        `${HOST}/purchase-orders/${id}/cancel`
+    )
+}
+
+export async function receivePurchaseOrder(id: number, data: ReceiveInput) {
+    return httpClient.post<DataResponse<PurchaseReceipt>>(
+        `${HOST}/purchase-orders/${id}/receive`,
+        data
+    )
+}
+
+// --- Purchase Order Items ---
+
+export async function getPurchaseOrderItems(orderId: number) {
+    return httpClient.get<PurchaseOrderItemsResponse>(
+        `${HOST}/purchase-orders/${orderId}/items`
+    )
+}
+
+export async function addPurchaseOrderItem(data: PurchaseOrderItemInput) {
+    return httpClient.post<DataResponse<PurchaseOrderItem>>(
+        `${HOST}/purchase-order-items`,
+        data
+    )
+}
+
+export async function updatePurchaseOrderItem(
+    itemId: number,
+    data: PurchaseOrderItemUpdateInput
+) {
+    return httpClient.put<DataResponse<PurchaseOrderItem>>(
+        `${HOST}/purchase-order-items/${itemId}`,
+        data
+    )
+}
+
+export async function deletePurchaseOrderItem(itemId: number) {
+    return httpClient.delete(`${HOST}/purchase-order-items/${itemId}`)
+}
+
+// --- Receipts ---
+
+export async function getPurchaseOrderReceipts(orderId: number) {
+    return httpClient.get<PurchaseReceiptsResponse>(
+        `${HOST}/purchase-orders/${orderId}/receipts`
+    )
+}

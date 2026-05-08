@@ -1,5 +1,5 @@
-import ApiService from '@/services/ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type { DataResponse } from '@/@types/api'
 import type {
     POSSale,
@@ -16,144 +16,90 @@ import type {
     ListResponse,
 } from './POSTypes'
 
-class POSSaleService {
-    private host = appConfig.posApiHost || 'http://localhost:3000/api/pos'
+const HOST = appConfig.posApiHost || 'http://localhost:3000/api/pos'
 
-    async createSale(data: CreateSaleInput) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales`,
-            method: 'post',
-            data,
-        })
-    }
+export const createSale = (data: CreateSaleInput) =>
+    httpClient.post<DataResponse<POSSale>>(`${HOST}/sales`, data)
 
-    async quickSale(data: QuickSaleInput) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales/quick`,
-            method: 'post',
-            data,
-        })
-    }
+export const quickSale = (data: QuickSaleInput) =>
+    httpClient.post<DataResponse<POSSale>>(`${HOST}/sales/quick`, data)
 
-    async getSale(id: number) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales/${id}`,
-            method: 'get',
-        })
-    }
+export const getSale = (id: number) =>
+    httpClient.get<DataResponse<POSSale>>(`${HOST}/sales/${id}`)
 
-    async addSaleItem(saleId: number, data: AddSaleItemInput) {
-        return ApiService.fetchData<DataResponse<POSSaleItem>>({
-            url: `${this.host}/sales/${saleId}/items`,
-            method: 'post',
-            data,
-        })
-    }
+export const addSaleItem = (saleId: number, data: AddSaleItemInput) =>
+    httpClient.post<DataResponse<POSSaleItem>>(
+        `${HOST}/sales/${saleId}/items`,
+        data
+    )
 
-    async getSaleItems(saleId: number) {
-        return ApiService.fetchData<ListResponse<POSSaleItem>>({
-            url: `${this.host}/sales/${saleId}/items`,
-            method: 'get',
-        })
-    }
+export const getSaleItems = (saleId: number) =>
+    httpClient.get<ListResponse<POSSaleItem>>(`${HOST}/sales/${saleId}/items`)
 
-    async updateSaleItem(
-        saleId: number,
-        itemId: number,
-        data: UpdateSaleItemInput
-    ) {
-        return ApiService.fetchData<DataResponse<POSSaleItem>>({
-            url: `${this.host}/sales/${saleId}/items/${itemId}`,
-            method: 'put',
-            data,
-        })
-    }
+export const updateSaleItem = (
+    saleId: number,
+    itemId: number,
+    data: UpdateSaleItemInput
+) =>
+    httpClient.put<DataResponse<POSSaleItem>>(
+        `${HOST}/sales/${saleId}/items/${itemId}`,
+        data
+    )
 
-    async deleteSaleItem(saleId: number, itemId: number) {
-        return ApiService.fetchData<void>({
-            url: `${this.host}/sales/${saleId}/items/${itemId}`,
-            method: 'delete',
-        })
-    }
+export const deleteSaleItem = (saleId: number, itemId: number) =>
+    httpClient.delete<void>(`${HOST}/sales/${saleId}/items/${itemId}`)
 
-    async confirmSale(saleId: number) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales/${saleId}/confirm`,
-            method: 'post',
-        })
-    }
+export const confirmSale = (saleId: number) =>
+    httpClient.post<DataResponse<POSSale>>(
+        `${HOST}/sales/${saleId}/confirm`,
+        undefined
+    )
 
-    async cancelSale(saleId: number, reason?: string) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales/${saleId}/cancel`,
-            method: 'post',
-            data: reason ? { reason } : undefined,
-        })
-    }
+export const cancelSale = (saleId: number, reason?: string) =>
+    httpClient.post<DataResponse<POSSale>>(
+        `${HOST}/sales/${saleId}/cancel`,
+        reason ? { reason } : undefined
+    )
 
-    async parkSale(saleId: number, reason?: string) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales/${saleId}/park`,
-            method: 'post',
-            data: reason ? { reason } : undefined,
-        })
-    }
+export const parkSale = (saleId: number, reason?: string) =>
+    httpClient.post<DataResponse<POSSale>>(
+        `${HOST}/sales/${saleId}/park`,
+        reason ? { reason } : undefined
+    )
 
-    async resumeSale(saleId: number) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales/${saleId}/resume`,
-            method: 'post',
-        })
-    }
+export const resumeSale = (saleId: number) =>
+    httpClient.post<DataResponse<POSSale>>(
+        `${HOST}/sales/${saleId}/resume`,
+        undefined
+    )
 
-    async getParkedSales() {
-        return ApiService.fetchData<ListResponse<POSSale>>({
-            url: `${this.host}/sales/parked`,
-            method: 'get',
-        })
-    }
+export const getParkedSales = () =>
+    httpClient.get<ListResponse<POSSale>>(`${HOST}/sales/parked`)
 
-    async applySaleDiscount(saleId: number, data: SaleDiscountInput) {
-        return ApiService.fetchData<DataResponse<POSSale>>({
-            url: `${this.host}/sales/${saleId}/discount`,
-            method: 'post',
-            data,
-        })
-    }
+export const applySaleDiscount = (saleId: number, data: SaleDiscountInput) =>
+    httpClient.post<DataResponse<POSSale>>(
+        `${HOST}/sales/${saleId}/discount`,
+        data
+    )
 
-    async addPayment(saleId: number, data: PaymentInput) {
-        return ApiService.fetchData<DataResponse<POSPayment>>({
-            url: `${this.host}/sales/${saleId}/payments`,
-            method: 'post',
-            data,
-        })
-    }
+export const addPayment = (saleId: number, data: PaymentInput) =>
+    httpClient.post<DataResponse<POSPayment>>(
+        `${HOST}/sales/${saleId}/payments`,
+        data
+    )
 
-    async getSalePayments(saleId: number) {
-        return ApiService.fetchData<ListResponse<POSPayment>>({
-            url: `${this.host}/sales/${saleId}/payments`,
-            method: 'get',
-        })
-    }
+export const getSalePayments = (saleId: number) =>
+    httpClient.get<ListResponse<POSPayment>>(`${HOST}/sales/${saleId}/payments`)
 
-    async overrideItemPrice(
-        saleId: number,
-        itemId: number,
-        data: PriceOverrideInput
-    ) {
-        return ApiService.fetchData<DataResponse<POSSaleItem>>({
-            url: `${this.host}/sales/${saleId}/items/${itemId}/price`,
-            method: 'put',
-            data,
-        })
-    }
+export const overrideItemPrice = (
+    saleId: number,
+    itemId: number,
+    data: PriceOverrideInput
+) =>
+    httpClient.put<DataResponse<POSSaleItem>>(
+        `${HOST}/sales/${saleId}/items/${itemId}/price`,
+        data
+    )
 
-    async getReceipt(saleId: number) {
-        return ApiService.fetchData<DataResponse<Receipt>>({
-            url: `${this.host}/sales/${saleId}/receipt`,
-            method: 'get',
-        })
-    }
-}
-
-export default new POSSaleService()
+export const getReceipt = (saleId: number) =>
+    httpClient.get<DataResponse<Receipt>>(`${HOST}/sales/${saleId}/receipt`)

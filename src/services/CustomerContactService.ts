@@ -1,6 +1,8 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type { DataResponse } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export interface CustomerContact {
     id: number
@@ -18,50 +20,33 @@ export interface CustomerContactInput {
     phone?: string
 }
 
-class CustomerContactService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
-    }
+export const getCustomerContacts = (customerId: number) =>
+    httpClient.get<DataResponse<CustomerContact[]>>(
+        `${HOST}/customers/${customerId}/contacts`
+    )
 
-    async getCustomerContacts(customerId: number) {
-        return ApiService.fetchData<DataResponse<CustomerContact[]>>({
-            url: `${this.config.host}/customers/${customerId}/contacts`,
-            method: 'get',
-        })
-    }
+export const getCustomerContact = (id: number) =>
+    httpClient.get<DataResponse<CustomerContact>>(
+        `${HOST}/customer-contacts/${id}`
+    )
 
-    async getCustomerContact(id: number) {
-        return ApiService.fetchData<DataResponse<CustomerContact>>({
-            url: `${this.config.host}/customer-contacts/${id}`,
-            method: 'get',
-        })
-    }
+export const createCustomerContact = (
+    customerId: number,
+    contact: CustomerContactInput
+) =>
+    httpClient.post<DataResponse<CustomerContact>>(
+        `${HOST}/customers/${customerId}/contacts`,
+        contact
+    )
 
-    async createCustomerContact(
-        customerId: number,
-        contact: CustomerContactInput
-    ) {
-        return ApiService.fetchData<DataResponse<CustomerContact>>({
-            url: `${this.config.host}/customers/${customerId}/contacts`,
-            method: 'post',
-            data: contact,
-        })
-    }
+export const updateCustomerContact = (
+    id: number,
+    contact: CustomerContactInput
+) =>
+    httpClient.put<DataResponse<CustomerContact>>(
+        `${HOST}/customer-contacts/${id}`,
+        contact
+    )
 
-    async updateCustomerContact(id: number, contact: CustomerContactInput) {
-        return ApiService.fetchData<DataResponse<CustomerContact>>({
-            url: `${this.config.host}/customer-contacts/${id}`,
-            method: 'put',
-            data: contact,
-        })
-    }
-
-    async deleteCustomerContact(id: number) {
-        return ApiService.fetchData<void>({
-            url: `${this.config.host}/customer-contacts/${id}`,
-            method: 'delete',
-        })
-    }
-}
-
-export default new CustomerContactService()
+export const deleteCustomerContact = (id: number) =>
+    httpClient.delete(`${HOST}/customer-contacts/${id}`)

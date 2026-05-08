@@ -1,5 +1,5 @@
-import ApiService from '@/services/ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type {
     DataResponse,
     PaginatedResponse,
@@ -7,56 +7,25 @@ import type {
 } from '@/@types/api'
 import type { Refund, CreateRefundInput, ProcessRefundInput } from './POSTypes'
 
-class POSRefundService {
-    private host = appConfig.posApiHost || 'http://localhost:3000/api/pos'
+const HOST = appConfig.posApiHost || 'http://localhost:3000/api/pos'
 
-    async createRefund(data: CreateRefundInput) {
-        return ApiService.fetchData<DataResponse<Refund>>({
-            url: `${this.host}/refunds`,
-            method: 'post',
-            data,
-        })
-    }
+export const createRefund = (data: CreateRefundInput) =>
+    httpClient.post<DataResponse<Refund>>(`${HOST}/refunds`, data)
 
-    async processRefund(refundId: number, data: ProcessRefundInput) {
-        return ApiService.fetchData<DataResponse<Refund>>({
-            url: `${this.host}/refunds/${refundId}/process`,
-            method: 'post',
-            data,
-        })
-    }
+export const processRefund = (refundId: number, data: ProcessRefundInput) =>
+    httpClient.post<DataResponse<Refund>>(
+        `${HOST}/refunds/${refundId}/process`,
+        data
+    )
 
-    async cancelRefund(refundId: number) {
-        return ApiService.fetchData<DataResponse<Refund>>({
-            url: `${this.host}/refunds/${refundId}/cancel`,
-            method: 'post',
-        })
-    }
+export const cancelRefund = (refundId: number) =>
+    httpClient.post<DataResponse<Refund>>(
+        `${HOST}/refunds/${refundId}/cancel`,
+        undefined
+    )
 
-    async getRefund(id: number) {
-        return ApiService.fetchData<DataResponse<Refund>>({
-            url: `${this.host}/refunds/${id}`,
-            method: 'get',
-        })
-    }
+export const getRefund = (id: number) =>
+    httpClient.get<DataResponse<Refund>>(`${HOST}/refunds/${id}`)
 
-    async getRefunds(params?: PaginationParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.limit !== undefined) {
-            queryParams.append('limit', params.limit.toString())
-        }
-        if (params?.offset !== undefined) {
-            queryParams.append('offset', params.offset.toString())
-        }
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.host}/refunds?${queryString}`
-            : `${this.host}/refunds`
-        return ApiService.fetchData<PaginatedResponse<Refund>>({
-            url,
-            method: 'get',
-        })
-    }
-}
-
-export default new POSRefundService()
+export const getRefunds = (params?: PaginationParams) =>
+    httpClient.get<PaginatedResponse<Refund>>(`${HOST}/refunds`, { params })

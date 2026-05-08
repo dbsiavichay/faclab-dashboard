@@ -1,39 +1,21 @@
-import ApiService from '@/services/ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type { DataResponse } from '@/@types/api'
 import type { POSCustomer, QuickCustomerInput, ListResponse } from './POSTypes'
 
-class POSCustomerService {
-    private host = appConfig.posApiHost || 'http://localhost:3000/api/pos'
+const HOST = appConfig.posApiHost || 'http://localhost:3000/api/pos'
 
-    async getCustomers() {
-        return ApiService.fetchData<ListResponse<POSCustomer>>({
-            url: `${this.host}/customers`,
-            method: 'get',
-        })
-    }
+export const getCustomers = () =>
+    httpClient.get<ListResponse<POSCustomer>>(`${HOST}/customers`)
 
-    async searchCustomerByTaxId(taxId: string) {
-        return ApiService.fetchData<DataResponse<POSCustomer>>({
-            url: `${this.host}/customers/search/by-tax-id?taxId=${taxId}`,
-            method: 'get',
-        })
-    }
+export const searchCustomerByTaxId = (taxId: string) =>
+    httpClient.get<DataResponse<POSCustomer>>(
+        `${HOST}/customers/search/by-tax-id`,
+        { params: { taxId } }
+    )
 
-    async quickCreateCustomer(data: QuickCustomerInput) {
-        return ApiService.fetchData<DataResponse<POSCustomer>>({
-            url: `${this.host}/customers`,
-            method: 'post',
-            data,
-        })
-    }
+export const quickCreateCustomer = (data: QuickCustomerInput) =>
+    httpClient.post<DataResponse<POSCustomer>>(`${HOST}/customers`, data)
 
-    async getCustomer(id: number) {
-        return ApiService.fetchData<DataResponse<POSCustomer>>({
-            url: `${this.host}/customers/${id}`,
-            method: 'get',
-        })
-    }
-}
-
-export default new POSCustomerService()
+export const getCustomer = (id: number) =>
+    httpClient.get<DataResponse<POSCustomer>>(`${HOST}/customers/${id}`)

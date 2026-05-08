@@ -1,10 +1,12 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type {
     PaginatedResponse,
     DataResponse,
     PaginationParams,
 } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export interface Lot {
     id: number
@@ -42,63 +44,14 @@ export interface LotQueryParams extends PaginationParams {
     expiringInDays?: number
 }
 
-class LotService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
-    }
+export const getLots = (params?: LotQueryParams) =>
+    httpClient.get<PaginatedResponse<Lot>>(`${HOST}/lots`, { params })
 
-    async getLots(params?: LotQueryParams) {
-        const queryParams = new URLSearchParams()
+export const getLot = (id: number) =>
+    httpClient.get<DataResponse<Lot>>(`${HOST}/lots/${id}`)
 
-        if (params?.productId) {
-            queryParams.append('productId', params.productId.toString())
-        }
-        if (params?.expiringInDays !== undefined) {
-            queryParams.append(
-                'expiringInDays',
-                params.expiringInDays.toString()
-            )
-        }
-        if (params?.limit !== undefined) {
-            queryParams.append('limit', params.limit.toString())
-        }
-        if (params?.offset !== undefined) {
-            queryParams.append('offset', params.offset.toString())
-        }
+export const createLot = (lot: LotInput) =>
+    httpClient.post<DataResponse<Lot>>(`${HOST}/lots`, lot)
 
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/lots?${queryString}`
-            : `${this.config.host}/lots`
-
-        return ApiService.fetchData<PaginatedResponse<Lot>>({
-            url,
-            method: 'get',
-        })
-    }
-
-    async getLot(id: number) {
-        return ApiService.fetchData<DataResponse<Lot>>({
-            url: `${this.config.host}/lots/${id}`,
-            method: 'get',
-        })
-    }
-
-    async createLot(lot: LotInput) {
-        return ApiService.fetchData<DataResponse<Lot>>({
-            url: `${this.config.host}/lots`,
-            method: 'post',
-            data: lot,
-        })
-    }
-
-    async updateLot(id: number, lot: LotUpdateInput) {
-        return ApiService.fetchData<DataResponse<Lot>>({
-            url: `${this.config.host}/lots/${id}`,
-            method: 'put',
-            data: lot,
-        })
-    }
-}
-
-export default new LotService()
+export const updateLot = (id: number, lot: LotUpdateInput) =>
+    httpClient.put<DataResponse<Lot>>(`${HOST}/lots/${id}`, lot)

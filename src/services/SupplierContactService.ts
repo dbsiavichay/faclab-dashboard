@@ -1,5 +1,5 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type { DataResponse } from '@/@types/api'
 
 export interface SupplierContact {
@@ -18,50 +18,40 @@ export interface SupplierContactInput {
     phone?: string
 }
 
-class SupplierContactService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
-    }
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
-    async getSupplierContacts(supplierId: number) {
-        return ApiService.fetchData<DataResponse<SupplierContact[]>>({
-            url: `${this.config.host}/suppliers/${supplierId}/contacts`,
-            method: 'get',
-        })
-    }
-
-    async getSupplierContact(id: number) {
-        return ApiService.fetchData<DataResponse<SupplierContact>>({
-            url: `${this.config.host}/supplier-contacts/${id}`,
-            method: 'get',
-        })
-    }
-
-    async createSupplierContact(
-        supplierId: number,
-        contact: SupplierContactInput
-    ) {
-        return ApiService.fetchData<DataResponse<SupplierContact>>({
-            url: `${this.config.host}/suppliers/${supplierId}/contacts`,
-            method: 'post',
-            data: contact,
-        })
-    }
-
-    async updateSupplierContact(id: number, contact: SupplierContactInput) {
-        return ApiService.fetchData<DataResponse<SupplierContact>>({
-            url: `${this.config.host}/supplier-contacts/${id}`,
-            method: 'put',
-            data: contact,
-        })
-    }
-
-    async deleteSupplierContact(id: number) {
-        return ApiService.fetchData<void>({
-            url: `${this.config.host}/supplier-contacts/${id}`,
-            method: 'delete',
-        })
-    }
+export async function getSupplierContacts(supplierId: number) {
+    return httpClient.get<DataResponse<SupplierContact[]>>(
+        `${HOST}/suppliers/${supplierId}/contacts`
+    )
 }
 
-export default new SupplierContactService()
+export async function getSupplierContact(id: number) {
+    return httpClient.get<DataResponse<SupplierContact>>(
+        `${HOST}/supplier-contacts/${id}`
+    )
+}
+
+export async function createSupplierContact(
+    supplierId: number,
+    contact: SupplierContactInput
+) {
+    return httpClient.post<DataResponse<SupplierContact>>(
+        `${HOST}/suppliers/${supplierId}/contacts`,
+        contact
+    )
+}
+
+export async function updateSupplierContact(
+    id: number,
+    contact: SupplierContactInput
+) {
+    return httpClient.put<DataResponse<SupplierContact>>(
+        `${HOST}/supplier-contacts/${id}`,
+        contact
+    )
+}
+
+export async function deleteSupplierContact(id: number) {
+    return httpClient.delete<void>(`${HOST}/supplier-contacts/${id}`)
+}

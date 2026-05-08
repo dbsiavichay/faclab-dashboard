@@ -1,10 +1,12 @@
-import ApiService from './ApiService'
+import { httpClient } from '@shared/lib/http/httpClient'
 import appConfig from '@/configs/app.config'
 import type {
     PaginatedResponse,
     DataResponse,
     PaginationParams,
 } from '@/@types/api'
+
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
 
 export interface UnitOfMeasure {
     id: number
@@ -26,62 +28,31 @@ export interface UnitOfMeasureQueryParams extends PaginationParams {
     isActive?: boolean
 }
 
-class UnitOfMeasureService {
-    private host: string
+export const getUnitsOfMeasure = (params?: UnitOfMeasureQueryParams) =>
+    httpClient.get<PaginatedResponse<UnitOfMeasure>>(
+        `${HOST}/units-of-measure`,
+        { params }
+    )
 
-    constructor() {
-        this.host = appConfig.enableMock
-            ? appConfig.apiPrefix
-            : appConfig.inventoryApiHost || ''
-    }
+export const getUnitOfMeasureById = (id: number) =>
+    httpClient.get<DataResponse<UnitOfMeasure>>(
+        `${HOST}/units-of-measure/${id}`
+    )
 
-    async getUnitsOfMeasure(params?: UnitOfMeasureQueryParams) {
-        const queryParams = new URLSearchParams()
-        if (params?.isActive !== undefined)
-            queryParams.append('isActive', params.isActive.toString())
-        if (params?.limit !== undefined)
-            queryParams.append('limit', params.limit.toString())
-        if (params?.offset !== undefined)
-            queryParams.append('offset', params.offset.toString())
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.host}/units-of-measure?${queryString}`
-            : `${this.host}/units-of-measure`
-        return ApiService.fetchData<PaginatedResponse<UnitOfMeasure>>({
-            url,
-            method: 'get',
-        })
-    }
+export const createUnitOfMeasure = (data: UnitOfMeasureInput) =>
+    httpClient.post<DataResponse<UnitOfMeasure>>(
+        `${HOST}/units-of-measure`,
+        data
+    )
 
-    async getUnitOfMeasureById(id: number) {
-        return ApiService.fetchData<DataResponse<UnitOfMeasure>>({
-            url: `${this.host}/units-of-measure/${id}`,
-            method: 'get',
-        })
-    }
+export const updateUnitOfMeasure = (
+    id: number,
+    data: Partial<UnitOfMeasureInput>
+) =>
+    httpClient.put<DataResponse<UnitOfMeasure>>(
+        `${HOST}/units-of-measure/${id}`,
+        data
+    )
 
-    async createUnitOfMeasure(data: UnitOfMeasureInput) {
-        return ApiService.fetchData<DataResponse<UnitOfMeasure>>({
-            url: `${this.host}/units-of-measure`,
-            method: 'post',
-            data,
-        })
-    }
-
-    async updateUnitOfMeasure(id: number, data: Partial<UnitOfMeasureInput>) {
-        return ApiService.fetchData<DataResponse<UnitOfMeasure>>({
-            url: `${this.host}/units-of-measure/${id}`,
-            method: 'put',
-            data,
-        })
-    }
-
-    async deleteUnitOfMeasure(id: number) {
-        return ApiService.fetchData({
-            url: `${this.host}/units-of-measure/${id}`,
-            method: 'delete',
-        })
-    }
-}
-
-export default new UnitOfMeasureService()
+export const deleteUnitOfMeasure = (id: number) =>
+    httpClient.delete(`${HOST}/units-of-measure/${id}`)

@@ -5,9 +5,9 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useParkedSales, useResumeSale, useCancelSale } from '@/hooks/usePOS'
 import { usePOSStore } from '@/stores/usePOSStore'
-import POSSaleService from '@/services/pos/POSSaleService'
-import POSProductService from '@/services/pos/POSProductService'
-import POSCustomerService from '@/services/pos/POSCustomerService'
+import { getSale, getSaleItems } from '@/services/pos/POSSaleService'
+import { getProduct } from '@/services/pos/POSProductService'
+import { getCustomer } from '@/services/pos/POSCustomerService'
 import { useCan } from '@/stores'
 
 interface ParkedSalesDrawerProps {
@@ -24,22 +24,20 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
 
     const handleResume = async (saleId: number) => {
         try {
-            const saleResponse = await POSSaleService.getSale(saleId)
-            const saleData = saleResponse.data.data
+            const saleResponse = await getSale(saleId)
+            const saleData = saleResponse.data
 
             await resumeSale.mutateAsync(saleId)
 
-            const itemsResponse = await POSSaleService.getSaleItems(saleId)
-            const saleItems = itemsResponse.data.data
+            const itemsResponse = await getSaleItems(saleId)
+            const saleItems = itemsResponse.data
 
             clearCart()
 
             // Restore customer
             if (saleData.customerId) {
-                const customerResponse = await POSCustomerService.getCustomer(
-                    saleData.customerId
-                )
-                const customer = customerResponse.data.data
+                const customerResponse = await getCustomer(saleData.customerId)
+                const customer = customerResponse.data
                 setCustomer(customer.id, customer.name)
             }
 
@@ -49,10 +47,8 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
             }
 
             for (const item of saleItems) {
-                const productResponse = await POSProductService.getProduct(
-                    item.productId
-                )
-                const product = productResponse.data.data
+                const productResponse = await getProduct(item.productId)
+                const product = productResponse.data
                 addItem({
                     productId: product.id,
                     name: product.name,

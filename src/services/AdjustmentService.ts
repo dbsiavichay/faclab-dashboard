@@ -1,5 +1,5 @@
-import ApiService from './ApiService'
 import appConfig from '@/configs/app.config'
+import { httpClient } from '@shared/lib/http/httpClient'
 import type {
     PaginatedResponse,
     DataResponse,
@@ -99,118 +99,99 @@ interface AdjustmentItemsResponse {
     meta: { requestId: string; timestamp: string }
 }
 
-class AdjustmentService {
-    private config = {
-        host: appConfig.inventoryApiHost || 'http://localhost:3000',
+const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+
+// --- Adjustments ---
+
+export async function getAdjustments(params?: AdjustmentQueryParams) {
+    const queryParams = new URLSearchParams()
+
+    if (params?.status) {
+        queryParams.append('status', params.status)
+    }
+    if (params?.warehouseId !== undefined) {
+        queryParams.append('warehouseId', params.warehouseId.toString())
+    }
+    if (params?.limit !== undefined) {
+        queryParams.append('limit', params.limit.toString())
+    }
+    if (params?.offset !== undefined) {
+        queryParams.append('offset', params.offset.toString())
     }
 
-    // --- Adjustments ---
+    const queryString = queryParams.toString()
+    const url = queryString
+        ? `${HOST}/adjustments?${queryString}`
+        : `${HOST}/adjustments`
 
-    async getAdjustments(params?: AdjustmentQueryParams) {
-        const queryParams = new URLSearchParams()
-
-        if (params?.status) {
-            queryParams.append('status', params.status)
-        }
-        if (params?.warehouseId !== undefined) {
-            queryParams.append('warehouseId', params.warehouseId.toString())
-        }
-        if (params?.limit !== undefined) {
-            queryParams.append('limit', params.limit.toString())
-        }
-        if (params?.offset !== undefined) {
-            queryParams.append('offset', params.offset.toString())
-        }
-
-        const queryString = queryParams.toString()
-        const url = queryString
-            ? `${this.config.host}/adjustments?${queryString}`
-            : `${this.config.host}/adjustments`
-
-        return ApiService.fetchData<PaginatedResponse<Adjustment>>({
-            url,
-            method: 'get',
-        })
-    }
-
-    async getAdjustment(id: number) {
-        return ApiService.fetchData<DataResponse<Adjustment>>({
-            url: `${this.config.host}/adjustments/${id}`,
-            method: 'get',
-        })
-    }
-
-    async createAdjustment(data: AdjustmentInput) {
-        return ApiService.fetchData<DataResponse<Adjustment>>({
-            url: `${this.config.host}/adjustments`,
-            method: 'post',
-            data,
-        })
-    }
-
-    async updateAdjustment(id: number, data: AdjustmentUpdateInput) {
-        return ApiService.fetchData<DataResponse<Adjustment>>({
-            url: `${this.config.host}/adjustments/${id}`,
-            method: 'put',
-            data,
-        })
-    }
-
-    async deleteAdjustment(id: number) {
-        return ApiService.fetchData({
-            url: `${this.config.host}/adjustments/${id}`,
-            method: 'delete',
-        })
-    }
-
-    async confirmAdjustment(id: number) {
-        return ApiService.fetchData<DataResponse<Adjustment>>({
-            url: `${this.config.host}/adjustments/${id}/confirm`,
-            method: 'post',
-        })
-    }
-
-    async cancelAdjustment(id: number) {
-        return ApiService.fetchData<DataResponse<Adjustment>>({
-            url: `${this.config.host}/adjustments/${id}/cancel`,
-            method: 'post',
-        })
-    }
-
-    // --- Adjustment Items ---
-
-    async getAdjustmentItems(adjustmentId: number) {
-        return ApiService.fetchData<AdjustmentItemsResponse>({
-            url: `${this.config.host}/adjustments/${adjustmentId}/items`,
-            method: 'get',
-        })
-    }
-
-    async addAdjustmentItem(adjustmentId: number, data: AdjustmentItemInput) {
-        return ApiService.fetchData<DataResponse<AdjustmentItem>>({
-            url: `${this.config.host}/adjustments/${adjustmentId}/items`,
-            method: 'post',
-            data,
-        })
-    }
-
-    async updateAdjustmentItem(
-        itemId: number,
-        data: AdjustmentItemUpdateInput
-    ) {
-        return ApiService.fetchData<DataResponse<AdjustmentItem>>({
-            url: `${this.config.host}/adjustment-items/${itemId}`,
-            method: 'put',
-            data,
-        })
-    }
-
-    async deleteAdjustmentItem(itemId: number) {
-        return ApiService.fetchData({
-            url: `${this.config.host}/adjustment-items/${itemId}`,
-            method: 'delete',
-        })
-    }
+    return httpClient.get<PaginatedResponse<Adjustment>>(url)
 }
 
-export default new AdjustmentService()
+export async function getAdjustment(id: number) {
+    return httpClient.get<DataResponse<Adjustment>>(`${HOST}/adjustments/${id}`)
+}
+
+export async function createAdjustment(data: AdjustmentInput) {
+    return httpClient.post<DataResponse<Adjustment>>(
+        `${HOST}/adjustments`,
+        data
+    )
+}
+
+export async function updateAdjustment(
+    id: number,
+    data: AdjustmentUpdateInput
+) {
+    return httpClient.put<DataResponse<Adjustment>>(
+        `${HOST}/adjustments/${id}`,
+        data
+    )
+}
+
+export async function deleteAdjustment(id: number) {
+    return httpClient.delete(`${HOST}/adjustments/${id}`)
+}
+
+export async function confirmAdjustment(id: number) {
+    return httpClient.post<DataResponse<Adjustment>>(
+        `${HOST}/adjustments/${id}/confirm`
+    )
+}
+
+export async function cancelAdjustment(id: number) {
+    return httpClient.post<DataResponse<Adjustment>>(
+        `${HOST}/adjustments/${id}/cancel`
+    )
+}
+
+// --- Adjustment Items ---
+
+export async function getAdjustmentItems(adjustmentId: number) {
+    return httpClient.get<AdjustmentItemsResponse>(
+        `${HOST}/adjustments/${adjustmentId}/items`
+    )
+}
+
+export async function addAdjustmentItem(
+    adjustmentId: number,
+    data: AdjustmentItemInput
+) {
+    return httpClient.post<DataResponse<AdjustmentItem>>(
+        `${HOST}/adjustments/${adjustmentId}/items`,
+        data
+    )
+}
+
+export async function updateAdjustmentItem(
+    itemId: number,
+    data: AdjustmentItemUpdateInput
+) {
+    return httpClient.put<DataResponse<AdjustmentItem>>(
+        `${HOST}/adjustment-items/${itemId}`,
+        data
+    )
+}
+
+export async function deleteAdjustmentItem(itemId: number) {
+    return httpClient.delete(`${HOST}/adjustment-items/${itemId}`)
+}

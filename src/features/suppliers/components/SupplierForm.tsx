@@ -6,9 +6,12 @@ import {
 } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { supplierSchema, type SupplierFormValues } from '@/schemas'
-import type { Supplier } from '@/services/SupplierService'
-import { TAX_TYPE_LABELS } from '@/services/SupplierService'
+import {
+    supplierSchema,
+    type SupplierFormValues,
+} from '../model/supplier.schema'
+import { TAX_TYPE_LABELS } from '../model/types'
+import type { Supplier } from '../model/types'
 
 interface SupplierFormProps {
     formId: string

@@ -1,24 +1,13 @@
 import { useNavigate } from 'react-router-dom'
-import {
-    useSuppliers,
-    useDeleteSupplier,
-    useCreateSupplier,
-    useUpdateSupplier,
-    useActivateSupplier,
-    useDeactivateSupplier,
-    useCrudOperations,
-} from '@/hooks'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import type { Supplier, SupplierInput } from '@/services/SupplierService'
-import { TAX_TYPE_LABELS } from '@/services/SupplierService'
-import { getErrorMessage } from '@/utils/getErrorMessage'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import SupplierForm from './SupplierForm'
+import { getErrorMessage } from '@/utils/getErrorMessage'
+import useCrudOperations from '@/hooks/utils/useCrudOperations'
 import {
     HiOutlinePlus,
     HiOutlinePencil,
@@ -27,27 +16,37 @@ import {
     HiOutlineXCircle,
     HiOutlineEye,
 } from 'react-icons/hi'
+import { useSuppliersList, useSupplierMutations } from '../hooks/useSuppliers'
+import SupplierForm from '../components/SupplierForm'
+import type { Supplier } from '../model/types'
+import { TAX_TYPE_LABELS } from '../model/types'
+import type { SupplierFormValues } from '../model/supplier.schema'
 
-const SuppliersView = () => {
+const SuppliersListPage = () => {
     const navigate = useNavigate()
     const crud = useCrudOperations<Supplier>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useSuppliers({ limit: crud.pageSize, offset })
+    const { data, isLoading } = useSuppliersList({
+        limit: crud.pageSize,
+        offset,
+    })
     const suppliers = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const deleteSupplier = useDeleteSupplier()
-    const createSupplier = useCreateSupplier()
-    const updateSupplier = useUpdateSupplier()
-    const activateSupplier = useActivateSupplier()
-    const deactivateSupplier = useDeactivateSupplier()
-    const isPending = createSupplier.isPending || updateSupplier.isPending
+    const {
+        create,
+        update,
+        delete: remove,
+        activate,
+        deactivate,
+    } = useSupplierMutations()
+    const isPending = create.isPending || update.isPending
 
-    const handleFormSubmit = async (formData: SupplierInput) => {
+    const handleFormSubmit = async (formData: SupplierFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
-                await updateSupplier.mutateAsync({
+                await update.mutateAsync({
                     id: crud.selectedItem.id,
                     data: formData,
                 })
@@ -58,7 +57,7 @@ const SuppliersView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await createSupplier.mutateAsync(formData)
+                await create.mutateAsync(formData)
                 toast.push(
                     <Notification title="Proveedor creado" type="success">
                         El proveedor se creó correctamente
@@ -80,7 +79,7 @@ const SuppliersView = () => {
     const handleDeleteConfirm = async () => {
         if (!crud.selectedItem) return
         try {
-            await deleteSupplier.mutateAsync(crud.selectedItem.id)
+            await remove.mutateAsync(crud.selectedItem.id)
             toast.push(
                 <Notification title="Proveedor eliminado" type="success">
                     El proveedor se eliminó correctamente
@@ -101,7 +100,7 @@ const SuppliersView = () => {
     const handleToggleStatus = async (supplier: Supplier) => {
         try {
             if (supplier.isActive) {
-                await deactivateSupplier.mutateAsync(supplier.id)
+                await deactivate.mutateAsync(supplier.id)
                 toast.push(
                     <Notification title="Proveedor desactivado" type="info">
                         El proveedor se desactivó correctamente
@@ -109,7 +108,7 @@ const SuppliersView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await activateSupplier.mutateAsync(supplier.id)
+                await activate.mutateAsync(supplier.id)
                 toast.push(
                     <Notification title="Proveedor activado" type="success">
                         El proveedor se activó correctamente
@@ -296,7 +295,7 @@ const SuppliersView = () => {
             <DeleteConfirmDialog
                 isOpen={crud.isDeleteOpen}
                 itemName={crud.selectedItem?.name}
-                isDeleting={deleteSupplier.isPending}
+                isDeleting={remove.isPending}
                 onClose={crud.closeAll}
                 onConfirm={handleDeleteConfirm}
             />
@@ -304,4 +303,4 @@ const SuppliersView = () => {
     )
 }
 
-export default SuppliersView
+export default SuppliersListPage

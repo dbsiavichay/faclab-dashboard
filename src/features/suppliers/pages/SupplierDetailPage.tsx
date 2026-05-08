@@ -1,15 +1,5 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useSupplier } from '@/hooks/useSuppliers'
-import {
-    useSupplierContacts,
-    useDeleteSupplierContact,
-} from '@/hooks/useSupplierContacts'
-import {
-    useSupplierProducts,
-    useDeleteSupplierProduct,
-} from '@/hooks/useSupplierProducts'
-import { useProducts } from '@/hooks/useProducts'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
@@ -18,23 +8,32 @@ import Tabs from '@/components/ui/Tabs'
 import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { TAX_TYPE_LABELS } from '@/services/SupplierService'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type { SupplierContact } from '@/services/SupplierContactService'
-import type { SupplierProduct } from '@/services/SupplierProductService'
-import ContactForm from './ContactForm'
-import SupplierProductForm from './SupplierProductForm'
+import { useProducts } from '@/hooks/useProducts'
 import {
     HiOutlineArrowLeft,
     HiOutlinePlus,
     HiOutlinePencil,
     HiOutlineTrash,
 } from 'react-icons/hi'
+import { useSupplier } from '../hooks/useSuppliers'
+import {
+    useSupplierContacts,
+    useSupplierContactMutations,
+} from '../hooks/useSupplierContacts'
+import {
+    useSupplierProducts,
+    useSupplierProductMutations,
+} from '../hooks/useSupplierProducts'
+import ContactForm from '../components/ContactForm'
+import SupplierProductForm from '../components/SupplierProductForm'
+import { TAX_TYPE_LABELS } from '../model/types'
+import type { SupplierContact, SupplierProduct } from '../model/types'
 
 const { Tr, Th, Td, THead, TBody } = Table
 const { TabList, TabNav, TabContent } = Tabs
 
-const SupplierDetailView = () => {
+const SupplierDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const supplierId = parseInt(id || '0')
@@ -47,10 +46,11 @@ const SupplierDetailView = () => {
         useSupplierProducts(supplierId)
     const { data: productsData } = useProducts()
     const products = productsData?.items ?? []
-    const deleteContact = useDeleteSupplierContact()
-    const deleteSupplierProduct = useDeleteSupplierProduct()
 
-    // Contact state
+    const { delete: deleteContact } = useSupplierContactMutations(supplierId)
+    const { delete: deleteSupplierProduct } =
+        useSupplierProductMutations(supplierId)
+
     const [contactFormOpen, setContactFormOpen] = useState(false)
     const [selectedContact, setSelectedContact] =
         useState<SupplierContact | null>(null)
@@ -59,7 +59,6 @@ const SupplierDetailView = () => {
     const [contactToDelete, setContactToDelete] =
         useState<SupplierContact | null>(null)
 
-    // Product state
     const [productFormOpen, setProductFormOpen] = useState(false)
     const [selectedProduct, setSelectedProduct] =
         useState<SupplierProduct | null>(null)
@@ -68,7 +67,6 @@ const SupplierDetailView = () => {
     const [productToDelete, setProductToDelete] =
         useState<SupplierProduct | null>(null)
 
-    // Contact handlers
     const handleCreateContact = () => {
         setSelectedContact(null)
         setContactFormOpen(true)
@@ -84,19 +82,10 @@ const SupplierDetailView = () => {
         setSelectedContact(null)
     }
 
-    const handleDeleteContactClick = (contact: SupplierContact) => {
-        setContactToDelete(contact)
-        setDeleteContactDialogOpen(true)
-    }
-
     const handleDeleteContactConfirm = async () => {
         if (!contactToDelete) return
-
         try {
-            await deleteContact.mutateAsync({
-                id: contactToDelete.id,
-                supplierId: supplierId,
-            })
+            await deleteContact.mutateAsync(contactToDelete.id)
             toast.push(
                 <Notification title="Contacto eliminado" type="success">
                     El contacto se eliminó correctamente
@@ -115,7 +104,6 @@ const SupplierDetailView = () => {
         }
     }
 
-    // Product handlers
     const handleCreateProduct = () => {
         setSelectedProduct(null)
         setProductFormOpen(true)
@@ -131,19 +119,10 @@ const SupplierDetailView = () => {
         setSelectedProduct(null)
     }
 
-    const handleDeleteProductClick = (product: SupplierProduct) => {
-        setProductToDelete(product)
-        setDeleteProductDialogOpen(true)
-    }
-
     const handleDeleteProductConfirm = async () => {
         if (!productToDelete) return
-
         try {
-            await deleteSupplierProduct.mutateAsync({
-                id: productToDelete.id,
-                supplierId: supplierId,
-            })
+            await deleteSupplierProduct.mutateAsync(productToDelete.id)
             toast.push(
                 <Notification title="Producto eliminado" type="success">
                     El producto se eliminó del proveedor correctamente
@@ -192,7 +171,6 @@ const SupplierDetailView = () => {
 
     return (
         <div className="flex flex-col gap-4">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button
@@ -212,7 +190,6 @@ const SupplierDetailView = () => {
                 </div>
             </div>
 
-            {/* Supplier Information */}
             <Card>
                 <h5 className="mb-4">Información del Proveedor</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -277,7 +254,6 @@ const SupplierDetailView = () => {
                 )}
             </Card>
 
-            {/* Tabs: Contacts & Products */}
             <Card>
                 <Tabs defaultValue="contacts" variant="underline">
                     <TabList>
@@ -289,7 +265,6 @@ const SupplierDetailView = () => {
                         </TabNav>
                     </TabList>
 
-                    {/* Contacts Tab */}
                     <TabContent value="contacts">
                         <div className="mt-4">
                             <div className="flex items-center justify-end mb-4">
@@ -350,11 +325,14 @@ const SupplierDetailView = () => {
                                                             icon={
                                                                 <HiOutlineTrash />
                                                             }
-                                                            onClick={() =>
-                                                                handleDeleteContactClick(
+                                                            onClick={() => {
+                                                                setContactToDelete(
                                                                     contact
                                                                 )
-                                                            }
+                                                                setDeleteContactDialogOpen(
+                                                                    true
+                                                                )
+                                                            }}
                                                         />
                                                     </div>
                                                 </Td>
@@ -366,7 +344,6 @@ const SupplierDetailView = () => {
                         </div>
                     </TabContent>
 
-                    {/* Products Tab */}
                     <TabContent value="products">
                         <div className="mt-4">
                             <div className="flex items-center justify-end mb-4">
@@ -459,11 +436,14 @@ const SupplierDetailView = () => {
                                                             icon={
                                                                 <HiOutlineTrash />
                                                             }
-                                                            onClick={() =>
-                                                                handleDeleteProductClick(
+                                                            onClick={() => {
+                                                                setProductToDelete(
                                                                     sp
                                                                 )
-                                                            }
+                                                                setDeleteProductDialogOpen(
+                                                                    true
+                                                                )
+                                                            }}
                                                         />
                                                     </div>
                                                 </Td>
@@ -477,7 +457,6 @@ const SupplierDetailView = () => {
                 </Tabs>
             </Card>
 
-            {/* Contact Form Modal */}
             <ContactForm
                 open={contactFormOpen}
                 supplierId={supplierId}
@@ -485,7 +464,6 @@ const SupplierDetailView = () => {
                 onClose={handleCloseContactForm}
             />
 
-            {/* Product Form Modal */}
             <SupplierProductForm
                 open={productFormOpen}
                 supplierId={supplierId}
@@ -493,7 +471,6 @@ const SupplierDetailView = () => {
                 onClose={handleCloseProductForm}
             />
 
-            {/* Delete Contact Confirmation Dialog */}
             <Dialog
                 isOpen={deleteContactDialogOpen}
                 onClose={() => setDeleteContactDialogOpen(false)}
@@ -521,7 +498,6 @@ const SupplierDetailView = () => {
                 </div>
             </Dialog>
 
-            {/* Delete Product Confirmation Dialog */}
             <Dialog
                 isOpen={deleteProductDialogOpen}
                 onClose={() => setDeleteProductDialogOpen(false)}
@@ -551,4 +527,4 @@ const SupplierDetailView = () => {
     )
 }
 
-export default SupplierDetailView
+export default SupplierDetailPage

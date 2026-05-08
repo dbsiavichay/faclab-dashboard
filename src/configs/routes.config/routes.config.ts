@@ -72,18 +72,6 @@ export const protectedRoutes: Routes = [
         authority: ['customer:read'],
     },
     {
-        key: 'purchases.suppliers',
-        path: '/suppliers',
-        component: lazy(() => import('@/views/inventory/SuppliersView')),
-        authority: ['supplier:read'],
-    },
-    {
-        key: 'purchases.supplierDetail',
-        path: '/suppliers/:id',
-        component: lazy(() => import('@/views/inventory/SupplierDetailView')),
-        authority: ['supplier:read'],
-    },
-    {
         key: 'inventory.lots',
         path: '/lots',
         component: lazy(() => import('@/views/inventory/LotsView')),

@@ -12,20 +12,14 @@ import {
 } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    useCreateSupplierProduct,
-    useUpdateSupplierProduct,
-} from '@/hooks/useSupplierProducts'
-import { useProducts } from '@/hooks/useProducts'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { useProducts } from '@/hooks/useProducts'
 import {
     supplierProductSchema,
     type SupplierProductFormValues,
-} from '@/schemas'
-import type {
-    SupplierProduct,
-    SupplierProductInput,
-} from '@/services/SupplierProductService'
+} from '../model/supplierProduct.schema'
+import { useSupplierProductMutations } from '../hooks/useSupplierProducts'
+import type { SupplierProduct } from '../model/types'
 
 interface SupplierProductFormProps {
     open: boolean
@@ -40,8 +34,7 @@ const SupplierProductForm = ({
     supplierId,
     supplierProduct,
 }: SupplierProductFormProps) => {
-    const createSupplierProduct = useCreateSupplierProduct()
-    const updateSupplierProduct = useUpdateSupplierProduct()
+    const { create, update } = useSupplierProductMutations(supplierId)
     const { data: productsData } = useProducts()
     const products = productsData?.items ?? []
     const isEdit = !!supplierProduct
@@ -107,15 +100,12 @@ const SupplierProductForm = ({
     const onSubmit = async (values: SupplierProductFormValues) => {
         try {
             if (isEdit && supplierProduct) {
-                await updateSupplierProduct.mutateAsync({
+                await update.mutateAsync({
                     id: supplierProduct.id,
-                    product: values as SupplierProductInput,
+                    data: values,
                 })
             } else {
-                await createSupplierProduct.mutateAsync({
-                    supplierId,
-                    product: values as SupplierProductInput,
-                })
+                await create.mutateAsync(values)
             }
             toast.push(
                 <Notification

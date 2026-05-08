@@ -1,3 +1,15 @@
-// S0: thin shim — re-exports from the legacy routes config.
-// In S1+, features register their routes here instead of in the legacy config.
-export { protectedRoutes, publicRoutes } from '@/configs/routes.config'
+import { suppliersRoutes } from '@features/suppliers'
+import {
+    protectedRoutes as legacyProtectedRoutes,
+    publicRoutes,
+} from '@/configs/routes.config'
+import type { Routes } from '@/@types/routes'
+
+const supplierKeys = new Set(suppliersRoutes.map((r) => r.key))
+
+const protectedRoutes: Routes = [
+    ...suppliersRoutes,
+    ...legacyProtectedRoutes.filter((r) => !supplierKeys.has(r.key)),
+]
+
+export { protectedRoutes, publicRoutes }

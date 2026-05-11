@@ -6,19 +6,18 @@ import {
 } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useWarehouses } from '@/hooks/useWarehouses'
-import { locationSchema, type LocationFormValues } from '@/schemas'
-import type {
-    Location,
-    LocationInput,
-    LocationType,
-} from '@/services/LocationService'
+import { useWarehousesList } from '@features/warehouses'
+import {
+    locationSchema,
+    type LocationFormValues,
+} from '../model/location.schema'
+import type { Location, LocationType } from '../model/types'
 
 interface LocationFormProps {
     formId: string
     location: Location | null
     isSubmitting?: boolean
-    onSubmit: (data: LocationInput) => void
+    onSubmit: (data: LocationFormValues) => void
 }
 
 const locationTypeOptions: { value: LocationType; label: string }[] = [
@@ -34,7 +33,7 @@ const LocationForm = ({
     isSubmitting = false,
     onSubmit,
 }: LocationFormProps) => {
-    const { data: warehousesData } = useWarehouses({ isActive: true })
+    const { data: warehousesData } = useWarehousesList({ isActive: true })
     const warehouses = warehousesData?.items ?? []
     const warehouseOptions = warehouses.map((w) => ({
         value: w.id,
@@ -66,12 +65,8 @@ const LocationForm = ({
               },
     })
 
-    const onFormSubmit = (values: LocationFormValues) => {
-        onSubmit(values as LocationInput)
-    }
-
     return (
-        <form id={formId} onSubmit={handleSubmit(onFormSubmit)}>
+        <form id={formId} onSubmit={handleSubmit(onSubmit)}>
             <FormContainer>
                 <FormItem
                     asterisk

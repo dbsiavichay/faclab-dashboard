@@ -4,19 +4,15 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import {
-    useLocations,
-    useDeleteLocation,
-    useCreateLocation,
-    useUpdateLocation,
-} from '@/hooks/useLocations'
-import { getErrorMessage } from '@/utils/getErrorMessage'
-import { useWarehouses } from '@/hooks/useWarehouses'
-import { useCrudOperations } from '@/hooks'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import type { Location, LocationInput } from '@/services/LocationService'
-import LocationForm from './LocationForm'
+import { useCrudOperations } from '@/hooks'
+import { getErrorMessage } from '@/utils/getErrorMessage'
+import { useWarehousesList } from '@features/warehouses'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
+import { useLocationsList, useLocationMutations } from '../hooks/useLocations'
+import LocationForm from '../components/LocationForm'
+import type { Location } from '../model/types'
+import type { LocationFormValues } from '../model/location.schema'
 
 const LOCATION_TYPE_LABELS: Record<string, string> = {
     STORAGE: 'Almacenamiento',
@@ -25,27 +21,28 @@ const LOCATION_TYPE_LABELS: Record<string, string> = {
     RETURN: 'Devolución',
 }
 
-const LocationsView = () => {
+const LocationsListPage = () => {
     const crud = useCrudOperations<Location>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useLocations({ limit: crud.pageSize, offset })
+    const { data, isLoading } = useLocationsList({
+        limit: crud.pageSize,
+        offset,
+    })
     const locations = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const { data: warehousesData } = useWarehouses()
+    const { data: warehousesData } = useWarehousesList()
     const warehouses = warehousesData?.items ?? []
     const warehouseMap = new Map(warehouses.map((w) => [w.id, w.name]))
 
-    const deleteLocation = useDeleteLocation()
-    const createLocation = useCreateLocation()
-    const updateLocation = useUpdateLocation()
-    const isPending = createLocation.isPending || updateLocation.isPending
+    const mutations = useLocationMutations()
+    const isPending = mutations.create.isPending || mutations.update.isPending
 
-    const handleFormSubmit = async (formData: LocationInput) => {
+    const handleFormSubmit = async (formData: LocationFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
-                await updateLocation.mutateAsync({
+                await mutations.update.mutateAsync({
                     id: crud.selectedItem.id,
                     data: formData,
                 })
@@ -56,7 +53,7 @@ const LocationsView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await createLocation.mutateAsync(formData)
+                await mutations.create.mutateAsync(formData)
                 toast.push(
                     <Notification title="Ubicación creada" type="success">
                         La ubicación se creó correctamente
@@ -78,7 +75,7 @@ const LocationsView = () => {
     const handleDeleteConfirm = async () => {
         if (!crud.selectedItem) return
         try {
-            await deleteLocation.mutateAsync(crud.selectedItem.id)
+            await mutations.delete.mutateAsync(crud.selectedItem.id)
             toast.push(
                 <Notification title="Ubicación eliminada" type="success">
                     La ubicación se eliminó correctamente
@@ -100,114 +97,94 @@ const LocationsView = () => {
         {
             header: 'ID',
             accessorKey: 'id',
-            cell: (props) => {
-                const { row } = props
-                return <span className="font-medium">#{row.original.id}</span>
-            },
+            cell: (props) => (
+                <span className="font-medium">#{props.row.original.id}</span>
+            ),
         },
         {
             header: 'Nombre',
             accessorKey: 'name',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="font-semibold">{row.original.name}</span>
-                )
-            },
+            cell: (props) => (
+                <span className="font-semibold">{props.row.original.name}</span>
+            ),
         },
         {
             header: 'Código',
             accessorKey: 'code',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
-                        {row.original.code}
-                    </span>
-                )
-            },
+            cell: (props) => (
+                <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
+                    {props.row.original.code}
+                </span>
+            ),
         },
         {
             header: 'Bodega',
             accessorKey: 'warehouseId',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="text-sm">
-                        {warehouseMap.get(row.original.warehouseId) || '-'}
-                    </span>
-                )
-            },
+            cell: (props) => (
+                <span className="text-sm">
+                    {warehouseMap.get(props.row.original.warehouseId) || '-'}
+                </span>
+            ),
         },
         {
             header: 'Tipo',
             accessorKey: 'type',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <Badge
-                        content={
-                            LOCATION_TYPE_LABELS[row.original.type] ||
-                            row.original.type
-                        }
-                        className="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
-                    />
-                )
-            },
+            cell: (props) => (
+                <Badge
+                    content={
+                        LOCATION_TYPE_LABELS[props.row.original.type] ||
+                        props.row.original.type
+                    }
+                    className="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300"
+                />
+            ),
         },
         {
             header: 'Capacidad',
             accessorKey: 'capacity',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.capacity != null
-                            ? row.original.capacity
-                            : '-'}
-                    </span>
-                )
-            },
+            cell: (props) => (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {props.row.original.capacity != null
+                        ? props.row.original.capacity
+                        : '-'}
+                </span>
+            ),
         },
         {
             header: 'Estado',
             accessorKey: 'isActive',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <Badge
-                        content={row.original.isActive ? 'Activo' : 'Inactivo'}
-                        className={
-                            row.original.isActive
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                        }
-                    />
-                )
-            },
+            cell: (props) => (
+                <Badge
+                    content={
+                        props.row.original.isActive ? 'Activo' : 'Inactivo'
+                    }
+                    className={
+                        props.row.original.isActive
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                    }
+                />
+            ),
         },
         {
             header: 'Acciones',
             id: 'actions',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            icon={<HiOutlinePencil />}
-                            onClick={() => crud.openEdit(row.original)}
-                        />
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            icon={<HiOutlineTrash />}
-                            onClick={() => crud.openDelete(row.original)}
-                        />
-                    </div>
-                )
-            },
+            cell: (props) => (
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlinePencil />}
+                        onClick={() => crud.openEdit(props.row.original)}
+                    />
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        icon={<HiOutlineTrash />}
+                        onClick={() => crud.openDelete(props.row.original)}
+                    />
+                </div>
+            ),
         },
     ]
 
@@ -275,7 +252,7 @@ const LocationsView = () => {
                         ? `${crud.selectedItem.name} (${crud.selectedItem.code})`
                         : undefined
                 }
-                isDeleting={deleteLocation.isPending}
+                isDeleting={mutations.delete.isPending}
                 onClose={crud.closeAll}
                 onConfirm={handleDeleteConfirm}
             />
@@ -283,4 +260,4 @@ const LocationsView = () => {
     )
 }
 
-export default LocationsView
+export default LocationsListPage

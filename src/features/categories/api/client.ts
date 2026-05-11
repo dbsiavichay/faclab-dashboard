@@ -5,20 +5,10 @@ import type {
     DataResponse,
     PaginationParams,
 } from '@/@types/api'
+import type { Category } from '../model/types'
+import type { CategoryFormValues } from '../model/category.schema'
 
 const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
-
-export interface Category {
-    id: number
-    name: string
-    description?: string | null
-}
-
-export interface CategoryInput {
-    name: string
-    description?: string
-    [key: string]: unknown
-}
 
 export const getCategories = (params?: PaginationParams) =>
     httpClient.get<PaginatedResponse<Category>>(`${HOST}/categories`, {
@@ -28,11 +18,11 @@ export const getCategories = (params?: PaginationParams) =>
 export const getCategoryById = (id: number) =>
     httpClient.get<DataResponse<Category>>(`${HOST}/categories/${id}`)
 
-export const createCategory = (category: CategoryInput) =>
-    httpClient.post<DataResponse<Category>>(`${HOST}/categories`, category)
+export const createCategory = (data: CategoryFormValues) =>
+    httpClient.post<DataResponse<Category>>(`${HOST}/categories`, data)
 
-export const updateCategory = (id: number, category: Partial<CategoryInput>) =>
-    httpClient.put<DataResponse<Category>>(`${HOST}/categories/${id}`, category)
+export const updateCategory = (id: number, data: Partial<CategoryFormValues>) =>
+    httpClient.put<DataResponse<Category>>(`${HOST}/categories/${id}`, data)
 
 export const deleteCategory = (id: number) =>
     httpClient.delete(`${HOST}/categories/${id}`)

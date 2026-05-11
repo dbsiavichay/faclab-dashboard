@@ -2,17 +2,20 @@ import Input from '@/components/ui/Input'
 import { FormItem, FormContainer } from '@/components/ui/Form'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { categorySchema, type CategoryFormValues } from '@/schemas'
-import type { Category } from '@/services/CategoryService'
+import {
+    categorySchema,
+    type CategoryFormValues,
+} from '../model/category.schema'
+import type { Category } from '../model/types'
 
 interface CategoryFormProps {
     formId: string
-    category: Category | null
+    category?: Category | null
     isSubmitting?: boolean
     onSubmit: (data: CategoryFormValues) => void
 }
 
-const CategoryForm = ({
+export const CategoryForm = ({
     formId,
     category,
     isSubmitting = false,
@@ -69,5 +72,3 @@ const CategoryForm = ({
         </form>
     )
 }
-
-export default CategoryForm

@@ -1,15 +1,17 @@
 import { suppliersRoutes } from '@features/suppliers'
+import { categoriesRoutes } from '@features/categories'
 import {
     protectedRoutes as legacyProtectedRoutes,
     publicRoutes,
 } from '@/configs/routes.config'
 import type { Routes } from '@/@types/routes'
 
-const supplierKeys = new Set(suppliersRoutes.map((r) => r.key))
+const featureRoutes: Routes = [...suppliersRoutes, ...categoriesRoutes]
+const featureKeys = new Set(featureRoutes.map((r) => r.key))
 
 const protectedRoutes: Routes = [
-    ...suppliersRoutes,
-    ...legacyProtectedRoutes.filter((r) => !supplierKeys.has(r.key)),
+    ...featureRoutes,
+    ...legacyProtectedRoutes.filter((r) => !featureKeys.has(r.key)),
 ]
 
 export { protectedRoutes, publicRoutes }

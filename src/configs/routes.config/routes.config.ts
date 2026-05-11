@@ -12,12 +12,6 @@ export const protectedRoutes: Routes = [
         authority: [],
     },
     {
-        key: 'catalog.categories',
-        path: '/catalog/categories',
-        component: lazy(() => import('@/views/inventory/CategoriesView')),
-        authority: ['product:read'],
-    },
-    {
         key: 'catalog.products',
         path: '/catalog/products',
         component: lazy(() => import('@/views/inventory/ProductsView')),

@@ -1,24 +1,13 @@
 import { useNavigate } from 'react-router-dom'
-import {
-    useCustomers,
-    useDeleteCustomer,
-    useCreateCustomer,
-    useUpdateCustomer,
-    useActivateCustomer,
-    useDeactivateCustomer,
-    useCrudOperations,
-} from '@/hooks'
+import { useCrudOperations } from '@/hooks'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import type { Customer, CustomerInput } from '@/services/CustomerService'
-import { TAX_TYPE_LABELS } from '@/services/CustomerService'
-import { getErrorMessage } from '@/utils/getErrorMessage'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import CustomerForm from './CustomerForm'
+import { getErrorMessage } from '@/utils/getErrorMessage'
 import {
     HiOutlinePlus,
     HiOutlinePencil,
@@ -27,27 +16,31 @@ import {
     HiOutlineXCircle,
     HiOutlineEye,
 } from 'react-icons/hi'
+import { useCustomersList, useCustomerMutations } from '../hooks/useCustomers'
+import { CustomerForm } from '../components/CustomerForm'
+import type { Customer } from '../model/types'
+import { TAX_TYPE_LABELS } from '../model/types'
+import type { CustomerFormValues } from '../model/customer.schema'
 
-const CustomersView = () => {
+const CustomersListPage = () => {
     const navigate = useNavigate()
     const crud = useCrudOperations<Customer>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useCustomers({ limit: crud.pageSize, offset })
+    const { data, isLoading } = useCustomersList({
+        limit: crud.pageSize,
+        offset,
+    })
     const customers = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const deleteCustomer = useDeleteCustomer()
-    const createCustomer = useCreateCustomer()
-    const updateCustomer = useUpdateCustomer()
-    const activateCustomer = useActivateCustomer()
-    const deactivateCustomer = useDeactivateCustomer()
-    const isPending = createCustomer.isPending || updateCustomer.isPending
+    const mutations = useCustomerMutations()
+    const isPending = mutations.create.isPending || mutations.update.isPending
 
-    const handleFormSubmit = async (formData: CustomerInput) => {
+    const handleFormSubmit = async (formData: CustomerFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
-                await updateCustomer.mutateAsync({
+                await mutations.update.mutateAsync({
                     id: crud.selectedItem.id,
                     data: formData,
                 })
@@ -58,7 +51,7 @@ const CustomersView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await createCustomer.mutateAsync(formData)
+                await mutations.create.mutateAsync(formData)
                 toast.push(
                     <Notification title="Cliente creado" type="success">
                         El cliente se creó correctamente
@@ -80,7 +73,7 @@ const CustomersView = () => {
     const handleDeleteConfirm = async () => {
         if (!crud.selectedItem) return
         try {
-            await deleteCustomer.mutateAsync(crud.selectedItem.id)
+            await mutations.delete.mutateAsync(crud.selectedItem.id)
             toast.push(
                 <Notification title="Cliente eliminado" type="success">
                     El cliente se eliminó correctamente
@@ -101,7 +94,7 @@ const CustomersView = () => {
     const handleToggleStatus = async (customer: Customer) => {
         try {
             if (customer.isActive) {
-                await deactivateCustomer.mutateAsync(customer.id)
+                await mutations.deactivate.mutateAsync(customer.id)
                 toast.push(
                     <Notification title="Cliente desactivado" type="info">
                         El cliente se desactivó correctamente
@@ -109,7 +102,7 @@ const CustomersView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await activateCustomer.mutateAsync(customer.id)
+                await mutations.activate.mutateAsync(customer.id)
                 toast.push(
                     <Notification title="Cliente activado" type="success">
                         El cliente se activó correctamente
@@ -294,7 +287,7 @@ const CustomersView = () => {
             <DeleteConfirmDialog
                 isOpen={crud.isDeleteOpen}
                 itemName={crud.selectedItem?.name}
-                isDeleting={deleteCustomer.isPending}
+                isDeleting={mutations.delete.isPending}
                 onClose={crud.closeAll}
                 onConfirm={handleDeleteConfirm}
             />
@@ -302,4 +295,4 @@ const CustomersView = () => {
     )
 }
 
-export default CustomersView
+export default CustomersListPage

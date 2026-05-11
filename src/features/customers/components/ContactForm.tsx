@@ -7,13 +7,10 @@ import toast from '@/components/ui/toast'
 import { FormItem } from '@/components/ui/Form'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    useCreateCustomerContact,
-    useUpdateCustomerContact,
-} from '@/hooks/useCustomerContacts'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { contactSchema, type ContactFormValues } from '@/schemas'
-import type { CustomerContact } from '@/services/CustomerContactService'
+import { contactSchema, type ContactFormValues } from '../model/contact.schema'
+import { useCustomerContactMutations } from '../hooks/useCustomerContacts'
+import type { CustomerContact } from '../model/types'
 
 interface ContactFormProps {
     open: boolean
@@ -22,14 +19,13 @@ interface ContactFormProps {
     contact?: CustomerContact | null
 }
 
-const ContactForm = ({
+export const ContactForm = ({
     open,
     onClose,
     customerId,
     contact,
 }: ContactFormProps) => {
-    const createContact = useCreateCustomerContact()
-    const updateContact = useUpdateCustomerContact()
+    const { create, update } = useCustomerContactMutations(customerId)
     const isEdit = !!contact
 
     const {
@@ -67,12 +63,9 @@ const ContactForm = ({
     const onSubmit = async (values: ContactFormValues) => {
         try {
             if (isEdit && contact) {
-                await updateContact.mutateAsync({
-                    id: contact.id,
-                    contact: values,
-                })
+                await update.mutateAsync({ id: contact.id, data: values })
             } else {
-                await createContact.mutateAsync({ customerId, contact: values })
+                await create.mutateAsync(values)
             }
             toast.push(
                 <Notification
@@ -171,5 +164,3 @@ const ContactForm = ({
         </Dialog>
     )
 }
-
-export default ContactForm

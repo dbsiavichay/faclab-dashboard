@@ -1,10 +1,5 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useCustomer } from '@/hooks/useCustomers'
-import {
-    useCustomerContacts,
-    useDeleteCustomerContact,
-} from '@/hooks/useCustomerContacts'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
@@ -12,20 +7,25 @@ import Table from '@/components/ui/Table'
 import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { TAX_TYPE_LABELS } from '@/services/CustomerService'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import type { CustomerContact } from '@/services/CustomerContactService'
-import ContactForm from './ContactForm'
 import {
     HiOutlineArrowLeft,
     HiOutlinePlus,
     HiOutlinePencil,
     HiOutlineTrash,
 } from 'react-icons/hi'
+import { useCustomer } from '../hooks/useCustomers'
+import {
+    useCustomerContactsList,
+    useCustomerContactMutations,
+} from '../hooks/useCustomerContacts'
+import { ContactForm } from '../components/ContactForm'
+import type { CustomerContact } from '../model/types'
+import { TAX_TYPE_LABELS } from '../model/types'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
-const CustomerDetailView = () => {
+const CustomerDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const customerId = parseInt(id || '0')
@@ -33,8 +33,8 @@ const CustomerDetailView = () => {
     const { data: customer, isLoading: customerLoading } =
         useCustomer(customerId)
     const { data: contacts = [], isLoading: contactsLoading } =
-        useCustomerContacts(customerId)
-    const deleteContact = useDeleteCustomerContact()
+        useCustomerContactsList(customerId)
+    const { delete: deleteContact } = useCustomerContactMutations(customerId)
 
     const [contactFormOpen, setContactFormOpen] = useState(false)
     const [selectedContact, setSelectedContact] =
@@ -67,10 +67,7 @@ const CustomerDetailView = () => {
         if (!contactToDelete) return
 
         try {
-            await deleteContact.mutateAsync({
-                id: contactToDelete.id,
-                customerId: customerId,
-            })
+            await deleteContact.mutateAsync(contactToDelete.id)
             toast.push(
                 <Notification title="Contacto eliminado" type="success">
                     El contacto se eliminó correctamente
@@ -114,7 +111,6 @@ const CustomerDetailView = () => {
 
     return (
         <div className="flex flex-col gap-4">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button
@@ -134,7 +130,6 @@ const CustomerDetailView = () => {
                 </div>
             </div>
 
-            {/* Customer Information */}
             <Card>
                 <h5 className="mb-4">Información del Cliente</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -199,7 +194,6 @@ const CustomerDetailView = () => {
                 )}
             </Card>
 
-            {/* Contacts */}
             <Card>
                 <div className="flex items-center justify-between mb-4">
                     <h5>Contactos ({contacts.length})</h5>
@@ -266,7 +260,6 @@ const CustomerDetailView = () => {
                 )}
             </Card>
 
-            {/* Contact Form Modal */}
             <ContactForm
                 open={contactFormOpen}
                 customerId={customerId}
@@ -274,7 +267,6 @@ const CustomerDetailView = () => {
                 onClose={handleCloseContactForm}
             />
 
-            {/* Delete Confirmation Dialog */}
             <Dialog
                 isOpen={deleteDialogOpen}
                 onClose={() => setDeleteDialogOpen(false)}
@@ -305,4 +297,4 @@ const CustomerDetailView = () => {
     )
 }
 
-export default CustomerDetailView
+export default CustomerDetailPage

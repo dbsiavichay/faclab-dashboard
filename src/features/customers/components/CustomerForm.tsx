@@ -6,9 +6,12 @@ import {
 } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { customerSchema, type CustomerFormValues } from '@/schemas'
-import type { Customer } from '@/services/CustomerService'
-import { TAX_TYPE_LABELS } from '@/services/CustomerService'
+import {
+    customerSchema,
+    type CustomerFormValues,
+} from '../model/customer.schema'
+import type { Customer } from '../model/types'
+import { TAX_TYPE_LABELS } from '../model/types'
 
 interface CustomerFormProps {
     formId: string
@@ -39,7 +42,7 @@ const emptyValues: CustomerFormValues = {
     isActive: true,
 }
 
-const CustomerForm = ({
+export const CustomerForm = ({
     formId,
     customer,
     isSubmitting = false,
@@ -289,5 +292,3 @@ const CustomerForm = ({
         </form>
     )
 }
-
-export default CustomerForm

@@ -3,37 +3,33 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import {
-    useCategories,
-    useDeleteCategory,
-    useCreateCategory,
-    useUpdateCategory,
-} from '@/hooks/useCategories'
+import { useCategoriesList, useCategoryMutations } from '../hooks/useCategories'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCrudOperations } from '@/hooks'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import type { Category } from '@/services/CategoryService'
-import type { CategoryFormValues } from '@/schemas'
-import CategoryForm from './CategoryForm'
+import { CategoryForm } from '../components/CategoryForm'
+import type { Category } from '../model/types'
+import type { CategoryFormValues } from '../model/category.schema'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
-const CategoriesView = () => {
+const CategoriesListPage = () => {
     const crud = useCrudOperations<Category>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useCategories({ limit: crud.pageSize, offset })
+    const { data, isLoading } = useCategoriesList({
+        limit: crud.pageSize,
+        offset,
+    })
     const categories = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const deleteCategory = useDeleteCategory()
-    const createCategory = useCreateCategory()
-    const updateCategory = useUpdateCategory()
-    const isPending = createCategory.isPending || updateCategory.isPending
+    const { create, update, delete: remove } = useCategoryMutations()
+    const isPending = create.isPending || update.isPending
 
     const handleFormSubmit = async (formData: CategoryFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
-                await updateCategory.mutateAsync({
+                await update.mutateAsync({
                     id: crud.selectedItem.id,
                     data: formData,
                 })
@@ -44,7 +40,7 @@ const CategoriesView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await createCategory.mutateAsync(formData)
+                await create.mutateAsync(formData)
                 toast.push(
                     <Notification title="Categoría creada" type="success">
                         La categoría se creó correctamente
@@ -66,7 +62,7 @@ const CategoriesView = () => {
     const handleDeleteConfirm = async () => {
         if (!crud.selectedItem) return
         try {
-            await deleteCategory.mutateAsync(crud.selectedItem.id)
+            await remove.mutateAsync(crud.selectedItem.id)
             toast.push(
                 <Notification title="Categoría eliminada" type="success">
                     La categoría se eliminó correctamente
@@ -88,57 +84,47 @@ const CategoriesView = () => {
         {
             header: 'ID',
             accessorKey: 'id',
-            cell: (props) => {
-                const { row } = props
-                return <span className="font-medium">#{row.original.id}</span>
-            },
+            cell: (props) => (
+                <span className="font-medium">#{props.row.original.id}</span>
+            ),
         },
         {
             header: 'Nombre',
             accessorKey: 'name',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="font-semibold">{row.original.name}</span>
-                )
-            },
+            cell: (props) => (
+                <span className="font-semibold">{props.row.original.name}</span>
+            ),
         },
         {
             header: 'Descripción',
             accessorKey: 'description',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.description || '-'}
-                    </span>
-                )
-            },
+            cell: (props) => (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {props.row.original.description || '-'}
+                </span>
+            ),
         },
         {
             header: 'Acciones',
             id: 'actions',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            aria-label={`Editar ${row.original.name}`}
-                            icon={<HiOutlinePencil />}
-                            onClick={() => crud.openEdit(row.original)}
-                        />
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            aria-label={`Eliminar ${row.original.name}`}
-                            icon={<HiOutlineTrash />}
-                            onClick={() => crud.openDelete(row.original)}
-                        />
-                    </div>
-                )
-            },
+            cell: (props) => (
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        aria-label={`Editar ${props.row.original.name}`}
+                        icon={<HiOutlinePencil />}
+                        onClick={() => crud.openEdit(props.row.original)}
+                    />
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        aria-label={`Eliminar ${props.row.original.name}`}
+                        icon={<HiOutlineTrash />}
+                        onClick={() => crud.openDelete(props.row.original)}
+                    />
+                </div>
+            ),
         },
     ]
 
@@ -202,7 +188,7 @@ const CategoriesView = () => {
             <DeleteConfirmDialog
                 isOpen={crud.isDeleteOpen}
                 itemName={crud.selectedItem?.name}
-                isDeleting={deleteCategory.isPending}
+                isDeleting={remove.isPending}
                 onClose={crud.closeAll}
                 onConfirm={handleDeleteConfirm}
             />
@@ -210,4 +196,4 @@ const CategoriesView = () => {
     )
 }
 
-export default CategoriesView
+export default CategoriesListPage

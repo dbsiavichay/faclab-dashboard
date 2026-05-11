@@ -5,7 +5,11 @@ export * from './useStock'
 export * from './useMovements'
 export * from './useCustomers'
 export * from './useCustomerContacts'
-export * from './useWarehouses'
+export {
+    useWarehousesList as useWarehouses,
+    useWarehouse,
+    useWarehouseMutations,
+} from '@features/warehouses'
 export * from './useLocations'
 export * from './useSuppliers'
 export * from './useSupplierContacts'

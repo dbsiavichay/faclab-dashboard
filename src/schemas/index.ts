@@ -22,7 +22,7 @@ export { productSchema, type ProductFormValues } from './product.schema'
 export { supplierSchema, type SupplierFormValues } from './supplier.schema'
 export { customerSchema, type CustomerFormValues } from './customer.schema'
 export { createUserSchema, type CreateUserFormValues } from './user.schema'
-export { warehouseSchema, type WarehouseFormValues } from './warehouse.schema'
+export { warehouseSchema, type WarehouseFormValues } from '@features/warehouses'
 export {
     unitOfMeasureSchema,
     type UnitOfMeasureFormValues,

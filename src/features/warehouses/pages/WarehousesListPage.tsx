@@ -5,38 +5,37 @@ import Badge from '@/components/ui/Badge'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import {
-    useWarehouses,
-    useDeleteWarehouse,
-    useCreateWarehouse,
-    useUpdateWarehouse,
-} from '@/hooks/useWarehouses'
+    useWarehousesList,
+    useWarehouseMutations,
+} from '../hooks/useWarehouses'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { useCrudOperations } from '@/hooks'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
-import type { Warehouse, WarehouseInput } from '@/services/WarehouseService'
-import type { WarehouseFormValues } from '@/schemas'
-import WarehouseForm from './WarehouseForm'
+import { WarehouseForm } from '../components/WarehouseForm'
+import type { Warehouse } from '../model/types'
+import type { WarehouseFormValues } from '../model/warehouse.schema'
 import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
 
-const WarehousesView = () => {
+const WarehousesListPage = () => {
     const crud = useCrudOperations<Warehouse>()
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
-    const { data, isLoading } = useWarehouses({ limit: crud.pageSize, offset })
+    const { data, isLoading } = useWarehousesList({
+        limit: crud.pageSize,
+        offset,
+    })
     const warehouses = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
-    const deleteWarehouse = useDeleteWarehouse()
-    const createWarehouse = useCreateWarehouse()
-    const updateWarehouse = useUpdateWarehouse()
-    const isPending = createWarehouse.isPending || updateWarehouse.isPending
+    const { create, update, delete: remove } = useWarehouseMutations()
+    const isPending = create.isPending || update.isPending
 
     const handleFormSubmit = async (formData: WarehouseFormValues) => {
         try {
             if (crud.isEditOpen && crud.selectedItem) {
-                await updateWarehouse.mutateAsync({
+                await update.mutateAsync({
                     id: crud.selectedItem.id,
-                    data: formData as WarehouseInput,
+                    data: formData,
                 })
                 toast.push(
                     <Notification title="Bodega actualizada" type="success">
@@ -45,7 +44,7 @@ const WarehousesView = () => {
                     { placement: 'top-center' }
                 )
             } else {
-                await createWarehouse.mutateAsync(formData as WarehouseInput)
+                await create.mutateAsync(formData)
                 toast.push(
                     <Notification title="Bodega creada" type="success">
                         La bodega se creó correctamente
@@ -67,7 +66,7 @@ const WarehousesView = () => {
     const handleDeleteConfirm = async () => {
         if (!crud.selectedItem) return
         try {
-            await deleteWarehouse.mutateAsync(crud.selectedItem.id)
+            await remove.mutateAsync(crud.selectedItem.id)
             toast.push(
                 <Notification title="Bodega eliminada" type="success">
                     La bodega se eliminó correctamente
@@ -89,111 +88,92 @@ const WarehousesView = () => {
         {
             header: 'ID',
             accessorKey: 'id',
-            cell: (props) => {
-                const { row } = props
-                return <span className="font-medium">#{row.original.id}</span>
-            },
+            cell: (props) => (
+                <span className="font-medium">#{props.row.original.id}</span>
+            ),
         },
         {
             header: 'Nombre',
             accessorKey: 'name',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="font-semibold">{row.original.name}</span>
-                )
-            },
+            cell: (props) => (
+                <span className="font-semibold">{props.row.original.name}</span>
+            ),
         },
         {
             header: 'Código',
             accessorKey: 'code',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
-                        {row.original.code}
-                    </span>
-                )
-            },
+            cell: (props) => (
+                <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
+                    {props.row.original.code}
+                </span>
+            ),
         },
         {
             header: 'Ciudad',
             accessorKey: 'city',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.city || '-'}
-                    </span>
-                )
-            },
+            cell: (props) => (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {props.row.original.city || '-'}
+                </span>
+            ),
         },
         {
             header: 'Responsable',
             accessorKey: 'manager',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                        {row.original.manager || '-'}
-                    </span>
-                )
-            },
+            cell: (props) => (
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {props.row.original.manager || '-'}
+                </span>
+            ),
         },
         {
             header: 'Por defecto',
             accessorKey: 'isDefault',
-            cell: (props) => {
-                const { row } = props
-                return row.original.isDefault ? (
+            cell: (props) =>
+                props.row.original.isDefault ? (
                     <Badge
                         content="Por defecto"
                         className="bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300"
                     />
-                ) : null
-            },
+                ) : null,
         },
         {
             header: 'Estado',
             accessorKey: 'isActive',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <Badge
-                        content={row.original.isActive ? 'Activo' : 'Inactivo'}
-                        className={
-                            row.original.isActive
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
-                        }
-                    />
-                )
-            },
+            cell: (props) => (
+                <Badge
+                    content={
+                        props.row.original.isActive ? 'Activo' : 'Inactivo'
+                    }
+                    className={
+                        props.row.original.isActive
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-300'
+                    }
+                />
+            ),
         },
         {
             header: 'Acciones',
             id: 'actions',
-            cell: (props) => {
-                const { row } = props
-                return (
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            aria-label={`Editar ${row.original.name}`}
-                            icon={<HiOutlinePencil />}
-                            onClick={() => crud.openEdit(row.original)}
-                        />
-                        <Button
-                            size="sm"
-                            variant="plain"
-                            aria-label={`Eliminar ${row.original.name}`}
-                            icon={<HiOutlineTrash />}
-                            onClick={() => crud.openDelete(row.original)}
-                        />
-                    </div>
-                )
-            },
+            cell: (props) => (
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        aria-label={`Editar ${props.row.original.name}`}
+                        icon={<HiOutlinePencil />}
+                        onClick={() => crud.openEdit(props.row.original)}
+                    />
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        aria-label={`Eliminar ${props.row.original.name}`}
+                        icon={<HiOutlineTrash />}
+                        onClick={() => crud.openDelete(props.row.original)}
+                    />
+                </div>
+            ),
         },
     ]
 
@@ -259,7 +239,7 @@ const WarehousesView = () => {
                         ? `${crud.selectedItem.name} (${crud.selectedItem.code})`
                         : undefined
                 }
-                isDeleting={deleteWarehouse.isPending}
+                isDeleting={remove.isPending}
                 onClose={crud.closeAll}
                 onConfirm={handleDeleteConfirm}
             />
@@ -267,4 +247,4 @@ const WarehousesView = () => {
     )
 }
 
-export default WarehousesView
+export default WarehousesListPage

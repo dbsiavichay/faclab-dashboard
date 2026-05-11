@@ -1,6 +1,7 @@
 import type { Routes } from '@/@types/routes'
 import authRoute from './authRoute'
 import { lazy } from 'react'
+import { warehousesRoutes } from '@features/warehouses'
 
 export const publicRoutes: Routes = [...authRoute]
 
@@ -41,12 +42,7 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/inventory/UnitsOfMeasureView')),
         authority: ['product:read'],
     },
-    {
-        key: 'inventory.warehouses',
-        path: '/warehouses',
-        component: lazy(() => import('@/views/inventory/WarehousesView')),
-        authority: ['warehouse:write'],
-    },
+    ...warehousesRoutes,
     {
         key: 'inventory.locations',
         path: '/locations',

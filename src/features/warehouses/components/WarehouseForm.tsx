@@ -3,8 +3,11 @@ import { FormItem, FormContainer } from '@/components/ui/Form'
 import { ControlledSwitcher } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { warehouseSchema, type WarehouseFormValues } from '@/schemas'
-import type { Warehouse } from '@/services/WarehouseService'
+import {
+    warehouseSchema,
+    type WarehouseFormValues,
+} from '../model/warehouse.schema'
+import type { Warehouse } from '../model/types'
 
 interface WarehouseFormProps {
     formId: string
@@ -26,7 +29,7 @@ const emptyValues: WarehouseFormValues = {
     isDefault: false,
 }
 
-const WarehouseForm = ({
+export const WarehouseForm = ({
     formId,
     warehouse,
     isSubmitting = false,
@@ -222,5 +225,3 @@ const WarehouseForm = ({
         </form>
     )
 }
-
-export default WarehouseForm

@@ -1,9 +1,15 @@
 import { z } from 'zod'
-import { optionalEmail } from './common'
+
+const optionalEmail = z
+    .union([z.email('Email inválido'), z.literal('')])
+    .optional()
 
 export const warehouseSchema = z.object({
-    name: z.string().min(1, 'Nombre requerido').max(200),
-    code: z.string().min(1, 'Código requerido').max(50),
+    name: z
+        .string()
+        .min(1, 'Nombre requerido')
+        .max(200, 'Máximo 200 caracteres'),
+    code: z.string().min(1, 'Código requerido').max(50, 'Máximo 50 caracteres'),
     address: z.string().optional(),
     city: z.string().optional(),
     country: z.string().optional(),

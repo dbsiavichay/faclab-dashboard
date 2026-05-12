@@ -1,12 +1,4 @@
-import appConfig from '@/configs/app.config'
-import { httpClient } from '@shared/lib/http/httpClient'
-import type {
-    DataResponse,
-    PaginatedResponse,
-    PaginationParams,
-} from '@/@types/api'
-
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
+import type { PaginationParams } from '@/@types/api'
 
 export interface ValuationItem {
     productId: number
@@ -83,27 +75,3 @@ export interface WarehouseSummary {
 export interface SummaryParams {
     warehouseId?: number
 }
-
-export const getValuation = (params?: ValuationParams) =>
-    httpClient.get<DataResponse<InventoryValuation>>(
-        `${HOST}/reports/inventory/valuation`,
-        { params }
-    )
-
-export const getRotation = (params?: RotationParams) =>
-    httpClient.get<DataResponse<ProductRotation[]>>(
-        `${HOST}/reports/inventory/rotation`,
-        { params }
-    )
-
-export const getMovementHistory = (params?: MovementHistoryParams) =>
-    httpClient.get<PaginatedResponse<MovementHistoryItem>>(
-        `${HOST}/reports/inventory/movements`,
-        { params }
-    )
-
-export const getWarehouseSummary = (params?: SummaryParams) =>
-    httpClient.get<DataResponse<WarehouseSummary[]>>(
-        `${HOST}/reports/inventory/summary`,
-        { params }
-    )

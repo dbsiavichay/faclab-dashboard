@@ -4,35 +4,24 @@ import Badge from '@/components/ui/Badge'
 import Select from '@/components/ui/Select'
 import Tabs from '@/components/ui/Tabs'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
+import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
+import { useWarehousesList } from '@features/warehouses'
+import { useProducts } from '@/hooks/useProducts'
 import {
     useValuation,
     useRotation,
     useMovementHistory,
     useWarehouseSummary,
-} from '@/hooks/useReports'
-import { useWarehouses } from '@/hooks/useWarehouses'
-import { useProducts } from '@/hooks/useProducts'
+} from '../hooks/useReports'
 import type {
     ValuationItem,
     ProductRotation,
     MovementHistoryItem,
     WarehouseSummary,
     MovementHistoryParams,
-} from '@/services/ReportService'
+} from '../model/types'
 
 const { TabList, TabNav, TabContent } = Tabs
-
-const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('es-EC', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(value)
-
-const formatDate = (date: string | null) =>
-    date ? new Date(date).toLocaleDateString('es-EC') : '-'
-
-const formatDateTime = (date: string | null) =>
-    date ? new Date(date).toLocaleString('es-EC') : '-'
 
 const movementTypeOptions = [
     { value: '', label: 'Todos' },
@@ -47,7 +36,7 @@ const referenceTypeLabels: Record<string, string> = {
     transfer: 'Transferencia',
 }
 
-const ReportsView = () => {
+const ReportsPage = () => {
     const [activeTab, setActiveTab] = useState('valuation')
 
     // Valuation filters
@@ -71,7 +60,7 @@ const ReportsView = () => {
     // Summary filter
     const [summaryWarehouse, setSummaryWarehouse] = useState('')
 
-    const { data: warehousesData } = useWarehouses({ limit: 100 })
+    const { data: warehousesData } = useWarehousesList({ limit: 100 })
     const warehouses = warehousesData?.items ?? []
     const warehouseOptions = [
         { value: '', label: 'Todos los almacenes' },
@@ -91,7 +80,6 @@ const ReportsView = () => {
         })),
     ]
 
-    // Hooks
     const { data: valuation, isLoading: loadingValuation } = useValuation({
         warehouseId: valuationWarehouse
             ? parseInt(valuationWarehouse)
@@ -129,7 +117,6 @@ const ReportsView = () => {
                 : undefined,
         })
 
-    // Column definitions
     const valuationColumns: ColumnDef<ValuationItem>[] = [
         {
             header: 'Producto',
@@ -345,11 +332,14 @@ const ReportsView = () => {
         {
             header: 'Fecha',
             accessorKey: 'date',
-            cell: (props) => (
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {formatDateTime(props.row.original.date)}
-                </span>
-            ),
+            cell: (props) => {
+                const date = props.row.original.date
+                return (
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {date ? formatDatetime(date) : '-'}
+                    </span>
+                )
+            },
         },
     ]
 
@@ -431,7 +421,6 @@ const ReportsView = () => {
                     </TabList>
 
                     <div className="mt-4">
-                        {/* Valuation Tab */}
                         <TabContent value="valuation">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
@@ -495,7 +484,6 @@ const ReportsView = () => {
                             />
                         </TabContent>
 
-                        {/* Rotation Tab */}
                         <TabContent value="rotation">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
@@ -555,7 +543,6 @@ const ReportsView = () => {
                             />
                         </TabContent>
 
-                        {/* Movements Tab */}
                         <TabContent value="movements">
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                                 <div>
@@ -653,7 +640,6 @@ const ReportsView = () => {
                             />
                         </TabContent>
 
-                        {/* Summary Tab */}
                         <TabContent value="summary">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
@@ -693,4 +679,4 @@ const ReportsView = () => {
     )
 }
 
-export default ReportsView
+export default ReportsPage

@@ -4,6 +4,7 @@ import { lazy } from 'react'
 import { warehousesRoutes } from '@features/warehouses'
 import { locationsRoutes } from '@features/locations'
 import { customersRoutes } from '@features/customers'
+import { reportsRoutes } from '@features/reports'
 
 export const publicRoutes: Routes = [...authRoute]
 
@@ -109,12 +110,7 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/sales/SaleDetailView')),
         authority: ['sale:read'],
     },
-    {
-        key: 'reports.inventory',
-        path: '/reports/inventory',
-        component: lazy(() => import('@/views/reports/ReportsView')),
-        authority: ['report:inventory:read'],
-    },
+    ...reportsRoutes,
     {
         key: 'inventory.alerts',
         path: '/alerts',

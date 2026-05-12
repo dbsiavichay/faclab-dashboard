@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import Table from '@/components/ui/Table'
 import Spinner from '@/components/ui/Spinner'
-import { useValuation, useWarehouseSummary } from '@/hooks/useReports'
+import { useValuation, useWarehouseSummary } from '@features/reports'
 import {
     useLowStock,
     useOutOfStock,

@@ -1,6 +1,6 @@
 import Card from '@/components/ui/Card'
 import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
-import type { PurchaseOrder } from '@/services/PurchaseOrderService'
+import type { PurchaseOrder } from '../model/types'
 
 type Props = {
     order: PurchaseOrder

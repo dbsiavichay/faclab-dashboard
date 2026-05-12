@@ -5,16 +5,17 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Select from '@/components/ui/Select'
-import { usePurchaseOrders } from '@/hooks/usePurchaseOrders'
-import { useSuppliers } from '@/hooks/useSuppliers'
+import { usePurchaseOrders } from '../hooks/usePurchaseOrders'
+import { useSuppliersList } from '@features/suppliers'
+import { formatCurrency } from '@shared/lib/format'
 import {
     PURCHASE_ORDER_STATUS_LABELS,
     PURCHASE_ORDER_STATUS_CLASSES,
     type PurchaseOrder,
     type PurchaseOrderQueryParams,
     type PurchaseOrderStatus,
-} from '@/services/PurchaseOrderService'
-import PurchaseOrderForm from './PurchaseOrderForm'
+} from '../model/types'
+import PurchaseOrderForm from '../components/PurchaseOrderForm'
 import { HiPlus, HiOutlineEye } from 'react-icons/hi'
 
 const statusOptions = [
@@ -25,7 +26,7 @@ const statusOptions = [
     })),
 ]
 
-const PurchaseOrdersView = () => {
+const PurchaseOrdersListPage = () => {
     const navigate = useNavigate()
     const [isFormOpen, setIsFormOpen] = useState(false)
 
@@ -35,7 +36,7 @@ const PurchaseOrdersView = () => {
     const [pageSize, setPageSize] = useState(10)
     const offset = (pageIndex - 1) * pageSize
 
-    const { data: suppliersData } = useSuppliers({ limit: 100 })
+    const { data: suppliersData } = useSuppliersList({ limit: 100 })
     const suppliers = suppliersData?.items ?? []
 
     const supplierOptions = [
@@ -72,13 +73,6 @@ const PurchaseOrdersView = () => {
 
     const handleCreated = (id: number) => {
         navigate(`/purchase-orders/${id}`)
-    }
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('es-EC', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(value)
     }
 
     const columns: ColumnDef<PurchaseOrder>[] = [
@@ -252,4 +246,4 @@ const PurchaseOrdersView = () => {
     )
 }
 
-export default PurchaseOrdersView
+export default PurchaseOrdersListPage

@@ -3,10 +3,7 @@ import Button from '@/components/ui/Button'
 import Table from '@/components/ui/Table'
 import { formatCurrency } from '@shared/lib/format'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
-import type {
-    PurchaseOrder,
-    PurchaseOrderItem,
-} from '@/services/PurchaseOrderService'
+import type { PurchaseOrder, PurchaseOrderItem } from '../model/types'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 

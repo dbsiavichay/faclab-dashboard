@@ -12,22 +12,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
     useAddPurchaseOrderItem,
     useUpdatePurchaseOrderItem,
-} from '@/hooks/usePurchaseOrders'
+} from '../hooks/usePurchaseOrders'
 import { useProducts } from '@/hooks/useProducts'
 import { getErrorMessage } from '@/utils/getErrorMessage'
+import { formatCurrency } from '@shared/lib/format'
 import {
     purchaseOrderItemCreateSchema,
     purchaseOrderItemUpdateSchema,
     type PurchaseOrderItemCreateFormValues,
     type PurchaseOrderItemUpdateFormValues,
-} from '@/schemas'
-import type { PurchaseOrderItem } from '@/services/PurchaseOrderService'
-
-const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('es-EC', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(value)
+} from '../model/purchaseOrderItem.schema'
+import type { PurchaseOrderItem } from '../model/types'
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 

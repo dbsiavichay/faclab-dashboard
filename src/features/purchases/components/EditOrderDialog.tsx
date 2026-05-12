@@ -2,7 +2,7 @@ import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import Input from '@/components/ui/Input'
 import Select from '@/components/ui/Select'
-import type { PurchaseOrderUpdateInput } from '@/services/PurchaseOrderService'
+import type { PurchaseOrderUpdateInput } from '../model/types'
 
 type EditData = PurchaseOrderUpdateInput & { supplierId: number }
 

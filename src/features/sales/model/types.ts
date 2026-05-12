@@ -1,11 +1,3 @@
-import appConfig from '@/configs/app.config'
-import { httpClient } from '@shared/lib/http/httpClient'
-import type {
-    PaginatedResponse,
-    DataResponse,
-    PaginationParams,
-} from '@/@types/api'
-
 export type SaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
 export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
 export type PaymentMethod = 'CASH' | 'CARD' | 'TRANSFER' | 'CREDIT'
@@ -46,6 +38,44 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
     CREDIT: 'Crédito',
 }
 
+export type InvoiceStatus =
+    | 'created'
+    | 'signed'
+    | 'sent'
+    | 'authorized'
+    | 'rejected'
+
+export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
+    created: 'Creada',
+    signed: 'Firmada',
+    sent: 'Enviada',
+    authorized: 'Autorizada',
+    rejected: 'Rechazada',
+}
+
+export const INVOICE_STATUS_CLASSES: Record<InvoiceStatus, string> = {
+    created: 'bg-gray-100 text-gray-600',
+    signed: 'bg-blue-100 text-blue-600',
+    sent: 'bg-yellow-100 text-yellow-600',
+    authorized: 'bg-emerald-100 text-emerald-600',
+    rejected: 'bg-red-100 text-red-600',
+}
+
+export interface InvoiceStatusHistoryEntry {
+    name: string
+    statusDate: string
+    description?: string
+}
+
+export interface Invoice {
+    id: string
+    saleId: string
+    accessCode: string
+    status: InvoiceStatus
+    signatureId: string
+    statusHistory: InvoiceStatusHistoryEntry[]
+}
+
 export interface Sale {
     id: number
     customerId: number
@@ -83,53 +113,9 @@ export interface Payment {
     createdAt: string
 }
 
-export interface SaleQueryParams extends PaginationParams {
+export interface SaleQueryParams {
     customerId?: number
     status?: SaleStatus
-}
-
-interface SaleItemsResponse {
-    data: SaleItem[]
-    meta: { requestId: string; timestamp: string }
-}
-
-interface PaymentsResponse {
-    data: Payment[]
-    meta: { requestId: string; timestamp: string }
-}
-
-const HOST = appConfig.inventoryApiHost || 'http://localhost:3000/api/admin'
-
-export async function getSales(params?: SaleQueryParams) {
-    const queryParams = new URLSearchParams()
-
-    if (params?.customerId !== undefined) {
-        queryParams.append('customerId', params.customerId.toString())
-    }
-    if (params?.status) {
-        queryParams.append('status', params.status)
-    }
-    if (params?.limit !== undefined) {
-        queryParams.append('limit', params.limit.toString())
-    }
-    if (params?.offset !== undefined) {
-        queryParams.append('offset', params.offset.toString())
-    }
-
-    const queryString = queryParams.toString()
-    const url = queryString ? `${HOST}/sales?${queryString}` : `${HOST}/sales`
-
-    return httpClient.get<PaginatedResponse<Sale>>(url)
-}
-
-export async function getSale(id: number) {
-    return httpClient.get<DataResponse<Sale>>(`${HOST}/sales/${id}`)
-}
-
-export async function getSaleItems(saleId: number) {
-    return httpClient.get<SaleItemsResponse>(`${HOST}/sales/${saleId}/items`)
-}
-
-export async function getSalePayments(saleId: number) {
-    return httpClient.get<PaymentsResponse>(`${HOST}/sales/${saleId}/payments`)
+    limit?: number
+    offset?: number
 }

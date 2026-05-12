@@ -7,6 +7,7 @@ import { customersRoutes } from '@features/customers'
 import { reportsRoutes } from '@features/reports'
 import { salesRoutes } from '@features/sales'
 import { purchasesRoutes } from '@features/purchases'
+import { posRoutes } from '@features/pos'
 
 export const publicRoutes: Routes = [...authRoute]
 
@@ -95,12 +96,7 @@ export const protectedRoutes: Routes = [
         component: lazy(() => import('@/views/inventory/AlertsView')),
         authority: ['alert:read'],
     },
-    {
-        key: 'pos',
-        path: '/pos',
-        component: lazy(() => import('@/views/pos/POSView')),
-        authority: ['pos:operate'],
-    },
+    ...posRoutes,
     {
         key: 'settings.users',
         path: '/settings/users',

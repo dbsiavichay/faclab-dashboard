@@ -68,11 +68,12 @@ export {
     adjustmentSchema,
     type AdjustmentFormValues,
 } from './adjustment.schema'
-export { shiftOpenSchema, type ShiftOpenFormValues } from './shiftOpen.schema'
 export {
+    shiftOpenSchema,
+    type ShiftOpenFormValues,
     cashMovementSchema,
     type CashMovementFormValues,
-} from './cashMovement.schema'
+} from '@features/pos'
 export {
     serialStatusChangeSchema,
     type SerialStatusChangeFormValues,

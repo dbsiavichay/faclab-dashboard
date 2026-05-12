@@ -1,7 +1,0 @@
-export * from './POSTypes'
-export * from './ShiftService'
-export * from './POSSaleService'
-export * from './POSRefundService'
-export * from './POSReportService'
-export * from './POSProductService'
-export * from './POSCustomerService'

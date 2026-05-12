@@ -1,45 +1,37 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useSale, useSaleItems, useSalePayments } from '@/hooks/useSales'
-import { useProducts } from '@/hooks/useProducts'
-import { useCustomers } from '@/hooks/useCustomers'
-import { useInvoicesBySale } from '@/hooks/useInvoicing'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Table from '@/components/ui/Table'
 import Tabs from '@/components/ui/Tabs'
 import Dialog from '@/components/ui/Dialog'
+import { useCustomersList } from '@features/customers'
+import { useProducts } from '@/hooks/useProducts'
+import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
+import {
+    useSale,
+    useSaleItems,
+    useSalePayments,
+    useInvoicesBySale,
+} from '../hooks/useSales'
 import {
     SALE_STATUS_LABELS,
     SALE_STATUS_CLASSES,
     PAYMENT_STATUS_LABELS,
     PAYMENT_STATUS_CLASSES,
     PAYMENT_METHOD_LABELS,
-} from '@/services/SaleService'
-import type { Invoice, InvoiceStatus } from '@/services/InvoicingService'
+    INVOICE_STATUS_LABELS,
+    INVOICE_STATUS_CLASSES,
+    type Invoice,
+    type InvoiceStatus,
+} from '../model/types'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
-
-const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
-    created: 'Creada',
-    signed: 'Firmada',
-    sent: 'Enviada',
-    authorized: 'Autorizada',
-    rejected: 'Rechazada',
-}
-
-const INVOICE_STATUS_CLASSES: Record<InvoiceStatus, string> = {
-    created: 'bg-gray-100 text-gray-600',
-    signed: 'bg-blue-100 text-blue-600',
-    sent: 'bg-yellow-100 text-yellow-600',
-    authorized: 'bg-emerald-100 text-emerald-600',
-    rejected: 'bg-red-100 text-red-600',
-}
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 const { TabList, TabNav, TabContent } = Tabs
 
-const SaleDetailView = () => {
+const SaleDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const saleId = parseInt(id || '0')
@@ -57,7 +49,7 @@ const SaleDetailView = () => {
     const { data: productsData } = useProducts()
     const products = productsData?.items ?? []
 
-    const { data: customersData } = useCustomers({ limit: 100 })
+    const { data: customersData } = useCustomersList({ limit: 100 })
     const customers = customersData?.items ?? []
 
     const getProductName = (productId: number) => {
@@ -68,23 +60,6 @@ const SaleDetailView = () => {
     const getCustomerName = (customerId: number) => {
         const c = customers.find((c) => c.id === customerId)
         return c ? c.name : `#${customerId}`
-    }
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('es-EC', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(value)
-    }
-
-    const formatDate = (date: string | null) => {
-        if (!date) return '-'
-        return new Date(date).toLocaleDateString('es-EC')
-    }
-
-    const formatDateTime = (date: string | null) => {
-        if (!date) return '-'
-        return new Date(date).toLocaleString('es-EC')
     }
 
     if (saleLoading) {
@@ -146,7 +121,7 @@ const SaleDetailView = () => {
                     <div>
                         <p className="text-sm text-gray-500">Fecha de Venta</p>
                         <p className="font-medium">
-                            {formatDate(sale.saleDate)}
+                            {sale.saleDate ? formatDate(sale.saleDate) : '-'}
                         </p>
                     </div>
                     <div>
@@ -158,7 +133,7 @@ const SaleDetailView = () => {
                             Fecha de Creación
                         </p>
                         <p className="font-medium">
-                            {formatDateTime(sale.createdAt)}
+                            {formatDatetime(sale.createdAt)}
                         </p>
                     </div>
                     <div>
@@ -166,7 +141,9 @@ const SaleDetailView = () => {
                             Última Actualización
                         </p>
                         <p className="font-medium">
-                            {formatDateTime(sale.updatedAt)}
+                            {sale.updatedAt
+                                ? formatDatetime(sale.updatedAt)
+                                : '-'}
                         </p>
                     </div>
                 </div>
@@ -318,9 +295,11 @@ const SaleDetailView = () => {
                                                         )}
                                                     </Td>
                                                     <Td>
-                                                        {formatDate(
-                                                            payment.paymentDate
-                                                        )}
+                                                        {payment.paymentDate
+                                                            ? formatDate(
+                                                                  payment.paymentDate
+                                                              )
+                                                            : '-'}
                                                     </Td>
                                                     <Td>
                                                         {payment.reference ??
@@ -415,7 +394,7 @@ const SaleDetailView = () => {
                                                     </Td>
                                                     <Td>
                                                         {lastEntry
-                                                            ? formatDateTime(
+                                                            ? formatDatetime(
                                                                   lastEntry.statusDate
                                                               )
                                                             : '-'}
@@ -430,6 +409,7 @@ const SaleDetailView = () => {
                     </div>
                 </Tabs>
             </Card>
+
             {/* Invoice Detail Dialog */}
             <Dialog
                 isOpen={selectedInvoice !== null}
@@ -505,7 +485,7 @@ const SaleDetailView = () => {
                                             />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs text-gray-500">
-                                                    {formatDateTime(
+                                                    {formatDatetime(
                                                         entry.statusDate
                                                     )}
                                                 </p>
@@ -527,4 +507,4 @@ const SaleDetailView = () => {
     )
 }
 
-export default SaleDetailView
+export default SaleDetailPage

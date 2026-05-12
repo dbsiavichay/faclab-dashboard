@@ -5,8 +5,9 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Select from '@/components/ui/Select'
-import { useSales } from '@/hooks/useSales'
-import { useCustomers } from '@/hooks/useCustomers'
+import { useCustomersList } from '@features/customers'
+import { formatCurrency } from '@shared/lib/format'
+import { useSalesList } from '../hooks/useSales'
 import {
     SALE_STATUS_LABELS,
     SALE_STATUS_CLASSES,
@@ -15,7 +16,7 @@ import {
     type Sale,
     type SaleQueryParams,
     type SaleStatus,
-} from '@/services/SaleService'
+} from '../model/types'
 import { HiOutlineEye } from 'react-icons/hi'
 
 const statusOptions = [
@@ -26,7 +27,7 @@ const statusOptions = [
     })),
 ]
 
-const SalesView = () => {
+const SalesListPage = () => {
     const navigate = useNavigate()
 
     const [statusFilter, setStatusFilter] = useState<string>('')
@@ -35,7 +36,7 @@ const SalesView = () => {
     const [pageSize, setPageSize] = useState(10)
     const offset = (pageIndex - 1) * pageSize
 
-    const { data: customersData } = useCustomers({ limit: 100 })
+    const { data: customersData } = useCustomersList({ limit: 100 })
     const customers = customersData?.items ?? []
 
     const customerOptions = [
@@ -53,7 +54,7 @@ const SalesView = () => {
         offset,
     }
 
-    const { data, isLoading } = useSales(queryParams)
+    const { data, isLoading } = useSalesList(queryParams)
     const sales = data?.items ?? []
     const total = data?.pagination?.total ?? 0
 
@@ -66,13 +67,6 @@ const SalesView = () => {
     const getCustomerName = (customerId: number) => {
         const customer = customers.find((c) => c.id === customerId)
         return customer ? customer.name : `#${customerId}`
-    }
-
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('es-EC', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(value)
     }
 
     const columns: ColumnDef<Sale>[] = [
@@ -232,4 +226,4 @@ const SalesView = () => {
     )
 }
 
-export default SalesView
+export default SalesListPage

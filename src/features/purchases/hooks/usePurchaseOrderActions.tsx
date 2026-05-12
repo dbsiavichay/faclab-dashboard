@@ -6,7 +6,7 @@ import {
     useSendPurchaseOrder,
     useCancelPurchaseOrder,
     useDeletePurchaseOrderItem,
-} from '@/hooks/usePurchaseOrders'
+} from './usePurchaseOrders'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { getErrorMessage } from '@/utils/getErrorMessage'
@@ -14,7 +14,7 @@ import type {
     PurchaseOrder,
     PurchaseOrderItem,
     PurchaseOrderUpdateInput,
-} from '@/services/PurchaseOrderService'
+} from '../model/types'
 
 type EditData = PurchaseOrderUpdateInput & { supplierId: number }
 

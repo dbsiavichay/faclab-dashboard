@@ -10,8 +10,8 @@ import { HiOutlinePaperAirplane, HiOutlineArchiveBox } from 'react-icons/hi2'
 import {
     PURCHASE_ORDER_STATUS_LABELS,
     PURCHASE_ORDER_STATUS_CLASSES,
-} from '@/services/PurchaseOrderService'
-import type { PurchaseOrder } from '@/services/PurchaseOrderService'
+} from '../model/types'
+import type { PurchaseOrder } from '../model/types'
 
 type Props = {
     order: PurchaseOrder

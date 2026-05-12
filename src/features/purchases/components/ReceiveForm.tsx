@@ -6,14 +6,17 @@ import Table from '@/components/ui/Table'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useReceivePurchaseOrder } from '@/hooks/usePurchaseOrders'
-import { useLocations } from '@/hooks/useLocations'
+import { useReceivePurchaseOrder } from '../hooks/usePurchaseOrders'
+import { useLocationsList } from '@features/locations'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { dateToIsoStartOfDay } from '@/utils/dateToIsoStartOfDay'
 import { useForm, useFieldArray, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { receiveFormSchema, type ReceiveFormValues } from '@/schemas'
-import type { PurchaseOrderItem } from '@/services/PurchaseOrderService'
+import {
+    receiveFormSchema,
+    type ReceiveFormValues,
+} from '../model/receivePurchaseOrder.schema'
+import type { PurchaseOrderItem } from '../model/types'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -33,7 +36,7 @@ const ReceiveForm = ({
     getProductName,
 }: ReceiveFormProps) => {
     const receiveMutation = useReceivePurchaseOrder()
-    const { data: locationsData } = useLocations({ limit: 100 })
+    const { data: locationsData } = useLocationsList({ limit: 100 })
     const locations = locationsData?.items ?? []
 
     const locationOptions = [

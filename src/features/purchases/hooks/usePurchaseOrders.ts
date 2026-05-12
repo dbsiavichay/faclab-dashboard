@@ -4,27 +4,15 @@ import {
     useQueryClient,
     keepPreviousData,
 } from '@tanstack/react-query'
-import {
-    getPurchaseOrders,
-    getPurchaseOrder,
-    createPurchaseOrder,
-    updatePurchaseOrder,
-    deletePurchaseOrder,
-    sendPurchaseOrder,
-    cancelPurchaseOrder,
-    receivePurchaseOrder,
-    getPurchaseOrderItems,
-    addPurchaseOrderItem,
-    updatePurchaseOrderItem,
-    deletePurchaseOrderItem,
-    getPurchaseOrderReceipts,
-    type PurchaseOrderInput,
-    type PurchaseOrderUpdateInput,
-    type PurchaseOrderQueryParams,
-    type PurchaseOrderItemInput,
-    type PurchaseOrderItemUpdateInput,
-    type ReceiveInput,
-} from '@/services/PurchaseOrderService'
+import * as api from '../api/client'
+import type {
+    PurchaseOrderInput,
+    PurchaseOrderUpdateInput,
+    PurchaseOrderQueryParams,
+    PurchaseOrderItemInput,
+    PurchaseOrderItemUpdateInput,
+    ReceiveInput,
+} from '../model/types'
 
 // --- Purchase Orders ---
 
@@ -32,7 +20,7 @@ export function usePurchaseOrders(params?: PurchaseOrderQueryParams) {
     return useQuery({
         queryKey: ['purchaseOrders', params],
         queryFn: async () => {
-            const body = await getPurchaseOrders(params)
+            const body = await api.getPurchaseOrders(params)
             return { items: body.data, pagination: body.meta.pagination }
         },
         placeholderData: keepPreviousData,
@@ -43,7 +31,7 @@ export function usePurchaseOrder(id: number) {
     return useQuery({
         queryKey: ['purchaseOrders', id],
         queryFn: async () => {
-            const body = await getPurchaseOrder(id)
+            const body = await api.getPurchaseOrder(id)
             return body.data
         },
         enabled: id > 0,
@@ -55,7 +43,7 @@ export function useCreatePurchaseOrder() {
 
     return useMutation({
         mutationFn: async (data: PurchaseOrderInput) => {
-            const body = await createPurchaseOrder(data)
+            const body = await api.createPurchaseOrder(data)
             return body.data
         },
         onSuccess: () => {
@@ -75,7 +63,7 @@ export function useUpdatePurchaseOrder() {
             id: number
             data: PurchaseOrderUpdateInput
         }) => {
-            const body = await updatePurchaseOrder(id, data)
+            const body = await api.updatePurchaseOrder(id, data)
             return body.data
         },
         onSuccess: (_, variables) => {
@@ -91,7 +79,7 @@ export function useDeletePurchaseOrder() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (id: number) => deletePurchaseOrder(id),
+        mutationFn: (id: number) => api.deletePurchaseOrder(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] })
         },
@@ -103,13 +91,11 @@ export function useSendPurchaseOrder() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const body = await sendPurchaseOrder(id)
+            const body = await api.sendPurchaseOrder(id)
             return body.data
         },
         onSuccess: (_, id) => {
-            queryClient.invalidateQueries({
-                queryKey: ['purchaseOrders', id],
-            })
+            queryClient.invalidateQueries({ queryKey: ['purchaseOrders', id] })
             queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] })
         },
     })
@@ -120,13 +106,11 @@ export function useCancelPurchaseOrder() {
 
     return useMutation({
         mutationFn: async (id: number) => {
-            const body = await cancelPurchaseOrder(id)
+            const body = await api.cancelPurchaseOrder(id)
             return body.data
         },
         onSuccess: (_, id) => {
-            queryClient.invalidateQueries({
-                queryKey: ['purchaseOrders', id],
-            })
+            queryClient.invalidateQueries({ queryKey: ['purchaseOrders', id] })
             queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] })
         },
     })
@@ -143,7 +127,7 @@ export function useReceivePurchaseOrder() {
             id: number
             data: ReceiveInput
         }) => {
-            const body = await receivePurchaseOrder(id, data)
+            const body = await api.receivePurchaseOrder(id, data)
             return body.data
         },
         onSuccess: (_, variables) => {
@@ -167,7 +151,7 @@ export function usePurchaseOrderItems(orderId: number) {
     return useQuery({
         queryKey: ['purchaseOrderItems', orderId],
         queryFn: async () => {
-            const body = await getPurchaseOrderItems(orderId)
+            const body = await api.getPurchaseOrderItems(orderId)
             return body.data
         },
         enabled: orderId > 0,
@@ -179,7 +163,7 @@ export function useAddPurchaseOrderItem() {
 
     return useMutation({
         mutationFn: async (data: PurchaseOrderItemInput) => {
-            const body = await addPurchaseOrderItem(data)
+            const body = await api.addPurchaseOrderItem(data)
             return body.data
         },
         onSuccess: (_, variables) => {
@@ -205,7 +189,7 @@ export function useUpdatePurchaseOrderItem() {
             orderId: number
             data: PurchaseOrderItemUpdateInput
         }) => {
-            const body = await updatePurchaseOrderItem(itemId, data)
+            const body = await api.updatePurchaseOrderItem(itemId, data)
             return body.data
         },
         onSuccess: (_, variables) => {
@@ -224,7 +208,7 @@ export function useDeletePurchaseOrderItem() {
 
     return useMutation({
         mutationFn: async ({ itemId }: { itemId: number; orderId: number }) => {
-            await deletePurchaseOrderItem(itemId)
+            await api.deletePurchaseOrderItem(itemId)
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({
@@ -243,7 +227,7 @@ export function usePurchaseOrderReceipts(orderId: number) {
     return useQuery({
         queryKey: ['purchaseOrderReceipts', orderId],
         queryFn: async () => {
-            const body = await getPurchaseOrderReceipts(orderId)
+            const body = await api.getPurchaseOrderReceipts(orderId)
             return body.data
         },
         enabled: orderId > 0,

@@ -6,13 +6,16 @@ import { FormItem, FormContainer } from '@/components/ui/Form'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
-import { useCreatePurchaseOrder } from '@/hooks/usePurchaseOrders'
-import { useSuppliers } from '@/hooks/useSuppliers'
+import { useCreatePurchaseOrder } from '../hooks/usePurchaseOrders'
+import { useSuppliersList } from '@features/suppliers'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import { dateToIsoStartOfDay } from '@/utils/dateToIsoStartOfDay'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { purchaseOrderSchema, type PurchaseOrderFormValues } from '@/schemas'
+import {
+    purchaseOrderSchema,
+    type PurchaseOrderFormValues,
+} from '../model/purchaseOrder.schema'
 
 interface PurchaseOrderFormProps {
     open: boolean
@@ -26,7 +29,7 @@ const PurchaseOrderForm = ({
     onCreated,
 }: PurchaseOrderFormProps) => {
     const createOrder = useCreatePurchaseOrder()
-    const { data: suppliersData } = useSuppliers({ limit: 100 })
+    const { data: suppliersData } = useSuppliersList({ limit: 100 })
     const suppliers = suppliersData?.items ?? []
 
     const supplierOptions = suppliers

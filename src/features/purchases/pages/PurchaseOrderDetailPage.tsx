@@ -3,23 +3,23 @@ import {
     usePurchaseOrder,
     usePurchaseOrderItems,
     usePurchaseOrderReceipts,
-} from '@/hooks/usePurchaseOrders'
+} from '../hooks/usePurchaseOrders'
 import { useProducts } from '@/hooks/useProducts'
-import { useSuppliers } from '@/hooks/useSuppliers'
+import { useSuppliersList } from '@features/suppliers'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
-import { usePurchaseOrderActions } from './usePurchaseOrderActions'
-import { PurchaseOrderHeader } from './PurchaseOrderHeader'
-import { PurchaseOrderInfo } from './PurchaseOrderInfo'
-import { PurchaseOrderItems } from './PurchaseOrderItems'
-import { PurchaseOrderReceipts } from './PurchaseOrderReceipts'
-import { EditOrderDialog } from './EditOrderDialog'
-import { SendOrderDialog } from './SendOrderDialog'
-import PurchaseOrderItemForm from './PurchaseOrderItemForm'
-import ReceiveForm from './ReceiveForm'
+import { usePurchaseOrderActions } from '../hooks/usePurchaseOrderActions'
+import { PurchaseOrderHeader } from '../components/PurchaseOrderHeader'
+import { PurchaseOrderInfo } from '../components/PurchaseOrderInfo'
+import { PurchaseOrderItems } from '../components/PurchaseOrderItems'
+import { PurchaseOrderReceipts } from '../components/PurchaseOrderReceipts'
+import { EditOrderDialog } from '../components/EditOrderDialog'
+import { SendOrderDialog } from '../components/SendOrderDialog'
+import PurchaseOrderItemForm from '../components/PurchaseOrderItemForm'
+import ReceiveForm from '../components/ReceiveForm'
 
-const PurchaseOrderDetailView = () => {
+const PurchaseOrderDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const orderId = parseInt(id || '0')
@@ -32,7 +32,7 @@ const PurchaseOrderDetailView = () => {
     const { data: productsData } = useProducts()
     const products = productsData?.items ?? []
 
-    const { data: suppliersData } = useSuppliers({ limit: 100 })
+    const { data: suppliersData } = useSuppliersList({ limit: 100 })
     const suppliers = suppliersData?.items ?? []
 
     const actions = usePurchaseOrderActions(orderId, order)
@@ -243,4 +243,4 @@ const PurchaseOrderDetailView = () => {
     )
 }
 
-export default PurchaseOrderDetailView
+export default PurchaseOrderDetailPage

@@ -1,10 +1,7 @@
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { formatCurrency } from '@shared/lib/format'
-import type {
-    PurchaseOrder,
-    PurchaseOrderItem,
-} from '@/services/PurchaseOrderService'
+import type { PurchaseOrder, PurchaseOrderItem } from '../model/types'
 
 type Props = {
     open: boolean

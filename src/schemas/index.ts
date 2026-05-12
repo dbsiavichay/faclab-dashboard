@@ -10,13 +10,13 @@ export {
 export {
     purchaseOrderSchema,
     type PurchaseOrderFormValues,
-} from './purchaseOrder.schema'
+} from '@features/purchases'
 export {
     receiveItemSchema,
     receiveFormSchema,
     type ReceiveItemFormValues,
     type ReceiveFormValues,
-} from './receivePurchaseOrder.schema'
+} from '@features/purchases'
 export { categorySchema, type CategoryFormValues } from './category.schema'
 export { productSchema, type ProductFormValues } from './product.schema'
 export { supplierSchema, type SupplierFormValues } from './supplier.schema'
@@ -48,7 +48,7 @@ export {
     purchaseOrderItemUpdateSchema,
     type PurchaseOrderItemCreateFormValues,
     type PurchaseOrderItemUpdateFormValues,
-} from './purchaseOrderItem.schema'
+} from '@features/purchases'
 export {
     transferItemCreateSchema,
     transferItemUpdateSchema,

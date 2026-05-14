@@ -13,6 +13,10 @@ import { productsRoutes } from '@features/products'
 import { stockRoutes } from '@features/stock'
 import { lotsRoutes } from '@features/lots'
 import { serialNumbersRoutes } from '@features/serialNumbers'
+import { movementsRoutes } from '@features/movements'
+import { alertsRoutes } from '@features/alerts'
+import { adjustmentsRoutes } from '@features/adjustments'
+import { transfersRoutes } from '@features/transfers'
 
 export const publicRoutes: Routes = [...authRoute]
 
@@ -26,50 +30,18 @@ export const protectedRoutes: Routes = [
     ...productsRoutes,
     ...unitsOfMeasureRoutes,
     ...stockRoutes,
-    {
-        key: 'inventory.movements',
-        path: '/movements',
-        component: lazy(() => import('@/views/inventory/MovementsView')),
-        authority: ['movement:write'],
-    },
+    ...movementsRoutes,
     ...warehousesRoutes,
     ...locationsRoutes,
     ...customersRoutes,
     ...lotsRoutes,
     ...serialNumbersRoutes,
-    {
-        key: 'inventory.adjustments',
-        path: '/adjustments',
-        component: lazy(() => import('@/views/inventory/AdjustmentsView')),
-        authority: ['adjustment:write'],
-    },
-    {
-        key: 'inventory.adjustmentDetail',
-        path: '/adjustments/:id',
-        component: lazy(() => import('@/views/inventory/AdjustmentDetailView')),
-        authority: ['adjustment:write'],
-    },
-    {
-        key: 'inventory.transfers',
-        path: '/transfers',
-        component: lazy(() => import('@/views/inventory/TransfersView')),
-        authority: ['transfer:write'],
-    },
-    {
-        key: 'inventory.transferDetail',
-        path: '/transfers/:id',
-        component: lazy(() => import('@/views/inventory/TransferDetailView')),
-        authority: ['transfer:write'],
-    },
+    ...adjustmentsRoutes,
+    ...transfersRoutes,
     ...purchasesRoutes,
     ...salesRoutes,
     ...reportsRoutes,
-    {
-        key: 'inventory.alerts',
-        path: '/alerts',
-        component: lazy(() => import('@/views/inventory/AlertsView')),
-        authority: ['alert:read'],
-    },
+    ...alertsRoutes,
     ...posRoutes,
     {
         key: 'settings.users',

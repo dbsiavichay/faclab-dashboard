@@ -13,7 +13,7 @@ import {
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { useProducts } from '@/hooks/useProducts'
+import { useProductsList } from '@features/products'
 import {
     supplierProductSchema,
     type SupplierProductFormValues,
@@ -35,7 +35,7 @@ const SupplierProductForm = ({
     supplierProduct,
 }: SupplierProductFormProps) => {
     const { create, update } = useSupplierProductMutations(supplierId)
-    const { data: productsData } = useProducts()
+    const { data: productsData } = useProductsList()
     const products = productsData?.items ?? []
     const isEdit = !!supplierProduct
 

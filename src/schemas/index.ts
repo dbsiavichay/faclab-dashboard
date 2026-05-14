@@ -54,20 +54,20 @@ export {
     transferItemUpdateSchema,
     type TransferItemCreateFormValues,
     type TransferItemUpdateFormValues,
-} from './transferItem.schema'
+} from '@features/transfers'
 export {
     adjustmentItemCreateSchema,
     adjustmentItemUpdateSchema,
     type AdjustmentItemCreateFormValues,
     type AdjustmentItemUpdateFormValues,
-} from './adjustmentItem.schema'
-export { movementSchema, type MovementFormValues } from './movement.schema'
-export { transferSchema, type TransferFormValues } from './transfer.schema'
+} from '@features/adjustments'
+export { movementSchema, type MovementFormValues } from '@features/movements'
+export { transferSchema, type TransferFormValues } from '@features/transfers'
 export {
     adjustmentReasons,
     adjustmentSchema,
     type AdjustmentFormValues,
-} from './adjustment.schema'
+} from '@features/adjustments'
 export {
     shiftOpenSchema,
     type ShiftOpenFormValues,

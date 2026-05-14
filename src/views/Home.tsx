@@ -8,7 +8,7 @@ import {
     useOutOfStock,
     useReorderPoint,
     useExpiringLots,
-} from '@/hooks/useAlerts'
+} from '@features/alerts'
 
 const { THead, TBody, Th, Tr, Td } = Table
 

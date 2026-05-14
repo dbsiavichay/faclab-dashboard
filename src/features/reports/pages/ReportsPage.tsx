@@ -6,7 +6,7 @@ import Tabs from '@/components/ui/Tabs'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
 import { useWarehousesList } from '@features/warehouses'
-import { useProducts } from '@/hooks/useProducts'
+import { useProductsList } from '@features/products'
 import {
     useValuation,
     useRotation,
@@ -70,7 +70,7 @@ const ReportsPage = () => {
         })),
     ]
 
-    const { data: productsData } = useProducts({ limit: 200 })
+    const { data: productsData } = useProductsList({ limit: 200 })
     const products = productsData?.items ?? []
     const productOptions = [
         { value: '', label: 'Todos los productos' },

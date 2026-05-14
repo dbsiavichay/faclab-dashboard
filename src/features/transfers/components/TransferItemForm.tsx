@@ -9,35 +9,30 @@ import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    useAddPurchaseOrderItem,
-    useUpdatePurchaseOrderItem,
-} from '../hooks/usePurchaseOrders'
+import { useTransferItemMutations } from '../hooks/useTransfers'
 import { useProductsList } from '@features/products'
+import { useLotsList } from '@features/lots'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { formatCurrency } from '@shared/lib/format'
 import {
-    purchaseOrderItemCreateSchema,
-    purchaseOrderItemUpdateSchema,
-    type PurchaseOrderItemCreateFormValues,
-    type PurchaseOrderItemUpdateFormValues,
-} from '../model/purchaseOrderItem.schema'
-import type { PurchaseOrderItem } from '../model/types'
-
-// ─── Create ───────────────────────────────────────────────────────────────────
+    transferItemCreateSchema,
+    transferItemUpdateSchema,
+    type TransferItemCreateFormValues,
+    type TransferItemUpdateFormValues,
+} from '../model/transferItem.schema'
+import type { TransferItem } from '../model/types'
 
 interface CreateFormProps {
     open: boolean
     onClose: () => void
-    orderId: number
+    transferId: number
 }
 
-const PurchaseOrderItemCreateForm = ({
+const TransferItemCreateForm = ({
     open,
     onClose,
-    orderId,
+    transferId,
 }: CreateFormProps) => {
-    const addItem = useAddPurchaseOrderItem()
+    const { add } = useTransferItemMutations(transferId)
     const { data: productsData } = useProductsList()
     const products = productsData?.items ?? []
 
@@ -46,33 +41,42 @@ const PurchaseOrderItemCreateForm = ({
         handleSubmit,
         control,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
-    } = useForm<PurchaseOrderItemCreateFormValues>({
-        resolver: zodResolver(purchaseOrderItemCreateSchema),
+    } = useForm<TransferItemCreateFormValues>({
+        resolver: zodResolver(transferItemCreateSchema),
         defaultValues: {
             productId: undefined,
-            quantityOrdered: 1,
-            unitCost: 0,
+            quantity: 1,
+            lotId: null,
+            notes: '',
         },
     })
 
     const numberRegister = makeNumberRegister(register)
+    const selectedProductId = useWatch({ control, name: 'productId' })
 
-    const [quantityOrdered, unitCost] = useWatch({
-        control,
-        name: ['quantityOrdered', 'unitCost'],
-    })
-    const subtotal = (quantityOrdered ?? 0) * (unitCost ?? 0)
+    const { data: lotsData } = useLotsList(
+        selectedProductId
+            ? { productId: selectedProductId, limit: 100 }
+            : undefined
+    )
+    const lots = lotsData?.items ?? []
 
     useEffect(() => {
         if (open) {
             reset({
                 productId: undefined,
-                quantityOrdered: 1,
-                unitCost: 0,
+                quantity: 1,
+                lotId: null,
+                notes: '',
             })
         }
-    }, [open, orderId, reset])
+    }, [open, transferId, reset])
+
+    useEffect(() => {
+        setValue('lotId', null)
+    }, [selectedProductId, setValue])
 
     const handleClose = () => {
         if (!isSubmitting) onClose()
@@ -83,16 +87,21 @@ const PurchaseOrderItemCreateForm = ({
         label: `${p.name} (${p.sku})`,
     }))
 
-    const onSubmit = async (values: PurchaseOrderItemCreateFormValues) => {
+    const lotOptions: { value: number | null; label: string }[] = [
+        { value: null, label: 'Sin lote' },
+        ...lots.map((l) => ({ value: l.id, label: l.lotNumber })),
+    ]
+
+    const onSubmit = async (values: TransferItemCreateFormValues) => {
         try {
-            await addItem.mutateAsync({
-                purchaseOrderId: orderId,
+            await add.mutateAsync({
                 productId: values.productId,
-                quantityOrdered: values.quantityOrdered,
-                unitCost: values.unitCost,
+                quantity: values.quantity,
+                lotId: values.lotId,
+                notes: values.notes || undefined,
             })
             toast.push(<Notification title="Item agregado" type="success" />, {
-                placement: 'top-center',
+                placement: 'top-end',
             })
             onClose()
         } catch (error: unknown) {
@@ -100,7 +109,7 @@ const PurchaseOrderItemCreateForm = ({
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al agregar el item')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -134,16 +143,16 @@ const PurchaseOrderItemCreateForm = ({
                         <FormItem
                             asterisk
                             label="Cantidad"
-                            invalid={!!errors.quantityOrdered}
-                            errorMessage={errors.quantityOrdered?.message}
+                            invalid={!!errors.quantity}
+                            errorMessage={errors.quantity?.message}
                         >
                             <Input
                                 type="number"
                                 min={1}
                                 placeholder="1"
                                 disabled={isSubmitting}
-                                invalid={!!errors.quantityOrdered}
-                                {...numberRegister('quantityOrdered', {
+                                invalid={!!errors.quantity}
+                                {...numberRegister('quantity', {
                                     integer: true,
                                     emptyValue: 1,
                                 })}
@@ -151,29 +160,32 @@ const PurchaseOrderItemCreateForm = ({
                         </FormItem>
 
                         <FormItem
-                            asterisk
-                            label="Costo Unitario"
-                            invalid={!!errors.unitCost}
-                            errorMessage={errors.unitCost?.message}
+                            label="Lote (opcional)"
+                            invalid={!!errors.lotId}
+                            errorMessage={errors.lotId?.message}
                         >
-                            <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                disabled={isSubmitting}
-                                invalid={!!errors.unitCost}
-                                {...numberRegister('unitCost', {
-                                    emptyValue: 0,
-                                })}
+                            <ControlledSelect
+                                name="lotId"
+                                control={control}
+                                options={lotOptions}
+                                placeholder="Seleccionar lote"
+                                isDisabled={isSubmitting || !selectedProductId}
                             />
                         </FormItem>
 
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p className="text-sm text-gray-500">Subtotal</p>
-                            <p className="text-lg font-semibold">
-                                {formatCurrency(subtotal)}
-                            </p>
-                        </div>
+                        <FormItem
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
+                            <Input
+                                textArea
+                                placeholder="Observaciones del item"
+                                disabled={isSubmitting}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
+                            />
+                        </FormItem>
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">
@@ -199,50 +211,41 @@ const PurchaseOrderItemCreateForm = ({
     )
 }
 
-// ─── Update ───────────────────────────────────────────────────────────────────
-
 interface UpdateFormProps {
     open: boolean
     onClose: () => void
-    orderId: number
-    item: PurchaseOrderItem
+    transferId: number
+    item: TransferItem
 }
 
-const PurchaseOrderItemUpdateForm = ({
+const TransferItemUpdateForm = ({
     open,
     onClose,
-    orderId,
+    transferId,
     item,
 }: UpdateFormProps) => {
-    const updateItem = useUpdatePurchaseOrderItem()
+    const { update } = useTransferItemMutations(transferId)
 
     const {
         register,
         handleSubmit,
-        control,
         reset,
         formState: { errors, isSubmitting },
-    } = useForm<PurchaseOrderItemUpdateFormValues>({
-        resolver: zodResolver(purchaseOrderItemUpdateSchema),
+    } = useForm<TransferItemUpdateFormValues>({
+        resolver: zodResolver(transferItemUpdateSchema),
         defaultValues: {
-            quantityOrdered: item.quantityOrdered,
-            unitCost: item.unitCost,
+            quantity: item.quantity,
+            notes: item.notes ?? '',
         },
     })
 
     const numberRegister = makeNumberRegister(register)
 
-    const [quantityOrdered, unitCost] = useWatch({
-        control,
-        name: ['quantityOrdered', 'unitCost'],
-    })
-    const subtotal = (quantityOrdered ?? 0) * (unitCost ?? 0)
-
     useEffect(() => {
         if (open) {
             reset({
-                quantityOrdered: item.quantityOrdered,
-                unitCost: item.unitCost,
+                quantity: item.quantity,
+                notes: item.notes ?? '',
             })
         }
     }, [open, item, reset])
@@ -251,16 +254,18 @@ const PurchaseOrderItemUpdateForm = ({
         if (!isSubmitting) onClose()
     }
 
-    const onSubmit = async (values: PurchaseOrderItemUpdateFormValues) => {
+    const onSubmit = async (values: TransferItemUpdateFormValues) => {
         try {
-            await updateItem.mutateAsync({
+            await update.mutateAsync({
                 itemId: item.id,
-                orderId,
-                data: values,
+                data: {
+                    quantity: values.quantity,
+                    notes: values.notes || undefined,
+                },
             })
             toast.push(
                 <Notification title="Item actualizado" type="success" />,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
             onClose()
         } catch (error: unknown) {
@@ -268,7 +273,7 @@ const PurchaseOrderItemUpdateForm = ({
                 <Notification title="Error" type="danger">
                     {getErrorMessage(error, 'Error al actualizar el item')}
                 </Notification>,
-                { placement: 'top-center' }
+                { placement: 'top-end' }
             )
         }
     }
@@ -287,16 +292,16 @@ const PurchaseOrderItemUpdateForm = ({
                         <FormItem
                             asterisk
                             label="Cantidad"
-                            invalid={!!errors.quantityOrdered}
-                            errorMessage={errors.quantityOrdered?.message}
+                            invalid={!!errors.quantity}
+                            errorMessage={errors.quantity?.message}
                         >
                             <Input
                                 type="number"
                                 min={1}
                                 placeholder="1"
                                 disabled={isSubmitting}
-                                invalid={!!errors.quantityOrdered}
-                                {...numberRegister('quantityOrdered', {
+                                invalid={!!errors.quantity}
+                                {...numberRegister('quantity', {
                                     integer: true,
                                     emptyValue: 1,
                                 })}
@@ -304,29 +309,18 @@ const PurchaseOrderItemUpdateForm = ({
                         </FormItem>
 
                         <FormItem
-                            asterisk
-                            label="Costo Unitario"
-                            invalid={!!errors.unitCost}
-                            errorMessage={errors.unitCost?.message}
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
                         >
                             <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
+                                textArea
+                                placeholder="Observaciones del item"
                                 disabled={isSubmitting}
-                                invalid={!!errors.unitCost}
-                                {...numberRegister('unitCost', {
-                                    emptyValue: 0,
-                                })}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
                             />
                         </FormItem>
-
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p className="text-sm text-gray-500">Subtotal</p>
-                            <p className="text-lg font-semibold">
-                                {formatCurrency(subtotal)}
-                            </p>
-                        </div>
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">
@@ -352,34 +346,32 @@ const PurchaseOrderItemUpdateForm = ({
     )
 }
 
-// ─── Wrapper ──────────────────────────────────────────────────────────────────
-
-interface PurchaseOrderItemFormProps {
+interface TransferItemFormProps {
     open: boolean
     onClose: () => void
-    orderId: number
-    item: PurchaseOrderItem | null
+    transferId: number
+    item: TransferItem | null
 }
 
-const PurchaseOrderItemForm = ({
+const TransferItemForm = ({
     open,
     onClose,
-    orderId,
+    transferId,
     item,
-}: PurchaseOrderItemFormProps) =>
+}: TransferItemFormProps) =>
     item ? (
-        <PurchaseOrderItemUpdateForm
+        <TransferItemUpdateForm
             open={open}
-            orderId={orderId}
+            transferId={transferId}
             item={item}
             onClose={onClose}
         />
     ) : (
-        <PurchaseOrderItemCreateForm
+        <TransferItemCreateForm
             open={open}
-            orderId={orderId}
+            transferId={transferId}
             onClose={onClose}
         />
     )
 
-export default PurchaseOrderItemForm
+export default TransferItemForm

@@ -9,70 +9,85 @@ import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { ControlledSelect } from '@/components/ui/Form/controlled'
 import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    useAddPurchaseOrderItem,
-    useUpdatePurchaseOrderItem,
-} from '../hooks/usePurchaseOrders'
+import { useAdjustmentItemMutations } from '../hooks/useAdjustments'
 import { useProductsList } from '@features/products'
+import { useLocationsList } from '@features/locations'
+import { useLotsList } from '@features/lots'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { formatCurrency } from '@shared/lib/format'
 import {
-    purchaseOrderItemCreateSchema,
-    purchaseOrderItemUpdateSchema,
-    type PurchaseOrderItemCreateFormValues,
-    type PurchaseOrderItemUpdateFormValues,
-} from '../model/purchaseOrderItem.schema'
-import type { PurchaseOrderItem } from '../model/types'
-
-// ─── Create ───────────────────────────────────────────────────────────────────
+    adjustmentItemCreateSchema,
+    adjustmentItemUpdateSchema,
+    type AdjustmentItemCreateFormValues,
+    type AdjustmentItemUpdateFormValues,
+} from '../model/adjustmentItem.schema'
+import type { AdjustmentItem } from '../model/types'
 
 interface CreateFormProps {
     open: boolean
     onClose: () => void
-    orderId: number
+    adjustmentId: number
+    warehouseId: number
 }
 
-const PurchaseOrderItemCreateForm = ({
+const AdjustmentItemCreateForm = ({
     open,
     onClose,
-    orderId,
+    adjustmentId,
+    warehouseId,
 }: CreateFormProps) => {
-    const addItem = useAddPurchaseOrderItem()
+    const { add } = useAdjustmentItemMutations(adjustmentId)
     const { data: productsData } = useProductsList()
     const products = productsData?.items ?? []
+
+    const { data: locationsData } = useLocationsList({
+        warehouseId,
+        limit: 100,
+    })
+    const locations = locationsData?.items ?? []
 
     const {
         register,
         handleSubmit,
         control,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
-    } = useForm<PurchaseOrderItemCreateFormValues>({
-        resolver: zodResolver(purchaseOrderItemCreateSchema),
+    } = useForm<AdjustmentItemCreateFormValues>({
+        resolver: zodResolver(adjustmentItemCreateSchema),
         defaultValues: {
             productId: undefined,
-            quantityOrdered: 1,
-            unitCost: 0,
+            locationId: undefined,
+            actualQuantity: 0,
+            lotId: null,
+            notes: '',
         },
     })
 
     const numberRegister = makeNumberRegister(register)
+    const selectedProductId = useWatch({ control, name: 'productId' })
 
-    const [quantityOrdered, unitCost] = useWatch({
-        control,
-        name: ['quantityOrdered', 'unitCost'],
-    })
-    const subtotal = (quantityOrdered ?? 0) * (unitCost ?? 0)
+    const { data: lotsData } = useLotsList(
+        selectedProductId
+            ? { productId: selectedProductId, limit: 100 }
+            : undefined
+    )
+    const lots = lotsData?.items ?? []
 
     useEffect(() => {
         if (open) {
             reset({
                 productId: undefined,
-                quantityOrdered: 1,
-                unitCost: 0,
+                locationId: undefined,
+                actualQuantity: 0,
+                lotId: null,
+                notes: '',
             })
         }
-    }, [open, orderId, reset])
+    }, [open, adjustmentId, reset])
+
+    useEffect(() => {
+        setValue('lotId', null)
+    }, [selectedProductId, setValue])
 
     const handleClose = () => {
         if (!isSubmitting) onClose()
@@ -83,13 +98,24 @@ const PurchaseOrderItemCreateForm = ({
         label: `${p.name} (${p.sku})`,
     }))
 
-    const onSubmit = async (values: PurchaseOrderItemCreateFormValues) => {
+    const locationOptions = locations.map((l) => ({
+        value: l.id,
+        label: `${l.name} (${l.code})`,
+    }))
+
+    const lotOptions: { value: number | null; label: string }[] = [
+        { value: null, label: 'Sin lote' },
+        ...lots.map((l) => ({ value: l.id, label: l.lotNumber })),
+    ]
+
+    const onSubmit = async (values: AdjustmentItemCreateFormValues) => {
         try {
-            await addItem.mutateAsync({
-                purchaseOrderId: orderId,
+            await add.mutateAsync({
                 productId: values.productId,
-                quantityOrdered: values.quantityOrdered,
-                unitCost: values.unitCost,
+                locationId: values.locationId,
+                actualQuantity: values.actualQuantity,
+                lotId: values.lotId,
+                notes: values.notes || undefined,
             })
             toast.push(<Notification title="Item agregado" type="success" />, {
                 placement: 'top-center',
@@ -133,47 +159,65 @@ const PurchaseOrderItemCreateForm = ({
 
                         <FormItem
                             asterisk
-                            label="Cantidad"
-                            invalid={!!errors.quantityOrdered}
-                            errorMessage={errors.quantityOrdered?.message}
+                            label="Ubicación"
+                            invalid={!!errors.locationId}
+                            errorMessage={errors.locationId?.message}
                         >
-                            <Input
-                                type="number"
-                                min={1}
-                                placeholder="1"
-                                disabled={isSubmitting}
-                                invalid={!!errors.quantityOrdered}
-                                {...numberRegister('quantityOrdered', {
-                                    integer: true,
-                                    emptyValue: 1,
-                                })}
+                            <ControlledSelect
+                                name="locationId"
+                                control={control}
+                                options={locationOptions}
+                                placeholder="Seleccionar ubicación"
+                                isDisabled={isSubmitting}
                             />
                         </FormItem>
 
                         <FormItem
                             asterisk
-                            label="Costo Unitario"
-                            invalid={!!errors.unitCost}
-                            errorMessage={errors.unitCost?.message}
+                            label="Cantidad Actual"
+                            invalid={!!errors.actualQuantity}
+                            errorMessage={errors.actualQuantity?.message}
                         >
                             <Input
                                 type="number"
-                                step="0.01"
-                                placeholder="0.00"
+                                min={0}
+                                placeholder="0"
                                 disabled={isSubmitting}
-                                invalid={!!errors.unitCost}
-                                {...numberRegister('unitCost', {
+                                invalid={!!errors.actualQuantity}
+                                {...numberRegister('actualQuantity', {
+                                    integer: true,
                                     emptyValue: 0,
                                 })}
                             />
                         </FormItem>
 
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p className="text-sm text-gray-500">Subtotal</p>
-                            <p className="text-lg font-semibold">
-                                {formatCurrency(subtotal)}
-                            </p>
-                        </div>
+                        <FormItem
+                            label="Lote (opcional)"
+                            invalid={!!errors.lotId}
+                            errorMessage={errors.lotId?.message}
+                        >
+                            <ControlledSelect
+                                name="lotId"
+                                control={control}
+                                options={lotOptions}
+                                placeholder="Seleccionar lote"
+                                isDisabled={isSubmitting || !selectedProductId}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
+                            <Input
+                                textArea
+                                placeholder="Observaciones del item"
+                                disabled={isSubmitting}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
+                            />
+                        </FormItem>
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">
@@ -199,50 +243,41 @@ const PurchaseOrderItemCreateForm = ({
     )
 }
 
-// ─── Update ───────────────────────────────────────────────────────────────────
-
 interface UpdateFormProps {
     open: boolean
     onClose: () => void
-    orderId: number
-    item: PurchaseOrderItem
+    adjustmentId: number
+    item: AdjustmentItem
 }
 
-const PurchaseOrderItemUpdateForm = ({
+const AdjustmentItemUpdateForm = ({
     open,
     onClose,
-    orderId,
+    adjustmentId,
     item,
 }: UpdateFormProps) => {
-    const updateItem = useUpdatePurchaseOrderItem()
+    const { update } = useAdjustmentItemMutations(adjustmentId)
 
     const {
         register,
         handleSubmit,
-        control,
         reset,
         formState: { errors, isSubmitting },
-    } = useForm<PurchaseOrderItemUpdateFormValues>({
-        resolver: zodResolver(purchaseOrderItemUpdateSchema),
+    } = useForm<AdjustmentItemUpdateFormValues>({
+        resolver: zodResolver(adjustmentItemUpdateSchema),
         defaultValues: {
-            quantityOrdered: item.quantityOrdered,
-            unitCost: item.unitCost,
+            actualQuantity: item.actualQuantity,
+            notes: item.notes ?? '',
         },
     })
 
     const numberRegister = makeNumberRegister(register)
 
-    const [quantityOrdered, unitCost] = useWatch({
-        control,
-        name: ['quantityOrdered', 'unitCost'],
-    })
-    const subtotal = (quantityOrdered ?? 0) * (unitCost ?? 0)
-
     useEffect(() => {
         if (open) {
             reset({
-                quantityOrdered: item.quantityOrdered,
-                unitCost: item.unitCost,
+                actualQuantity: item.actualQuantity,
+                notes: item.notes ?? '',
             })
         }
     }, [open, item, reset])
@@ -251,12 +286,14 @@ const PurchaseOrderItemUpdateForm = ({
         if (!isSubmitting) onClose()
     }
 
-    const onSubmit = async (values: PurchaseOrderItemUpdateFormValues) => {
+    const onSubmit = async (values: AdjustmentItemUpdateFormValues) => {
         try {
-            await updateItem.mutateAsync({
+            await update.mutateAsync({
                 itemId: item.id,
-                orderId,
-                data: values,
+                data: {
+                    actualQuantity: values.actualQuantity,
+                    notes: values.notes || undefined,
+                },
             })
             toast.push(
                 <Notification title="Item actualizado" type="success" />,
@@ -286,47 +323,36 @@ const PurchaseOrderItemUpdateForm = ({
                     <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                         <FormItem
                             asterisk
-                            label="Cantidad"
-                            invalid={!!errors.quantityOrdered}
-                            errorMessage={errors.quantityOrdered?.message}
+                            label="Cantidad Actual"
+                            invalid={!!errors.actualQuantity}
+                            errorMessage={errors.actualQuantity?.message}
                         >
                             <Input
                                 type="number"
-                                min={1}
-                                placeholder="1"
+                                min={0}
+                                placeholder="0"
                                 disabled={isSubmitting}
-                                invalid={!!errors.quantityOrdered}
-                                {...numberRegister('quantityOrdered', {
+                                invalid={!!errors.actualQuantity}
+                                {...numberRegister('actualQuantity', {
                                     integer: true,
-                                    emptyValue: 1,
-                                })}
-                            />
-                        </FormItem>
-
-                        <FormItem
-                            asterisk
-                            label="Costo Unitario"
-                            invalid={!!errors.unitCost}
-                            errorMessage={errors.unitCost?.message}
-                        >
-                            <Input
-                                type="number"
-                                step="0.01"
-                                placeholder="0.00"
-                                disabled={isSubmitting}
-                                invalid={!!errors.unitCost}
-                                {...numberRegister('unitCost', {
                                     emptyValue: 0,
                                 })}
                             />
                         </FormItem>
 
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p className="text-sm text-gray-500">Subtotal</p>
-                            <p className="text-lg font-semibold">
-                                {formatCurrency(subtotal)}
-                            </p>
-                        </div>
+                        <FormItem
+                            label="Notas"
+                            invalid={!!errors.notes}
+                            errorMessage={errors.notes?.message}
+                        >
+                            <Input
+                                textArea
+                                placeholder="Observaciones del item"
+                                disabled={isSubmitting}
+                                invalid={!!errors.notes}
+                                {...register('notes')}
+                            />
+                        </FormItem>
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">
@@ -352,34 +378,35 @@ const PurchaseOrderItemUpdateForm = ({
     )
 }
 
-// ─── Wrapper ──────────────────────────────────────────────────────────────────
-
-interface PurchaseOrderItemFormProps {
+interface AdjustmentItemFormProps {
     open: boolean
     onClose: () => void
-    orderId: number
-    item: PurchaseOrderItem | null
+    adjustmentId: number
+    warehouseId: number
+    item: AdjustmentItem | null
 }
 
-const PurchaseOrderItemForm = ({
+const AdjustmentItemForm = ({
     open,
     onClose,
-    orderId,
+    adjustmentId,
+    warehouseId,
     item,
-}: PurchaseOrderItemFormProps) =>
+}: AdjustmentItemFormProps) =>
     item ? (
-        <PurchaseOrderItemUpdateForm
+        <AdjustmentItemUpdateForm
             open={open}
-            orderId={orderId}
+            adjustmentId={adjustmentId}
             item={item}
             onClose={onClose}
         />
     ) : (
-        <PurchaseOrderItemCreateForm
+        <AdjustmentItemCreateForm
             open={open}
-            orderId={orderId}
+            adjustmentId={adjustmentId}
+            warehouseId={warehouseId}
             onClose={onClose}
         />
     )
 
-export default PurchaseOrderItemForm
+export default AdjustmentItemForm

@@ -1,63 +1,52 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import {
-    usePurchaseOrder,
-    usePurchaseOrderItems,
-    usePurchaseOrderReceipts,
-} from '../hooks/usePurchaseOrders'
+import { useTransfer, useTransferItems } from '../hooks/useTransfers'
 import { useProductsList } from '@features/products'
-import { useSuppliersList } from '@features/suppliers'
+import { useLocationsList } from '@features/locations'
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { HiOutlineArrowLeft } from 'react-icons/hi'
-import { usePurchaseOrderActions } from '../hooks/usePurchaseOrderActions'
-import { PurchaseOrderHeader } from '../components/PurchaseOrderHeader'
-import { PurchaseOrderInfo } from '../components/PurchaseOrderInfo'
-import { PurchaseOrderItems } from '../components/PurchaseOrderItems'
-import { PurchaseOrderReceipts } from '../components/PurchaseOrderReceipts'
-import { EditOrderDialog } from '../components/EditOrderDialog'
-import { SendOrderDialog } from '../components/SendOrderDialog'
-import PurchaseOrderItemForm from '../components/PurchaseOrderItemForm'
-import ReceiveForm from '../components/ReceiveForm'
+import { useTransferActions } from '../components/useTransferActions'
+import { TransferHeader } from '../components/TransferHeader'
+import { TransferInfo } from '../components/TransferInfo'
+import { TransferItems } from '../components/TransferItems'
+import { EditTransferDialog } from '../components/EditTransferDialog'
+import { ConfirmTransferDialog } from '../components/ConfirmTransferDialog'
+import { ReceiveTransferDialog } from '../components/ReceiveTransferDialog'
+import TransferItemForm from '../components/TransferItemForm'
 
-const PurchaseOrderDetailPage = () => {
+const TransferDetailPage = () => {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const orderId = parseInt(id || '0')
+    const transferId = parseInt(id || '0')
 
-    const { data: order, isLoading: orderLoading } = usePurchaseOrder(orderId)
+    const { data: transfer, isLoading: transferLoading } =
+        useTransfer(transferId)
     const { data: items = [], isLoading: itemsLoading } =
-        usePurchaseOrderItems(orderId)
-    const { data: receipts = [] } = usePurchaseOrderReceipts(orderId)
+        useTransferItems(transferId)
 
     const { data: productsData } = useProductsList()
     const products = productsData?.items ?? []
 
-    const { data: suppliersData } = useSuppliersList({ limit: 100 })
-    const suppliers = suppliersData?.items ?? []
+    const { data: locationsData } = useLocationsList({ limit: 100 })
+    const locations = locationsData?.items ?? []
 
-    const actions = usePurchaseOrderActions(orderId, order)
+    const actions = useTransferActions(transferId, transfer)
 
-    const isDraft = order?.status === 'draft'
-    const isSent = order?.status === 'sent'
-    const isPartial = order?.status === 'partial'
-    const canReceive = isSent || isPartial
-    const canCancel = isDraft || isSent || isPartial
+    const isDraft = transfer?.status === 'draft'
+    const isConfirmed = transfer?.status === 'confirmed'
+    const canCancel = isDraft || isConfirmed
 
-    const supplierOptions = suppliers
-        .filter((s) => s.isActive)
-        .map((s) => ({ value: s.id.toString(), label: s.name }))
+    const getLocationName = (locationId: number) => {
+        const l = locations.find((l) => l.id === locationId)
+        return l ? `${l.name} (${l.code})` : `#${locationId}`
+    }
 
     const getProductName = (productId: number) => {
         const p = products.find((p) => p.id === productId)
         return p ? `${p.name} (${p.sku})` : `#${productId}`
     }
 
-    const getSupplierName = (supplierId: number) => {
-        const s = suppliers.find((s) => s.id === supplierId)
-        return s ? s.name : `#${supplierId}`
-    }
-
-    if (orderLoading) {
+    if (transferLoading) {
         return (
             <div className="flex justify-center items-center h-96">
                 <div>Cargando...</div>
@@ -65,16 +54,16 @@ const PurchaseOrderDetailPage = () => {
         )
     }
 
-    if (!order) {
+    if (!transfer) {
         return (
             <div className="flex flex-col items-center justify-center h-96">
-                <h4 className="mb-4">Orden de compra no encontrada</h4>
+                <h4 className="mb-4">Transferencia no encontrada</h4>
                 <Button
                     variant="solid"
                     icon={<HiOutlineArrowLeft />}
-                    onClick={() => navigate('/purchase-orders')}
+                    onClick={() => navigate('/transfers')}
                 >
-                    Volver a Órdenes de Compra
+                    Volver a Transferencias
                 </Button>
             </div>
         )
@@ -82,29 +71,31 @@ const PurchaseOrderDetailPage = () => {
 
     return (
         <div className="flex flex-col gap-4">
-            <PurchaseOrderHeader
-                order={order}
+            <TransferHeader
+                transfer={transfer}
                 isDraft={isDraft}
-                canReceive={canReceive}
+                isConfirmed={isConfirmed}
                 canCancel={canCancel}
-                onBack={() => navigate('/purchase-orders')}
-                onEdit={actions.handleEditOrder}
-                onSend={() => actions.setSendDialogOpen(true)}
-                onDelete={() => actions.setDeleteDialogOpen(true)}
-                onReceive={() => actions.setReceiveFormOpen(true)}
+                onBack={() => navigate('/transfers')}
+                onEdit={actions.handleEditTransfer}
+                onConfirm={() => actions.setConfirmDialogOpen(true)}
+                onReceive={() => actions.setReceiveDialogOpen(true)}
                 onCancel={() => actions.setCancelDialogOpen(true)}
+                onDelete={() => actions.setDeleteDialogOpen(true)}
             />
 
-            <PurchaseOrderInfo
-                order={order}
-                supplierName={getSupplierName(order.supplierId)}
+            <TransferInfo
+                transfer={transfer}
+                sourceName={getLocationName(transfer.sourceLocationId)}
+                destinationName={getLocationName(
+                    transfer.destinationLocationId
+                )}
             />
 
-            <PurchaseOrderItems
+            <TransferItems
                 items={items}
                 itemsLoading={itemsLoading}
                 isDraft={isDraft}
-                order={order}
                 getProductName={getProductName}
                 onAdd={actions.handleAddItem}
                 onEdit={actions.handleEditItem}
@@ -113,41 +104,38 @@ const PurchaseOrderDetailPage = () => {
                 }
             />
 
-            <PurchaseOrderReceipts order={order} receipts={receipts} />
-
-            <PurchaseOrderItemForm
-                orderId={orderId}
+            <TransferItemForm
+                transferId={transferId}
                 item={actions.selectedItem}
                 open={actions.itemFormOpen}
                 onClose={actions.handleCloseItemForm}
             />
 
-            <ReceiveForm
-                orderId={orderId}
-                items={items}
-                open={actions.receiveFormOpen}
-                getProductName={getProductName}
-                onClose={() => actions.setReceiveFormOpen(false)}
-            />
-
-            <EditOrderDialog
+            <EditTransferDialog
                 open={actions.editDialogOpen}
                 editData={actions.editData}
-                supplierOptions={supplierOptions}
-                isPending={actions.updateOrder.isPending}
+                isPending={actions.updateTransfer.isPending}
                 onClose={() => actions.setEditDialogOpen(false)}
                 onChange={actions.setEditData}
                 onSave={actions.handleSaveEdit}
             />
 
-            <SendOrderDialog
-                open={actions.sendDialogOpen}
+            <ConfirmTransferDialog
+                open={actions.confirmDialogOpen}
                 items={items}
-                order={order}
                 getProductName={getProductName}
-                isPending={actions.sendOrder.isPending}
-                onClose={() => actions.setSendDialogOpen(false)}
-                onSend={actions.handleSend}
+                isPending={actions.confirmTransfer.isPending}
+                onClose={() => actions.setConfirmDialogOpen(false)}
+                onConfirm={actions.handleConfirm}
+            />
+
+            <ReceiveTransferDialog
+                open={actions.receiveDialogOpen}
+                items={items}
+                getProductName={getProductName}
+                isPending={actions.receiveTransfer.isPending}
+                onClose={() => actions.setReceiveDialogOpen(false)}
+                onReceive={actions.handleReceive}
             />
 
             <Dialog
@@ -155,10 +143,11 @@ const PurchaseOrderDetailPage = () => {
                 onClose={() => actions.setCancelDialogOpen(false)}
                 onRequestClose={() => actions.setCancelDialogOpen(false)}
             >
-                <h5 className="mb-4">Cancelar Orden de Compra</h5>
+                <h5 className="mb-4">Cancelar Transferencia</h5>
                 <p className="mb-6">
-                    ¿Está seguro que desea cancelar esta orden de compra?
-                    {isPartial && ' La mercancía ya recibida no será afectada.'}
+                    ¿Está seguro que desea cancelar esta transferencia?
+                    {isConfirmed &&
+                        ' Se liberarán las reservas de stock en la ubicación de origen.'}
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
@@ -169,10 +158,10 @@ const PurchaseOrderDetailPage = () => {
                     </Button>
                     <Button
                         variant="solid"
-                        loading={actions.cancelOrder.isPending}
+                        loading={actions.cancelTransfer.isPending}
                         onClick={actions.handleCancel}
                     >
-                        Cancelar Orden
+                        Cancelar Transferencia
                     </Button>
                 </div>
             </Dialog>
@@ -182,9 +171,9 @@ const PurchaseOrderDetailPage = () => {
                 onClose={() => actions.setDeleteDialogOpen(false)}
                 onRequestClose={() => actions.setDeleteDialogOpen(false)}
             >
-                <h5 className="mb-4">Eliminar Orden de Compra</h5>
+                <h5 className="mb-4">Eliminar Transferencia</h5>
                 <p className="mb-6">
-                    ¿Está seguro que desea eliminar esta orden de compra? Esta
+                    ¿Está seguro que desea eliminar esta transferencia? Esta
                     acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
@@ -196,7 +185,7 @@ const PurchaseOrderDetailPage = () => {
                     </Button>
                     <Button
                         variant="solid"
-                        loading={actions.deleteOrder.isPending}
+                        loading={actions.deleteTransfer.isPending}
                         onClick={actions.handleDelete}
                     >
                         Eliminar
@@ -215,8 +204,8 @@ const PurchaseOrderDetailPage = () => {
             >
                 <h5 className="mb-4">Eliminar Item</h5>
                 <p className="mb-6">
-                    ¿Está seguro que desea eliminar este item de la orden? Esta
-                    acción no se puede deshacer.
+                    ¿Está seguro que desea eliminar este item de la
+                    transferencia? Esta acción no se puede deshacer.
                 </p>
                 <div className="flex justify-end gap-2">
                     <Button
@@ -243,4 +232,4 @@ const PurchaseOrderDetailPage = () => {
     )
 }
 
-export default PurchaseOrderDetailPage
+export default TransferDetailPage

@@ -9,7 +9,7 @@ import Dialog from '@/components/ui/Dialog'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { useProducts } from '@/hooks/useProducts'
+import { useProductsList } from '@features/products'
 import {
     HiOutlineArrowLeft,
     HiOutlinePlus,
@@ -44,7 +44,7 @@ const SupplierDetailPage = () => {
         useSupplierContacts(supplierId)
     const { data: supplierProducts = [], isLoading: productsLoading } =
         useSupplierProducts(supplierId)
-    const { data: productsData } = useProducts()
+    const { data: productsData } = useProductsList()
     const products = productsData?.items ?? []
 
     const { delete: deleteContact } = useSupplierContactMutations(supplierId)

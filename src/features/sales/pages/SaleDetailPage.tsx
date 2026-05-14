@@ -7,7 +7,7 @@ import Table from '@/components/ui/Table'
 import Tabs from '@/components/ui/Tabs'
 import Dialog from '@/components/ui/Dialog'
 import { useCustomersList } from '@features/customers'
-import { useProducts } from '@/hooks/useProducts'
+import { useProductsList } from '@features/products'
 import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
 import {
     useSale,
@@ -46,7 +46,7 @@ const SaleDetailPage = () => {
     const { data: invoices = [], isLoading: invoicesLoading } =
         useInvoicesBySale(saleId)
 
-    const { data: productsData } = useProducts()
+    const { data: productsData } = useProductsList()
     const products = productsData?.items ?? []
 
     const { data: customersData } = useCustomersList({ limit: 100 })

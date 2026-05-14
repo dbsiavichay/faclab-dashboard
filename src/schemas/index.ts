@@ -18,7 +18,7 @@ export {
     type ReceiveFormValues,
 } from '@features/purchases'
 export { categorySchema, type CategoryFormValues } from './category.schema'
-export { productSchema, type ProductFormValues } from './product.schema'
+export { productSchema, type ProductFormValues } from '@features/products'
 export { supplierSchema, type SupplierFormValues } from './supplier.schema'
 export { customerSchema, type CustomerFormValues } from './customer.schema'
 export { createUserSchema, type CreateUserFormValues } from './user.schema'
@@ -26,17 +26,17 @@ export { warehouseSchema, type WarehouseFormValues } from '@features/warehouses'
 export {
     unitOfMeasureSchema,
     type UnitOfMeasureFormValues,
-} from './unitOfMeasure.schema'
+} from '@features/unitsOfMeasure'
 export {
     lotCreateSchema,
     lotUpdateSchema,
     type LotCreateFormValues,
     type LotUpdateFormValues,
-} from './lot.schema'
+} from '@features/lots'
 export {
     serialNumberSchema,
     type SerialNumberFormValues,
-} from './serialNumber.schema'
+} from '@features/serialNumbers'
 export { locationSchema, type LocationFormValues } from './location.schema'
 export { contactSchema, type ContactFormValues } from './contact.schema'
 export {
@@ -77,7 +77,7 @@ export {
 export {
     serialStatusChangeSchema,
     type SerialStatusChangeFormValues,
-} from './serialStatusChange.schema'
+} from '@features/serialNumbers'
 export {
     companyConfigSchema,
     type CompanyConfigFormValues,

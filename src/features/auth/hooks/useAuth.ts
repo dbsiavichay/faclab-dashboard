@@ -4,7 +4,7 @@ import { apiChangePassword, apiLogin, apiMe, apiRefresh } from '../api/client'
 import { navigateTo } from '@shared/lib/auth/navigationRef'
 import appConfig from '@/configs/app.config'
 import tokenStorage from '@shared/lib/auth/tokenStorage'
-import { refreshScheduler } from '@shared/lib/auth/refreshScheduler'
+import { refreshScheduler } from '../lib/refreshScheduler'
 import type {
     ChangePasswordRequest,
     LoginRequest,

@@ -55,7 +55,7 @@ Each feature is self-contained and exposes a single public surface (`index.ts`).
 | Path | Purpose |
 |---|---|
 | `shared/lib/http/httpClient.ts` | Axios wrapper returning `T`; token + 401 handled by `BaseService` interceptors |
-| `shared/lib/auth/refreshScheduler.ts` | `start(expiresIn)` / `stop()` — proactive JWT refresh scheduler |
+| `features/auth/lib/refreshScheduler.ts` | `start(expiresIn)` / `stop()` — proactive JWT refresh scheduler (auth-feature owned) |
 | `shared/lib/format.ts` | `formatCurrency`, `formatDate`, `formatDatetime`, `formatPercent` |
 
 ## Directory Structure (target state after S6)
@@ -81,3 +81,45 @@ src/
 | S4 | Migrate leaf features (customers, categories, warehouses, locations) |
 | S5 | Migrate cross-feature features (purchases, sales, pos, inventory, reports) |
 | S6 | Delete legacy dirs, remove @legacy alias, complete Controlled* wrappers |
+
+## API Response Envelope `{ data, meta }`
+
+**Status:** Active | **Date:** 2026-05-14
+
+### Convention
+
+The backend wraps every JSON response in an envelope:
+
+```ts
+// list endpoint
+{ data: T[], meta: { pagination: { page, pageSize, total, totalPages } } }
+
+// detail / mutation endpoint
+{ data: T }
+```
+
+`src/@types/api.ts` declares `PaginatedResponse<T>` and `DataResponse<T>` to type this raw shape.
+
+### Where the unwrap happens
+
+- **`features/<x>/api/client.ts`** — functions are typed against the *raw envelope*
+  (`httpClient.get<PaginatedResponse<T>>(...)`). They return the envelope as-is.
+- **`features/<x>/hooks/use*.ts`** — hooks unwrap before exposing data:
+  `return { items: body.data, pagination: body.meta.pagination }`.
+- **Consumers (pages, components)** never see the envelope.
+
+### Why hooks own the unwrap (not `api/client`)
+
+- `meta.pagination` is needed by table components alongside `data`. Centralizing the
+  unwrap in `api/client` would either drop `meta` (breaking pagination) or return a
+  bespoke shape per endpoint (no net simplification).
+- The envelope is a *backend contract*, not a frontend concern. Keeping it visible in
+  the type signature of `api/client` makes the boundary explicit; transforming inside
+  hooks keeps the frontend model clean.
+- React Query keys naturally live in hooks. Unwrap + cache key colocate there.
+
+### Rule for new endpoints
+
+1. Type the `api/client` function with `PaginatedResponse<T>` or `DataResponse<T>`.
+2. In the hook, destructure `body.data` (and `body.meta.pagination` when paginated).
+3. Never expose the envelope past the hook boundary.

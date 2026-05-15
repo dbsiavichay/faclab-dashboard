@@ -23,7 +23,6 @@ export default defineConfig({
       '@shared': path.join(__dirname, 'src/shared'),
       '@stores': path.join(__dirname, 'src/stores'),
       '@configs': path.join(__dirname, 'src/configs'),
-      '@legacy': path.join(__dirname, 'src/views'),
     },
   },
   build: {

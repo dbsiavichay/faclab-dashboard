@@ -1,12 +1,22 @@
-export { optionalEmail, taxTypeSchema } from './common'
+export { optionalEmail, taxTypeSchema } from '@shared/lib/schemas/common'
 export {
     signInSchema,
     changePasswordSchema,
-    resetPasswordSchema,
     type SignInFormValues,
     type ChangePasswordFormValues,
+} from '@features/auth'
+export {
+    resetPasswordSchema,
+    createUserSchema,
     type ResetPasswordFormValues,
-} from './auth.schema'
+    type CreateUserFormValues,
+} from '@features/admin-users'
+export {
+    companyConfigSchema,
+    certificateUploadSchema,
+    type CompanyConfigFormValues,
+    type CertificateUploadFormValues,
+} from '@features/invoicing'
 export {
     purchaseOrderSchema,
     type PurchaseOrderFormValues,
@@ -17,11 +27,10 @@ export {
     type ReceiveItemFormValues,
     type ReceiveFormValues,
 } from '@features/purchases'
-export { categorySchema, type CategoryFormValues } from './category.schema'
+export { categorySchema, type CategoryFormValues } from '@features/categories'
 export { productSchema, type ProductFormValues } from '@features/products'
-export { supplierSchema, type SupplierFormValues } from './supplier.schema'
-export { customerSchema, type CustomerFormValues } from './customer.schema'
-export { createUserSchema, type CreateUserFormValues } from './user.schema'
+export { supplierSchema, type SupplierFormValues } from '@features/suppliers'
+export { customerSchema, type CustomerFormValues } from '@features/customers'
 export { warehouseSchema, type WarehouseFormValues } from '@features/warehouses'
 export {
     unitOfMeasureSchema,
@@ -37,12 +46,12 @@ export {
     serialNumberSchema,
     type SerialNumberFormValues,
 } from '@features/serialNumbers'
-export { locationSchema, type LocationFormValues } from './location.schema'
-export { contactSchema, type ContactFormValues } from './contact.schema'
+export { locationSchema, type LocationFormValues } from '@features/locations'
+export { contactSchema, type ContactFormValues } from '@features/customers'
 export {
     supplierProductSchema,
     type SupplierProductFormValues,
-} from './supplierProduct.schema'
+} from '@features/suppliers'
 export {
     purchaseOrderItemCreateSchema,
     purchaseOrderItemUpdateSchema,
@@ -78,11 +87,3 @@ export {
     serialStatusChangeSchema,
     type SerialStatusChangeFormValues,
 } from '@features/serialNumbers'
-export {
-    companyConfigSchema,
-    type CompanyConfigFormValues,
-} from './companyConfig.schema'
-export {
-    certificateUploadSchema,
-    type CertificateUploadFormValues,
-} from './certificateUpload.schema'

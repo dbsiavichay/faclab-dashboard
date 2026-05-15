@@ -4,7 +4,7 @@ import SidePanel from '@/components/template/SidePanel'
 import MobileNav from '@/components/template/MobileNav'
 import UserDropdown from '@/components/template/UserDropdown'
 import SideNav from '@/components/template/SideNav'
-import View from '@/views'
+import View from '@app/AppViews'
 
 const HeaderActionsStart = () => {
     return (

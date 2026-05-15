@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input'
 import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { useLotsList, useLotMutations } from '../hooks/useLots'
-import { useCrudOperations } from '@/hooks'
+import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal } from '@/components/shared'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import type {

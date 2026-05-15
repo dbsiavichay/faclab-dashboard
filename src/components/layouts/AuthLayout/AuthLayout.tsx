@@ -1,7 +1,7 @@
 import Side from './Side'
 // import Cover from './Cover'
 // import Simple from './Simple'
-import View from '@/views'
+import View from '@app/AppViews'
 import { useThemeStore } from '@/stores'
 import { LAYOUT_TYPE_BLANK } from '@/constants/theme.constant'
 

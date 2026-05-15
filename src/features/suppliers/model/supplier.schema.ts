@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { optionalEmail } from '@/schemas/common'
+import { optionalEmail } from '@shared/lib/schemas/common'
 
 export const taxTypeSchema = z.union(
     [z.literal(1), z.literal(2), z.literal(3), z.literal(4)],

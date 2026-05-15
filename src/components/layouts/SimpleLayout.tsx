@@ -4,7 +4,7 @@ import UserDropdown from '@/components/template/UserDropdown'
 import HeaderLogo from '@/components/template/HeaderLogo'
 import MobileNav from '@/components/template/MobileNav'
 import HorizontalNav from '@/components/template/HorizontalNav'
-import View from '@/views'
+import View from '@app/AppViews'
 
 const HeaderActionsStart = () => {
     return (

@@ -1,4 +1,4 @@
-import View from '@/views'
+import View from '@app/AppViews'
 import SidePanel from '@/components/template/SidePanel'
 import { useThemeStore } from '@/stores'
 import { HiOutlineCog } from 'react-icons/hi'

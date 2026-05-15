@@ -13,7 +13,7 @@ import type { UnitOfMeasureFormValues } from '../model/unitOfMeasure.schema'
 import { UnitOfMeasureForm } from '../components/UnitOfMeasureForm'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import toast from '@/components/ui/toast'
-import { useCrudOperations } from '@/hooks'
+import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 
 const UnitsOfMeasureListPage = () => {

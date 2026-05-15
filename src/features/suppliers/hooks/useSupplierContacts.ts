@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as api from '../api/client'
-import type { ContactFormValues } from '@/schemas'
+import type { ContactFormValues } from '@features/customers'
 
 const KEY = ['supplierContacts'] as const
 

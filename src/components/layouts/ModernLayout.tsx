@@ -6,7 +6,7 @@ import SideNavToggle from '@/components/template/SideNavToggle'
 import MobileNav from '@/components/template/MobileNav'
 import SideNav from '@/components/template/SideNav'
 import Button from '@/components/ui/Button'
-import View from '@/views'
+import View from '@app/AppViews'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
 import { useCan } from '@/stores'
 

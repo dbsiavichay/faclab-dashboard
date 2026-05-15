@@ -126,24 +126,6 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/features/**', 'src/shared/**', 'src/app/**'],
-        rules: {
-            'no-restricted-imports': [
-                'warn',
-                {
-                    patterns: [
-                        {
-                            group: ['@legacy/*', '@legacy'],
-                            message:
-                                'Código nuevo en features/, shared/ o app/ no puede importar desde @legacy (src/views). Expón lo necesario desde el index.ts del feature o muévelo a shared/.',
-                        },
-                    ],
-                },
-            ],
-        },
-    },
-
-    {
         files: ['**/*.cjs'],
         rules: {
             '@typescript-eslint/no-require-imports': 'off',

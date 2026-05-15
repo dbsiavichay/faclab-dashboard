@@ -3,7 +3,7 @@ import SidePanel from '@/components/template/SidePanel'
 import UserDropdown from '@/components/template/UserDropdown'
 import MobileNav from '@/components/template/MobileNav'
 import StackedSideNav from '@/components/template/StackedSideNav'
-import View from '@/views'
+import View from '@app/AppViews'
 
 const HeaderActionsStart = () => {
     return (

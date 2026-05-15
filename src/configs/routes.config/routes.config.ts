@@ -17,6 +17,8 @@ import { movementsRoutes } from '@features/movements'
 import { alertsRoutes } from '@features/alerts'
 import { adjustmentsRoutes } from '@features/adjustments'
 import { transfersRoutes } from '@features/transfers'
+import { adminUsersRoutes } from '@features/admin-users'
+import { invoicingRoutes } from '@features/invoicing'
 
 export const publicRoutes: Routes = [...authRoute]
 
@@ -24,7 +26,7 @@ export const protectedRoutes: Routes = [
     {
         key: 'home',
         path: '/home',
-        component: lazy(() => import('@/views/Home')),
+        component: lazy(() => import('@app/pages/HomePage')),
         authority: [],
     },
     ...productsRoutes,
@@ -43,34 +45,20 @@ export const protectedRoutes: Routes = [
     ...reportsRoutes,
     ...alertsRoutes,
     ...posRoutes,
-    {
-        key: 'settings.users',
-        path: '/settings/users',
-        component: lazy(() => import('@/views/settings/UsersView')),
-        authority: ['user:manage'],
-    },
-    {
-        key: 'settings.companyConfig',
-        path: '/settings/company-config',
-        component: lazy(() => import('@/views/settings/CompanyConfigView')),
-        authority: [],
-    },
-    {
-        key: 'settings.certificates',
-        path: '/settings/certificates',
-        component: lazy(() => import('@/views/settings/CertificatesView')),
-        authority: [],
-    },
+    ...adminUsersRoutes,
+    ...invoicingRoutes,
     {
         key: 'changePassword',
         path: '/change-password',
-        component: lazy(() => import('@/views/auth/ChangePassword')),
+        component: lazy(
+            () => import('@features/auth/pages/ChangePasswordPage')
+        ),
         authority: [],
     },
     {
         key: 'accessDenied',
         path: '/access-denied',
-        component: lazy(() => import('@/views/auth/AccessDenied')),
+        component: lazy(() => import('@features/auth/pages/AccessDeniedPage')),
         authority: [],
     },
 ]

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { optionalEmail, taxTypeSchema } from '@/schemas/common'
+import { optionalEmail, taxTypeSchema } from '@shared/lib/schemas/common'
 
 export const customerSchema = z.object({
     name: z.string().min(1, 'Nombre requerido'),

@@ -9,7 +9,7 @@ import {
     useWarehouseMutations,
 } from '../hooks/useWarehouses'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import { useCrudOperations } from '@/hooks'
+import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { WarehouseForm } from '../components/WarehouseForm'
 import type { Warehouse } from '../model/types'

@@ -2,8 +2,8 @@ import { create } from 'zustand'
 import type { Session } from '@/@types/auth'
 import type { Permission } from '@/constants/permissions.constant'
 import type { RoleCode } from '@/constants/roles.constant'
-import tokenStorage from '@/services/tokenStorage'
-import { resetRefreshManager } from '@/services/refreshManager'
+import tokenStorage from '@shared/lib/auth/tokenStorage'
+import { resetRefreshManager } from '@shared/lib/auth/refreshManager'
 
 type SetTokensPayload = {
     accessToken: string

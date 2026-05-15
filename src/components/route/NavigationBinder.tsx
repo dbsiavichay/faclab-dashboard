@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { setNavigator } from '@/services/navigationRef'
+import { setNavigator } from '@shared/lib/auth/navigationRef'
 
 const NavigationBinder = () => {
     const navigate = useNavigate()

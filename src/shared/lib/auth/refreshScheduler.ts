@@ -1,4 +1,4 @@
-import { apiRefresh } from '@/services/AuthService'
+import { apiRefresh } from '@features/auth/api/client'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 let timer: ReturnType<typeof setTimeout> | null = null

@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { refreshScheduler } from './refreshScheduler'
-import { apiRefresh } from '@/services/AuthService'
+import { apiRefresh } from '@features/auth/api/client'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 // vi.mock calls are hoisted by Vitest before imports at runtime
-vi.mock('@/services/AuthService', () => ({
+vi.mock('@features/auth/api/client', () => ({
     apiRefresh: vi.fn(),
 }))
 

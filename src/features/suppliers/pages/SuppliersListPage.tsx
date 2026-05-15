@@ -7,7 +7,7 @@ import Notification from '@/components/ui/Notification'
 import toast from '@/components/ui/toast'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import { getErrorMessage } from '@/utils/getErrorMessage'
-import useCrudOperations from '@/hooks/utils/useCrudOperations'
+import useCrudOperations from '@shared/hooks/useCrudOperations'
 import {
     HiOutlinePlus,
     HiOutlinePencil,

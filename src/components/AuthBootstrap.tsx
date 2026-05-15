@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
-import { useMe } from '@/hooks/useAuth'
+import { useMe } from '@features/auth'
 import { useAccessToken, useSession } from '@/stores/useAuthStore'
 import Loading from '@/components/shared/Loading'
 

@@ -11,7 +11,7 @@ import {
     useSerialNumbersList,
     useSerialNumberMutations,
 } from '../hooks/useSerialNumbers'
-import { useCrudOperations } from '@/hooks'
+import useCrudOperations from '@shared/hooks/useCrudOperations'
 import { FormModal } from '@/components/shared'
 import { getErrorMessage } from '@/utils/getErrorMessage'
 import {

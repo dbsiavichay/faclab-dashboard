@@ -1,4 +1,4 @@
-import { useCategories } from '@/hooks/useCategories'
+import { useCategoriesList as useCategories } from '@features/categories'
 import { usePOSStore } from '../store/usePOSStore'
 import { HiOutlineViewGrid, HiOutlineTag } from 'react-icons/hi'
 

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useCrudOperations } from '@/hooks'
+import useCrudOperations from '@shared/hooks/useCrudOperations'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'

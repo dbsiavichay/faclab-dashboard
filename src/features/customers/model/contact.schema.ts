@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { optionalEmail } from '@/schemas/common'
+import { optionalEmail } from '@shared/lib/schemas/common'
 
 export const contactSchema = z.object({
     name: z.string().min(1, 'Nombre requerido'),

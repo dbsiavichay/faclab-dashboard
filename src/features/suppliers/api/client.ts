@@ -9,7 +9,7 @@ import type {
 } from '../model/types'
 import type { SupplierFormValues } from '../model/supplier.schema'
 import type { SupplierProductFormValues } from '../model/supplierProduct.schema'
-import type { ContactFormValues } from '@/schemas'
+import type { ContactFormValues } from '@features/customers'
 
 const HOST = appConfig.inventoryApiHost || 'http://localhost:3000'
 

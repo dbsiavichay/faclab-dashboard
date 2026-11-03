@@ -1,6 +1,8 @@
 import type { Meta } from '@/@types/api'
 import type { TaxCode } from '@/constants/tax.constant'
 import type { TaxType } from '@features/customers'
+import type { CreditNote } from '@features/invoicing'
+import type { SaleInvoiceStatus } from '@features/sales'
 import type { StatusTone } from '@shared/lib/statusTone'
 
 // === ENUMS ===
@@ -158,6 +160,8 @@ export interface POSSale {
     createdBy: string | null
     parkedAt: string | null
     parkReason: string | null
+    /** La factura de la venta; null si nunca se envió */
+    invoiceStatus?: SaleInvoiceStatus | null
     createdAt: string
 }
 
@@ -270,6 +274,12 @@ export interface Refund {
     status: RefundStatus
     refundedBy: string | null
     createdAt: string | null
+    /** Su nota de crédito; null si la venta aún no tiene factura autorizada */
+    creditNote?: CreditNote | null
+}
+
+export interface RefundDetail extends Refund {
+    items: RefundItem[]
 }
 
 export interface RefundListParams {

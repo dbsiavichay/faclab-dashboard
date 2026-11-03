@@ -23,7 +23,9 @@ const ACCESS_CODE = '0910202601179214100100110010010000000011234567812'
 
 const AUTHORIZED: Invoice = {
     id: 'inv-1',
+    docType: '01',
     saleId: '7',
+    sourceInvoiceId: null,
     accessCode: ACCESS_CODE,
     status: 'authorized',
     signatureId: 'cert-1',

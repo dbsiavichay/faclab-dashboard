@@ -14,6 +14,7 @@ export {
     useSetNextSequence,
     useInvoiceDeliveries,
     useResendInvoiceEmail,
+    useRequestCreditNoteAgain,
     useIssuerLogo,
     useUploadIssuerLogo,
     useDeleteIssuerLogo,
@@ -27,6 +28,8 @@ export type {
     Certificate,
     CompanyConfig,
     CompanyConfigInput,
+    CreditNote,
+    CreditNoteStatus,
     DeliveryKind,
     DeliveryStatus,
     Invoice,
@@ -36,12 +39,18 @@ export type {
     InvoicingStatus,
     RimpeRegime,
     SriSequence,
+    VoucherType,
 } from './model/types'
 export {
     RIMPE_REGIMES,
     RIMPE_REGIME_LABELS,
     INVOICE_STATUS_LABELS,
     INVOICE_STATUS_TONES,
+    CREDIT_NOTE_STATUS_LABELS,
+    CREDIT_NOTE_STATUS_TONES,
+    VOUCHER_TYPE_LABELS,
+    canAskAgain,
+    onlyInvoices,
     DELIVERY_STATUS_LABELS,
     DELIVERY_STATUS_TONES,
     DELIVERY_KIND_LABELS,
@@ -69,3 +78,4 @@ export { default as InvoicingSummaryCard } from './components/InvoicingSummaryCa
 export { default as InvoiceReason } from './components/InvoiceReason'
 export { default as InvoiceDocumentActions } from './components/InvoiceDocumentActions'
 export { default as InvoiceDeliveryLog } from './components/InvoiceDeliveryLog'
+export { default as CreditNoteCell } from './components/CreditNoteCell'

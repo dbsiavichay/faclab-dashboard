@@ -33,7 +33,9 @@ const NOT_READY: InvoicingStatus = {
 
 const PENDING: Invoice = {
     id: 'inv-1',
+    docType: '01',
     saleId: '7',
+    sourceInvoiceId: null,
     accessCode: null,
     status: 'pending',
     signatureId: null,

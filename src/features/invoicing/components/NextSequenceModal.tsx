@@ -12,16 +12,22 @@ import {
     type NextSequenceFormValues,
 } from '../model/schemas'
 import type { SequenceRow } from '../model/sequences'
+import { VOUCHER_TYPE_LABELS, type VoucherType } from '../model/types'
 
 interface NextSequenceModalProps {
     row: SequenceRow
+    docType?: VoucherType
     onClose: () => void
 }
 
 const FORM_ID = 'next-sequence'
 
 /** Dónde continúa la numeración de un punto de emisión; nunca retrocede. */
-const NextSequenceModal = ({ row, onClose }: NextSequenceModalProps) => {
+const NextSequenceModal = ({
+    row,
+    docType = '01',
+    onClose,
+}: NextSequenceModalProps) => {
     const setNext = useSetNextSequence()
     const {
         register,
@@ -40,10 +46,13 @@ const NextSequenceModal = ({ row, onClose }: NextSequenceModalProps) => {
                 establishment: row.establishment,
                 emissionPoint: row.emissionPoint,
                 nextSequence,
+                docType,
             })
             notifySuccess(
                 'Secuencial actualizado',
-                `La próxima factura ${series} lleva el número ${nextSequence}`
+                `La próxima ${VOUCHER_TYPE_LABELS[
+                    docType
+                ].toLowerCase()} ${series} lleva el número ${nextSequence}`
             )
             onClose()
         } catch (err) {

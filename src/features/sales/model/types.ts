@@ -1,4 +1,5 @@
 import type { TaxCode } from '@/constants/tax.constant'
+import type { CreditNote } from '@features/invoicing'
 import type { StatusTone } from '@shared/lib/statusTone'
 
 export type SaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
@@ -53,6 +54,7 @@ export const SALE_INVOICE_STATUSES = [
     'PENDING',
     'AUTHORIZED',
     'REJECTED',
+    'CREDITED',
 ] as const
 export type SaleInvoiceStatus = (typeof SALE_INVOICE_STATUSES)[number]
 
@@ -60,6 +62,7 @@ export const SALE_INVOICE_STATUS_LABELS: Record<SaleInvoiceStatus, string> = {
     PENDING: 'Factura pendiente',
     AUTHORIZED: 'Factura autorizada',
     REJECTED: 'Factura rechazada',
+    CREDITED: 'Factura anulada con nota de crédito',
 }
 
 export const SALE_INVOICE_STATUS_TONES: Record<SaleInvoiceStatus, StatusTone> =
@@ -67,6 +70,7 @@ export const SALE_INVOICE_STATUS_TONES: Record<SaleInvoiceStatus, StatusTone> =
         PENDING: 'warning',
         AUTHORIZED: 'success',
         REJECTED: 'danger',
+        CREDITED: 'info',
     }
 
 export interface Sale {
@@ -171,10 +175,14 @@ export interface InvoiceDiscrepancy {
         status: SaleStatus
         total: number
         branchId: number | null
+        /** Null: consumidor final, su factura no admite nota de crédito */
+        customerId?: number | null
         saleDate: string | null
         invoiceStatus: SaleInvoiceStatus | null
         invoiceRequestedAt: string | null
     } | null
+    /** La nota de crédito de la factura de una venta anulada, una vez pedida */
+    creditNote?: CreditNote | null
 }
 
 export interface DiscrepancyQueryParams {

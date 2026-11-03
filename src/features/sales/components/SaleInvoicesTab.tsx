@@ -11,8 +11,10 @@ import {
     INVOICE_STATUS_LABELS,
     InvoiceDocumentActions,
     InvoiceReason,
+    VOUCHER_TYPE_LABELS,
     invoiceNumber,
     isFinalInvoice,
+    onlyInvoices,
     useInvoiceRetryAction,
     useInvoicesBySale,
     type Invoice,
@@ -36,10 +38,12 @@ const SaleInvoicesTab = ({
     invoiceStatus,
 }: SaleInvoicesTabProps) => {
     const {
-        data: invoices = [],
+        data: documents = [],
         isLoading,
         isError,
     } = useInvoicesBySale(saleId)
+    // Sus notas de crédito se listan, pero solo una factura decide si reenviar
+    const invoices = onlyInvoices(documents)
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
     const canWrite = useCan('sale:write')
     const retry = useInvoiceRetryAction()
@@ -108,7 +112,7 @@ const SaleInvoicesTab = ({
                 </div>
             )}
 
-            {invoices.length === 0 ? (
+            {documents.length === 0 ? (
                 !canRequest && (
                     <EmptyState
                         className="!py-8"
@@ -119,6 +123,7 @@ const SaleInvoicesTab = ({
                 <Table>
                     <THead>
                         <Tr>
+                            <Th>Documento</Th>
                             <Th>Número</Th>
                             <Th>Estado</Th>
                             <Th>Motivo</Th>
@@ -127,12 +132,13 @@ const SaleInvoicesTab = ({
                         </Tr>
                     </THead>
                     <TBody>
-                        {invoices.map((invoice) => (
+                        {documents.map((invoice) => (
                             <Tr
                                 key={invoice.id}
                                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                                 onClick={() => setSelectedInvoice(invoice)}
                             >
+                                <Td>{VOUCHER_TYPE_LABELS[invoice.docType]}</Td>
                                 <Td className="font-mono text-sm">
                                     {invoiceNumber(invoice.accessCode)}
                                 </Td>

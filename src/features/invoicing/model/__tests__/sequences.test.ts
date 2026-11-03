@@ -98,4 +98,41 @@ describe('sequenceRows', () => {
             }),
         ])
     })
+
+    it('numbers each document apart: a credit note never overwrites an invoice', () => {
+        const sequences = [
+            sequence({
+                docType: '01',
+                lastSequence: '000000041',
+                nextSequence: 42,
+            }),
+            sequence({
+                docType: '04',
+                lastSequence: '000000003',
+                nextSequence: 4,
+            }),
+        ]
+
+        const invoices = sequenceRows([branch({})], [point({})], sequences)
+        const creditNotes = sequenceRows(
+            [branch({})],
+            [point({})],
+            sequences,
+            '04'
+        )
+
+        expect(invoices.map((row) => row.nextSequence)).toEqual([42])
+        expect(creditNotes.map((row) => row.nextSequence)).toEqual([4])
+    })
+
+    it('starts the credit notes from 1 when the point only issued invoices', () => {
+        const rows = sequenceRows(
+            [branch({})],
+            [point({})],
+            [sequence({ docType: '01' })],
+            '04'
+        )
+
+        expect(rows[0]).toMatchObject({ lastSequence: null, nextSequence: 1 })
+    })
 })

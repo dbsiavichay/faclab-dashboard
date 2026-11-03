@@ -67,7 +67,7 @@ export interface CompanyConfigInput {
 export interface SriSequence {
     establishment: string
     emissionPoint: string
-    /** `01`: factura */
+    /** `01`: factura; `04`: nota de crédito. Cada uno numera por su cuenta */
     docType: string
     /** Último número emitido (9 dígitos); null antes del primero */
     lastSequence: string | null
@@ -92,6 +92,45 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
     sent: 'Enviada',
     authorized: 'Autorizada',
     rejected: 'Rechazada',
+}
+
+// El documento: una nota de crédito pasa por los mismos pasos que una factura
+export const VOUCHER_TYPE_LABELS = {
+    '01': 'Factura',
+    '04': 'Nota de crédito',
+} as const
+export type VoucherType = keyof typeof VOUCHER_TYPE_LABELS
+
+/** Lo que el core sabe de una nota de crédito; la emite faclab-invoicing */
+export const CREDIT_NOTE_STATUS_LABELS = {
+    PENDING: 'En proceso',
+    AUTHORIZED: 'Autorizada',
+    REJECTED: 'Rechazada',
+} as const
+export type CreditNoteStatus = keyof typeof CREDIT_NOTE_STATUS_LABELS
+
+export const CREDIT_NOTE_STATUS_TONES: Record<CreditNoteStatus, StatusTone> = {
+    PENDING: 'warning',
+    AUTHORIZED: 'success',
+    REJECTED: 'danger',
+}
+
+export interface CreditNote {
+    id: number
+    status: CreditNoteStatus
+    saleId: number
+    /** Null: la factura de una venta anulada, sin devolución */
+    refundId: number | null
+    invoiceId: string
+    /** Su último documento con resultado: con él se descargan XML y RIDE */
+    documentId: string | null
+    number: string | null
+    accessCode: string | null
+    reason: string
+    total: number
+    authorizedAt: string | null
+    rejectionReason: string | null
+    requestedAt: string | null
 }
 
 export const INVOICE_STATUS_TONES: Record<InvoiceStatus, StatusTone> = {
@@ -187,7 +226,10 @@ export interface InvoiceStatusHistoryEntry {
 
 export interface Invoice {
     id: string
+    docType: VoucherType
     saleId: string
+    // La factura que modifica una nota de crédito; null en una factura
+    sourceInvoiceId: string | null
     // Null while pending: built with the XML
     accessCode: string | null
     status: InvoiceStatus
@@ -210,8 +252,25 @@ export interface InvoiceQueryParams {
     // Only pending ones or those whose last attempt failed, latest change first
     attention?: boolean
     status?: InvoiceStatus
+    docType?: VoucherType
     limit?: number
     offset?: number
+}
+
+/** Solo las facturas: `by-sale` trae también las notas de crédito de la venta */
+export const onlyInvoices = (documents: Invoice[]): Invoice[] =>
+    documents.filter((document) => document.docType !== '04')
+
+/** Se puede volver a pedir: el SRI la rechazó, o su resultado no llega */
+export const canAskAgain = (
+    note: CreditNote,
+    now: Date = new Date(),
+    waitMinutes = 30
+): boolean => {
+    if (note.status === 'REJECTED') return true
+    if (note.status !== 'PENDING' || !note.requestedAt) return false
+    const waited = now.getTime() - new Date(note.requestedAt).getTime()
+    return waited > waitMinutes * 60_000
 }
 
 export const isFinalInvoice = (invoice: Invoice) =>

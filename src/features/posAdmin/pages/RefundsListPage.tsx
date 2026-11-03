@@ -8,6 +8,7 @@ import Select from '@/components/ui/Select'
 import { useCan } from '@/stores/useAuthStore'
 import { formatCurrency, formatDatetime } from '@shared/lib/format'
 import { notifyError, notifySuccess } from '@shared/ui/notify'
+import { CreditNoteCell } from '@features/invoicing'
 import {
     REFUND_STATUS_TONES,
     REFUND_STATUS_LABELS,
@@ -62,7 +63,9 @@ const RefundsListPage = () => {
             header: 'Devolución',
             accessorKey: 'id',
             cell: (props) => (
-                <span className="font-medium">#{props.row.original.id}</span>
+                <span className="font-medium">
+                    {props.row.original.number ?? `#${props.row.original.id}`}
+                </span>
             ),
         },
         {
@@ -117,6 +120,14 @@ const RefundsListPage = () => {
                         {REFUND_STATUS_LABELS[status]}
                     </StatusBadge>
                 )
+            },
+        },
+        {
+            header: 'Nota de crédito',
+            id: 'creditNote',
+            cell: (props) => {
+                const note = props.row.original.creditNote
+                return note ? <CreditNoteCell note={note} /> : '-'
             },
         },
         {

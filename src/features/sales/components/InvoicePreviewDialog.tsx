@@ -7,6 +7,7 @@ import {
     InvoiceDeliveryLog,
     InvoiceDocumentActions,
     InvoiceReason,
+    VOUCHER_TYPE_LABELS,
     hasDocuments,
     type Invoice,
     type InvoiceStatus,
@@ -24,7 +25,9 @@ const InvoicePreviewDialog = ({
     <Dialog isOpen={invoice !== null} width={640} onClose={onClose}>
         {invoice && (
             <div>
-                <h5 className="mb-4">Detalle de Factura</h5>
+                <h5 className="mb-4">
+                    Detalle de {VOUCHER_TYPE_LABELS[invoice.docType]}
+                </h5>
                 <div className="grid grid-cols-1 gap-3 mb-6">
                     <div>
                         <p className="text-sm text-gray-500">

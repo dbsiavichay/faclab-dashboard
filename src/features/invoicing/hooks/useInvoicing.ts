@@ -7,7 +7,11 @@ import {
 import { isApiError } from '@/utils/errors/ApiError'
 import { useCan } from '@/stores'
 import * as api from '../api/client'
-import type { CompanyConfigInput, InvoiceQueryParams } from '../model/types'
+import type {
+    CompanyConfigInput,
+    InvoiceQueryParams,
+    VoucherType,
+} from '../model/types'
 
 // Everything faclab-invoicing serves lives under this key: a change to the
 // config or the certificates, or a retry, refreshes status and invoices too
@@ -220,21 +224,37 @@ export function useSetNextSequence() {
             establishment,
             emissionPoint,
             nextSequence,
+            docType,
         }: {
             establishment: string
             emissionPoint: string
             nextSequence: number
+            docType?: VoucherType
         }) =>
             (
                 await api.setNextSequence(
                     establishment,
                     emissionPoint,
-                    nextSequence
+                    nextSequence,
+                    docType
                 )
             ).data,
         onSuccess: () =>
             queryClient.invalidateQueries({
                 queryKey: [...INVOICING_KEY, 'sequences'],
             }),
+    })
+}
+
+/** La devolución y la discrepancia que la muestran se vuelven a leer */
+export function useRequestCreditNoteAgain() {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async (creditNoteId: number) =>
+            (await api.requestCreditNoteAgain(creditNoteId)).data,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['pos', 'refunds'] })
+            queryClient.invalidateQueries({ queryKey: ['sales'] })
+        },
     })
 }

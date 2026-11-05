@@ -24,6 +24,7 @@ export const buildProduct = (overrides: Partial<Product> = {}): Product => ({
     purchasePrice: 9.5,
     salePrice: 12.5,
     taxCode: 'VAT_15',
+    constructionMaterialCode: null,
     isActive: true,
     isService: false,
     minStock: 10,

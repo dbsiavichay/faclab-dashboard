@@ -2,6 +2,53 @@ import { describe, it, expect } from 'vitest'
 import { productSchema } from '../product.schema'
 
 describe('productSchema', () => {
+    const material = {
+        name: 'Cemento 50 kg',
+        sku: 'CEM-50',
+        constructionMaterialCode: 'F010401',
+    }
+
+    it('accepts a construction material at its rate', () => {
+        const result = productSchema.safeParse({
+            ...material,
+            taxCode: 'VAT_5',
+        })
+        expect(result.success).toBe(true)
+    })
+
+    it('marks the VAT of a construction material at another rate', () => {
+        const result = productSchema.safeParse({
+            ...material,
+            taxCode: 'VAT_15',
+        })
+        expect(result.success).toBe(false)
+        expect(result.error?.issues[0]).toMatchObject({
+            path: ['taxCode'],
+            message: 'Un material de construcción lleva IVA 5%',
+        })
+    })
+
+    it('rejects a code outside the catalog', () => {
+        const result = productSchema.safeParse({
+            ...material,
+            taxCode: 'VAT_5',
+            constructionMaterialCode: 'CEMENTO',
+        })
+        expect(result.success).toBe(false)
+    })
+
+    it.each([null, undefined])(
+        'leaves the VAT free without a code (%s)',
+        (constructionMaterialCode) => {
+            const result = productSchema.safeParse({
+                ...material,
+                taxCode: 'VAT_15',
+                constructionMaterialCode,
+            })
+            expect(result.success).toBe(true)
+        }
+    )
+
     it('accepts valid minimal data', () => {
         const result = productSchema.safeParse({
             name: 'Producto X',

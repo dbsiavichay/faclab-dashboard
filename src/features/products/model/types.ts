@@ -1,5 +1,8 @@
 import type { PaginationParams } from '@/@types/api'
-import type { TaxCode } from '@/constants/tax.constant'
+import type {
+    ConstructionMaterialCode,
+    TaxCode,
+} from '@/constants/tax.constant'
 
 export type Product = {
     id: number
@@ -12,6 +15,7 @@ export type Product = {
     purchasePrice: number | null
     salePrice: number | null
     taxCode: TaxCode
+    constructionMaterialCode: ConstructionMaterialCode | null
     isActive: boolean
     isService: boolean
     minStock: number
@@ -30,6 +34,7 @@ export type ProductInput = {
     purchasePrice?: number | null
     salePrice?: number | null
     taxCode?: TaxCode
+    constructionMaterialCode?: ConstructionMaterialCode | null
     isActive?: boolean
     isService?: boolean
     minStock?: number

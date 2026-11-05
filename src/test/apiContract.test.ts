@@ -14,7 +14,10 @@
  */
 import { readFile } from 'node:fs/promises'
 import { describe, expect, it } from 'vitest'
-import { TAX_CODES } from '@/constants/tax.constant'
+import {
+    CONSTRUCTION_MATERIAL_CODES,
+    TAX_CODES,
+} from '@/constants/tax.constant'
 import {
     ADJUSTMENT_REASON_LABELS,
     ADJUSTMENT_STATUS_LABELS,
@@ -58,6 +61,11 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
     ['LocationType', 'LOCATION_TYPES', LOCATION_TYPES],
     ['MovementType', 'MOVEMENT_TYPES', MOVEMENT_TYPES],
     ['TaxCode', 'TAX_CODES', TAX_CODES],
+    [
+        'ConstructionMaterialCode',
+        'CONSTRUCTION_MATERIAL_CODES',
+        CONSTRUCTION_MATERIAL_CODES,
+    ],
     ['SaleStatus', 'SALE_STATUS_LABELS', keys(SALE_STATUS_LABELS)],
     ['SaleStatus', 'POS_SALE_STATUS_LABELS', keys(POS_SALE_STATUS_LABELS)],
     ['PaymentStatus', 'PAYMENT_STATUS_LABELS', keys(PAYMENT_STATUS_LABELS)],

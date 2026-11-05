@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import Input from '@/components/ui/Input'
 import { FormItem, FormContainer } from '@/components/ui/Form'
 import { makeNumberRegister } from '@/components/ui/Form/utils'
@@ -5,14 +6,18 @@ import {
     ControlledSelect,
     ControlledSwitcher,
 } from '@/components/ui/Form/controlled'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCategoriesList } from '@features/categories'
 import { useUnitsOfMeasureList } from '@features/unitsOfMeasure'
 import {
+    CONSTRUCTION_MATERIAL_CODES,
+    CONSTRUCTION_MATERIAL_LABELS,
+    CONSTRUCTION_MATERIAL_TAX_CODE,
     DEFAULT_TAX_CODE,
     TAX_CODE_LABELS,
     TAX_CODES,
+    type ConstructionMaterialCode,
 } from '@/constants/tax.constant'
 import { productSchema, type ProductFormValues } from '../model/product.schema'
 import type { Product } from '../model/types'
@@ -34,6 +39,7 @@ const emptyValues: ProductFormValues = {
     purchasePrice: undefined,
     salePrice: undefined,
     taxCode: DEFAULT_TAX_CODE,
+    constructionMaterialCode: undefined,
     isActive: true,
     isService: false,
     minStock: 0,
@@ -46,6 +52,17 @@ const taxCodeOptions = TAX_CODES.map((value) => ({
     value,
     label: TAX_CODE_LABELS[value],
 }))
+
+const constructionMaterialOptions = [
+    {
+        value: undefined as ConstructionMaterialCode | undefined,
+        label: 'No es material de construcción',
+    },
+    ...CONSTRUCTION_MATERIAL_CODES.map((value) => ({
+        value: value as ConstructionMaterialCode | undefined,
+        label: `${value} · ${CONSTRUCTION_MATERIAL_LABELS[value]}`,
+    })),
+]
 
 export const ProductForm = ({
     formId,
@@ -87,6 +104,8 @@ export const ProductForm = ({
               purchasePrice: product.purchasePrice ?? undefined,
               salePrice: product.salePrice ?? undefined,
               taxCode: product.taxCode ?? DEFAULT_TAX_CODE,
+              constructionMaterialCode:
+                  product.constructionMaterialCode ?? undefined,
               isActive: product.isActive,
               isService: product.isService,
               minStock: product.minStock,
@@ -100,11 +119,26 @@ export const ProductForm = ({
         register,
         handleSubmit,
         control,
+        setValue,
         formState: { errors },
     } = useForm<ProductFormValues>({
         resolver: zodResolver(productSchema),
         defaultValues,
     })
+
+    const constructionMaterialCode = useWatch({
+        control,
+        name: 'constructionMaterialCode',
+    })
+
+    // Solo al elegir un código: cambiar el IVA después muestra el error del esquema
+    useEffect(() => {
+        if (constructionMaterialCode) {
+            setValue('taxCode', CONSTRUCTION_MATERIAL_TAX_CODE, {
+                shouldValidate: true,
+            })
+        }
+    }, [constructionMaterialCode, setValue])
 
     const numberRegister = makeNumberRegister(register)
 
@@ -249,6 +283,27 @@ export const ProductForm = ({
                         />
                     </FormItem>
                 </div>
+
+                <FormItem
+                    htmlFor="constructionMaterialCode"
+                    label="Material de construcción"
+                    invalid={!!errors.constructionMaterialCode}
+                    errorMessage={errors.constructionMaterialCode?.message}
+                    extra={
+                        <span className="text-xs text-gray-500 ml-2">
+                            Opcional. Código del SRI para la factura; lleva IVA
+                            5%
+                        </span>
+                    }
+                >
+                    <ControlledSelect
+                        name="constructionMaterialCode"
+                        control={control}
+                        options={constructionMaterialOptions}
+                        isDisabled={isSubmitting}
+                        placeholder="No es material de construcción"
+                    />
+                </FormItem>
 
                 <FormItem
                     asterisk

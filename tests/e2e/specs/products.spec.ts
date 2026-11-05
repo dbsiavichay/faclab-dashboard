@@ -100,6 +100,78 @@ test.describe('Productos', () => {
         ).toMatchObject({ salePrice: 13.9, sku: 'TAB-MDF-15' })
     })
 
+    test('un material de construcción lleva su código del SRI e IVA 5%', async ({
+        page,
+        api,
+    }) => {
+        await page.goto('/catalog/products')
+        await page.getByRole('button', { name: 'Nuevo producto' }).click()
+        const dialog = page.getByRole('dialog', { name: 'Nuevo producto' })
+        await dialog.getByLabel('Nombre', { exact: true }).fill('Cemento 50 kg')
+        await dialog.getByLabel('SKU').fill('CEM-50')
+        await expect(dialog).toContainText('IVA 15%')
+
+        await dialog.getByLabel('Material de construcción').click()
+        await page
+            .getByRole('option', { name: 'F010401 · Cemento y sus derivados' })
+            .click()
+
+        await expect(dialog).toContainText('IVA 5%')
+        await dialog.getByRole('button', { name: 'Guardar' }).click()
+
+        await expect(page.getByText('Producto creado')).toBeVisible()
+        expect(api.callsTo('POST', `${ADMIN}/products`)[0].body).toMatchObject({
+            sku: 'CEM-50',
+            taxCode: 'VAT_5',
+            constructionMaterialCode: 'F010401',
+        })
+    })
+
+    test('no guarda un material de construcción con otro IVA', async ({
+        page,
+        api,
+    }) => {
+        await page.goto('/catalog/products')
+        await page.getByRole('button', { name: 'Nuevo producto' }).click()
+        const dialog = page.getByRole('dialog', { name: 'Nuevo producto' })
+        await dialog.getByLabel('Nombre', { exact: true }).fill('Arena')
+        await dialog.getByLabel('SKU').fill('ARE-1')
+        await dialog.getByLabel('Material de construcción').click()
+        await page.getByRole('option', { name: 'F010202 · Arena' }).click()
+        await expect(dialog).toContainText('IVA 5%')
+
+        await dialog.getByLabel('IVA', { exact: true }).click()
+        await page.getByRole('option', { name: 'IVA 15%' }).click()
+        await dialog.getByRole('button', { name: 'Guardar' }).click()
+
+        await expect(
+            dialog.getByText('Un material de construcción lleva IVA 5%')
+        ).toBeVisible()
+        expect(api.callsTo('POST', `${ADMIN}/products`)).toHaveLength(0)
+    })
+
+    test('un producto que no es material no envía código', async ({
+        page,
+        api,
+    }) => {
+        await page.goto('/catalog/products')
+        await page
+            .getByRole('button', { name: 'Editar Tablero MDF 15mm' })
+            .click()
+        const dialog = page.getByRole('dialog', { name: 'Editar producto' })
+
+        await expect(dialog).toContainText('IVA 15%')
+        await dialog.getByRole('button', { name: 'Guardar' }).click()
+
+        await expect(page.getByText('Producto actualizado')).toBeVisible()
+        const { body } = api.callsTo('PUT', `${ADMIN}/products/:id`)[0]
+        expect(body).toMatchObject({ taxCode: 'VAT_15' })
+        expect(
+            (body as { constructionMaterialCode?: unknown })
+                .constructionMaterialCode ?? null
+        ).toBeNull()
+    })
+
     test('se puede recorrer y cerrar el formulario con el teclado', async ({
         page,
     }) => {

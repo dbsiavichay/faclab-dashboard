@@ -1,6 +1,7 @@
 import appConfig from '@/configs/app.config'
 import { httpClient } from '@shared/lib/http/httpClient'
 import type { PaginatedResponse, DataResponse } from '@/@types/api'
+import type { CreditNote } from '@features/invoicing'
 import type {
     DiscrepancyQueryParams,
     InvoiceDiscrepancy,
@@ -79,4 +80,11 @@ export const reviewInvoiceDiscrepancy = (id: number, note?: string) =>
     httpClient.post<DataResponse<InvoiceDiscrepancy>>(
         `${INVENTORY_HOST}/invoice-discrepancies/${id}/review`,
         { note: note || null }
+    )
+
+// La factura autorizada de una venta anulada: se acredita desde su discrepancia
+export const requestDiscrepancyCreditNote = (id: number, reason: string) =>
+    httpClient.post<DataResponse<CreditNote>>(
+        `${INVENTORY_HOST}/invoice-discrepancies/${id}/credit-note`,
+        { reason }
     )

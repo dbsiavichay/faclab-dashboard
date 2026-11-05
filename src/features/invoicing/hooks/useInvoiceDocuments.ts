@@ -3,7 +3,7 @@ import { saveFile } from '@shared/lib/saveFile'
 import { notifyError, notifySuccess } from '@shared/ui/notify'
 import * as api from '../api/client'
 import { INVOICING_ERROR_MESSAGES } from '../model/errors'
-import type { Invoice } from '../model/types'
+import { VOUCHER_TYPE_LABELS, type Invoice } from '../model/types'
 import { useResendInvoiceEmail } from './useInvoicing'
 
 export type InvoiceDocument = 'ride' | 'xml'
@@ -33,7 +33,10 @@ export function useInvoiceDocuments() {
     const resend = useResendInvoiceEmail()
     const [busy, setBusy] = useState<string | null>(null)
 
-    const download = async (invoice: Invoice, document: InvoiceDocument) => {
+    const download = async (
+        invoice: Pick<Invoice, 'id' | 'accessCode'>,
+        document: InvoiceDocument
+    ) => {
         const { extension, fetch, error } = DOCUMENTS[document]
         setBusy(`${invoice.id}:${document}`)
         try {
@@ -47,17 +50,18 @@ export function useInvoiceDocuments() {
     }
 
     const sendAgain = async (invoice: Invoice) => {
+        const name = VOUCHER_TYPE_LABELS[invoice.docType].toLowerCase()
         setBusy(`${invoice.id}:email`)
         try {
             const delivery = await resend.mutateAsync(invoice.id)
             notifySuccess(
                 'Envío en curso',
-                `La factura se enviará a ${
+                `La ${name} se enviará a ${
                     delivery.recipient ?? invoice.buyerEmail
                 }.`
             )
         } catch (err) {
-            notifyError(err, 'No se pudo reenviar la factura', {
+            notifyError(err, `No se pudo reenviar la ${name}`, {
                 messages: INVOICING_ERROR_MESSAGES,
             })
         } finally {
@@ -65,8 +69,10 @@ export function useInvoiceDocuments() {
         }
     }
 
-    const isBusy = (invoice: Invoice, action: InvoiceDocument | 'email') =>
-        busy === `${invoice.id}:${action}`
+    const isBusy = (
+        invoice: Pick<Invoice, 'id'>,
+        action: InvoiceDocument | 'email'
+    ) => busy === `${invoice.id}:${action}`
 
     return { download, sendAgain, isBusy }
 }

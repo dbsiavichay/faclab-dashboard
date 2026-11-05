@@ -28,6 +28,15 @@ export const POS_ERROR_MESSAGES: ErrorMessages = {
     BRANCH_INACTIVE: 'La sucursal está desactivada.',
     TERMINAL_REQUIRED: 'Elige la caja de este navegador.',
     BRANCH_REQUIRED: 'Elige la sucursal.',
+    CREDIT_NOTE_REQUIRED:
+        'La venta está facturada: se anula con una devolución total, que genera la nota de crédito.',
+    FINAL_CONSUMER_REFUND_NOT_ALLOWED:
+        'La factura a consumidor final no se anula ni admite nota de crédito (Res. NAC-DGERCGC25-00000014): esta venta no se puede devolver.',
+    REFUND_REASON_REQUIRED:
+        'Escribe el motivo: va en la nota de crédito que recibe el comprador.',
+    EXCEEDS_ORIGINAL_QUANTITY:
+        'La cantidad supera lo que queda sin devolver de esa venta.',
+    SALE_NOT_CONFIRMED: 'La venta no está confirmada o ya se anuló.',
     REFUND_OUTSIDE_BRANCH:
         'La venta es de otra sucursal: la devolución se hace en esa sucursal.',
     INSUFFICIENT_PAYMENT: 'Los pagos no cubren el total de la venta.',

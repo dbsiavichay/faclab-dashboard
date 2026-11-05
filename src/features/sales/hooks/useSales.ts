@@ -85,3 +85,14 @@ export const useReviewDiscrepancy = () => {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: SALES_KEY }),
     })
 }
+
+export const useRequestDiscrepancyCreditNote = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
+            const body = await api.requestDiscrepancyCreditNote(id, reason)
+            return body.data
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: SALES_KEY }),
+    })
+}

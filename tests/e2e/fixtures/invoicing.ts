@@ -36,7 +36,9 @@ export const ACCESS_CODE = '1501202601179214100100120010020000001231234567811'
 
 export const buildInvoice = (overrides: Partial<Invoice> = {}): Invoice => ({
     id: 'inv-1',
+    docType: '01',
     saleId: '501',
+    sourceInvoiceId: null,
     accessCode: ACCESS_CODE,
     status: 'authorized',
     signatureId: 'sig-1',

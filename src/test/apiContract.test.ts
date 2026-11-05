@@ -24,6 +24,7 @@ import {
     AUDIT_ACTION_LABELS,
     AUDIT_SOURCE_LABELS,
 } from '@features/audit-log/model/types'
+import { CREDIT_NOTE_STATUS_LABELS } from '@features/invoicing/model/types'
 import { LOCATION_TYPES } from '@features/locations/model/types'
 import { MOVEMENT_TYPES } from '@features/movements/model/types'
 import {
@@ -92,6 +93,11 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
     ['AlertType', 'ALERT_TYPE_LABELS', keys(ALERT_TYPE_LABELS)],
     ['AuditAction', 'AUDIT_ACTION_LABELS', keys(AUDIT_ACTION_LABELS)],
     ['InvoiceStatus', 'SALE_INVOICE_STATUSES', SALE_INVOICE_STATUSES],
+    [
+        'CreditNoteStatus',
+        'CREDIT_NOTE_STATUS_LABELS',
+        keys(CREDIT_NOTE_STATUS_LABELS),
+    ],
     [
         'DiscrepancyKind',
         'DISCREPANCY_KIND_LABELS',

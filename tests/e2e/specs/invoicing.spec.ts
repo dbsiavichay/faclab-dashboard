@@ -531,6 +531,6 @@ test.describe('Perfil fiscal', () => {
 
         await expect(dialog).toBeHidden()
         const [update] = api.callsTo('PUT', `${INVOICING}/sequences/001/002`)
-        expect(update.body).toEqual({ nextSequence: 100 })
+        expect(update.body).toEqual({ nextSequence: 100, docType: '01' })
     })
 })

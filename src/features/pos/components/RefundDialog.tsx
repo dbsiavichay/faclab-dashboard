@@ -8,7 +8,18 @@ import { POS_ERROR_MESSAGES } from '../model/errors'
 import { saleLabel } from '../lib/saleLabel'
 import { roundMoney } from '@shared/lib/money'
 import { useCreateRefund, useProcessRefund } from '../hooks/usePOS'
-import { getSale, getSaleItems, getProduct } from '../api/client'
+import {
+    getProduct,
+    getRefund,
+    getRefunds,
+    getSale,
+    getSaleItems,
+} from '../api/client'
+import {
+    invoicedToFinalConsumer,
+    refundedQuantities,
+    saleHasInvoice,
+} from '../model/refunds'
 import { discountFactor, taxBreakdown } from '../model/totals'
 import {
     POS_PAYMENT_METHOD_LABELS,
@@ -31,6 +42,27 @@ interface RefundItemSelection {
     productName: string
     maxQuantity: number
     selectedQuantity: number
+}
+
+/**
+ * Lo que ya se devolvió de cada ítem. Solo ayuda a no ofrecer de más: el backend
+ * rechaza lo que exceda, así que sin poder leerlo (un rol sin historial) el
+ * diálogo sigue sirviendo.
+ */
+const alreadyRefunded = async (
+    saleId: number
+): Promise<Map<number, number>> => {
+    try {
+        const previous = await getRefunds({ saleId })
+        const details = await Promise.all(
+            previous.data
+                .filter((refund) => refund.status !== 'CANCELLED')
+                .map((refund) => getRefund(refund.id))
+        )
+        return refundedQuantities(details.map((detail) => detail.data))
+    } catch {
+        return new Map()
+    }
 }
 
 const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
@@ -65,8 +97,18 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                 return
             }
 
+            if (invoicedToFinalConsumer(saleData)) {
+                notifyWarning(
+                    'La factura a consumidor final no se anula ni admite nota de crédito (Res. NAC-DGERCGC25-00000014): esta venta no se puede devolver'
+                )
+                setLoading(false)
+                return
+            }
+
             const itemsResponse = await getSaleItems(id)
             const saleItems = itemsResponse.data
+
+            const refunded = await alreadyRefunded(id)
 
             const selections: RefundItemSelection[] = []
             for (const item of saleItems) {
@@ -75,7 +117,10 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                 selections.push({
                     saleItem: item,
                     productName: product.name,
-                    maxQuantity: item.quantity,
+                    maxQuantity: Math.max(
+                        0,
+                        item.quantity - (refunded.get(item.id) ?? 0)
+                    ),
                     selectedQuantity: 0,
                 })
             }
@@ -106,7 +151,20 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
         )
     }
 
+    const selectAll = () => {
+        setItems((prev) =>
+            prev.map((item) => ({
+                ...item,
+                selectedQuantity: item.maxQuantity,
+            }))
+        )
+    }
+
     const selectedItems = items.filter((i) => i.selectedQuantity > 0)
+    const hasInvoice = sale ? saleHasInvoice(sale) : false
+    const nothingLeft = items.every((i) => i.maxQuantity === 0)
+    // The XML of its credit note requires a reason
+    const reasonMissing = hasInvoice && reason.trim() === ''
 
     // Preview: what was charged for these items, with the sale's global
     // discount prorated, rounded like the backend refund
@@ -132,7 +190,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                     saleItemId: i.saleItem.id,
                     quantity: i.selectedQuantity,
                 })),
-                reason: reason || undefined,
+                reason: reason.trim() || undefined,
             })
             setRefundId(refund.id)
             setRefundTotal(refund.total)
@@ -159,7 +217,12 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                     ],
                 },
             })
-            notifySuccess('Devolución procesada correctamente')
+            notifySuccess(
+                'Devolución procesada correctamente',
+                hasInvoice
+                    ? 'Su nota de crédito se está emitiendo: la verás en Devoluciones'
+                    : undefined
+            )
             handleClose()
         } catch (error: unknown) {
             notifyError(error, 'Error al procesar la devolución', {
@@ -229,9 +292,33 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                         </p>
                     </div>
 
-                    <p className="text-sm font-medium">
-                        Seleccione items a devolver:
-                    </p>
+                    {hasInvoice && (
+                        <p className="text-sm p-3 rounded-lg bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                            Esta venta tiene factura: la devolución genera una
+                            nota de crédito electrónica.
+                        </p>
+                    )}
+
+                    {nothingLeft ? (
+                        <p className="text-sm font-medium">
+                            Esta venta ya se devolvió por completo.
+                        </p>
+                    ) : (
+                        <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium">
+                                Seleccione items a devolver:
+                            </p>
+                            <Button
+                                size="xs"
+                                variant="default"
+                                onClick={selectAll}
+                            >
+                                {hasInvoice
+                                    ? 'Anular venta (devolver todo)'
+                                    : 'Devolver todo'}
+                            </Button>
+                        </div>
+                    )}
 
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                         {items.map((item, index) => (
@@ -285,7 +372,12 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
 
                     <Input
                         value={reason}
-                        placeholder="Razón de devolución (opcional)"
+                        maxLength={300}
+                        placeholder={
+                            hasInvoice
+                                ? 'Motivo (obligatorio: va en la nota de crédito)'
+                                : 'Razón de devolución (opcional)'
+                        }
                         onChange={(e) => setReason(e.target.value)}
                     />
 
@@ -307,7 +399,9 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                         <Button
                             block
                             variant="solid"
-                            disabled={selectedItems.length === 0}
+                            disabled={
+                                selectedItems.length === 0 || reasonMissing
+                            }
                             loading={createRefund.isPending}
                             onClick={handleCreateRefund}
                         >

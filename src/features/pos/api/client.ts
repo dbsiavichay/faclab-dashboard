@@ -21,6 +21,7 @@ import type {
     PaymentInput,
     Receipt,
     Refund,
+    RefundDetail,
     RefundListParams,
     CreateRefundInput,
     ProcessRefundInput,
@@ -215,7 +216,7 @@ export const cancelRefund = (refundId: number) =>
     )
 
 export const getRefund = (id: number) =>
-    httpClient.get<DataResponse<Refund>>(`${HOST}/refunds/${id}`)
+    httpClient.get<DataResponse<RefundDetail>>(`${HOST}/refunds/${id}`)
 
 export const getRefunds = (params?: RefundListParams) =>
     httpClient.get<PaginatedResponse<Refund>>(`${HOST}/refunds`, { params })

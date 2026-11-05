@@ -1,21 +1,29 @@
 import { useState } from 'react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import Select from '@/components/ui/Select'
+import LabeledField from '@/components/shared/LabeledField'
 import DataTable, { type ColumnDef } from '@/components/shared/DataTable'
 import PageHeader from '@/components/shared/PageHeader'
 import { useBranchesList, useEmissionPointsList } from '@features/organization'
 import { useSequences } from '../hooks/useInvoicing'
 import { sequenceRows, type SequenceRow } from '../model/sequences'
+import { VOUCHER_TYPE_LABELS, type VoucherType } from '../model/types'
 import NextSequenceModal from '../components/NextSequenceModal'
 
 // Una ferretería tiene pocas sucursales y puntos de emisión: se traen todos
 const ALL = { limit: 1000 }
+
+const DOC_TYPE_OPTIONS = Object.entries(VOUCHER_TYPE_LABELS).map(
+    ([value, label]) => ({ value: value as VoucherType, label })
+)
 
 const SequencesPage = () => {
     const branches = useBranchesList(ALL)
     const emissionPoints = useEmissionPointsList(ALL)
     const sequences = useSequences()
     const [editing, setEditing] = useState<SequenceRow | null>(null)
+    const [docType, setDocType] = useState<VoucherType>('01')
 
     const queries = [branches, emissionPoints, sequences]
     const rows =
@@ -23,7 +31,8 @@ const SequencesPage = () => {
             ? sequenceRows(
                   branches.data.items,
                   emissionPoints.data.items,
-                  sequences.data
+                  sequences.data,
+                  docType
               )
             : []
 
@@ -97,8 +106,23 @@ const SequencesPage = () => {
         <>
             <PageHeader
                 title="Secuenciales"
-                description="Número de la próxima factura de cada establecimiento y punto de emisión. Nunca retrocede."
+                description="Número del próximo comprobante de cada establecimiento y punto de emisión. Facturas y notas de crédito numeran aparte. Nunca retrocede."
             />
+            <Card className="mb-4">
+                <div className="p-4 max-w-xs">
+                    <LabeledField label="Documento">
+                        <Select
+                            options={DOC_TYPE_OPTIONS}
+                            value={DOC_TYPE_OPTIONS.find(
+                                (option) => option.value === docType
+                            )}
+                            onChange={(option) => {
+                                if (option) setDocType(option.value)
+                            }}
+                        />
+                    </LabeledField>
+                </div>
+            </Card>
             <Card bodyClass="p-0">
                 <DataTable
                     columns={columns}
@@ -111,6 +135,7 @@ const SequencesPage = () => {
             {editing && (
                 <NextSequenceModal
                     row={editing}
+                    docType={docType}
                     onClose={() => setEditing(null)}
                 />
             )}

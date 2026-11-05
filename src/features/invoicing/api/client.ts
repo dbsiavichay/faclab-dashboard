@@ -5,11 +5,13 @@ import type {
     Certificate,
     CompanyConfig,
     CompanyConfigInput,
+    CreditNote,
     Invoice,
     InvoiceDelivery,
     InvoiceQueryParams,
     InvoicingStatus,
     SriSequence,
+    VoucherType,
 } from '../model/types'
 
 const HOST = appConfig.invoicingApiHost
@@ -62,11 +64,18 @@ export const getSequences = () =>
 export const setNextSequence = (
     establishment: string,
     emissionPoint: string,
-    nextSequence: number
+    nextSequence: number,
+    docType: VoucherType = '01'
 ) =>
     httpClient.put<DataResponse<SriSequence>>(
         `${HOST}/api/sequences/${establishment}/${emissionPoint}`,
-        { nextSequence }
+        { nextSequence, docType }
+    )
+
+// Del core: volver a pedir una nota rechazada o cuyo resultado no llega
+export const requestCreditNoteAgain = (creditNoteId: number) =>
+    httpClient.post<DataResponse<CreditNote>>(
+        `${appConfig.inventoryApiHost}/credit-notes/${creditNoteId}/request-again`
     )
 
 // Whether the issuer can invoice (config, certificate) and unfinished counts

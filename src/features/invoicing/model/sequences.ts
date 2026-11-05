@@ -1,7 +1,7 @@
 import type { Branch, EmissionPoint } from '@features/organization'
-import type { SriSequence } from './types'
+import type { SriSequence, VoucherType } from './types'
 
-/** Un establecimiento y punto de emisión con su numeración de facturas */
+/** Un establecimiento y punto de emisión con la numeración de un documento */
 export interface SequenceRow {
     establishment: string
     emissionPoint: string
@@ -16,17 +16,20 @@ const keyOf = (establishment: string, emissionPoint: string) =>
     `${establishment}-${emissionPoint}`
 
 /**
- * Cada punto de emisión activo de una sucursal activa, con su contador o, si
- * todavía no emitió, desde 1; más los contadores de códigos que el core ya no
- * tiene activos (siguen numerando si vuelven).
+ * Cada punto de emisión activo de una sucursal activa, con su contador de ese
+ * documento o, si todavía no emitió, desde 1; más los contadores de códigos que
+ * el core ya no tiene activos (siguen numerando si vuelven). Facturas y notas de
+ * crédito numeran aparte: un contador nunca pisa al del otro documento.
  */
 export const sequenceRows = (
     branches: Branch[],
     emissionPoints: EmissionPoint[],
-    sequences: SriSequence[]
+    allSequences: SriSequence[],
+    docType: VoucherType = '01'
 ): SequenceRow[] => {
     const branchById = new Map(branches.map((b) => [b.id, b]))
     const rows = new Map<string, SequenceRow>()
+    const sequences = allSequences.filter((s) => s.docType === docType)
 
     for (const point of emissionPoints) {
         const branch = branchById.get(point.branchId)

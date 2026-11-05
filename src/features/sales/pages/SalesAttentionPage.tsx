@@ -28,6 +28,7 @@ import {
 import DiscrepancyInvoicing from '../components/DiscrepancyInvoicing'
 import DiscrepancyActionButtons from '../components/DiscrepancyActions'
 import ReviewDiscrepancyDialog from '../components/ReviewDiscrepancyDialog'
+import CreditNoteDiscrepancyDialog from '../components/CreditNoteDiscrepancyDialog'
 
 const { TabList, TabNav, TabContent } = Tabs
 
@@ -51,6 +52,7 @@ const DiscrepanciesTab = () => {
     const [status, setStatus] = useState<DiscrepancyStatus>('open')
     const [pageIndex, setPageIndex] = useState(1)
     const [reviewing, setReviewing] = useState<InvoiceDiscrepancy | null>(null)
+    const [crediting, setCrediting] = useState<InvoiceDiscrepancy | null>(null)
 
     const { data, isLoading, error, refetch } = useInvoiceDiscrepancies({
         status,
@@ -153,6 +155,7 @@ const DiscrepanciesTab = () => {
                 <DiscrepancyActionButtons
                     discrepancy={props.row.original}
                     onReview={setReviewing}
+                    onCreditNote={setCrediting}
                 />
             ),
         })
@@ -184,6 +187,10 @@ const DiscrepanciesTab = () => {
             <ReviewDiscrepancyDialog
                 discrepancy={reviewing}
                 onClose={() => setReviewing(null)}
+            />
+            <CreditNoteDiscrepancyDialog
+                discrepancy={crediting}
+                onClose={() => setCrediting(null)}
             />
         </>
     )

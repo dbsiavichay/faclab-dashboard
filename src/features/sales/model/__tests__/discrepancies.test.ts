@@ -34,7 +34,9 @@ const invoice = (
     createdAt = '2026-10-29'
 ): Invoice => ({
     id: `inv-${status}-${createdAt}`,
+    docType: '01',
     saleId: '7',
+    sourceInvoiceId: null,
     accessCode: null,
     status,
     signatureId: null,
@@ -51,7 +53,7 @@ const invoice = (
 
 describe('discrepancyActions', () => {
     it('resends a sale invoicing never received', () => {
-        expect(discrepancyActions(discrepancy(), [])).toEqual({
+        expect(discrepancyActions(discrepancy(), [])).toMatchObject({
             resend: true,
             retry: null,
             review: true,
@@ -76,11 +78,15 @@ describe('discrepancyActions', () => {
             pending,
         ])
 
-        expect(actions).toEqual({ resend: false, retry: pending, review: true })
+        expect(actions).toMatchObject({
+            resend: false,
+            retry: pending,
+            review: true,
+        })
     })
 
     it('only reviews while invoicing is unknown or for a cancelled sale', () => {
-        expect(discrepancyActions(discrepancy(), undefined)).toEqual({
+        expect(discrepancyActions(discrepancy(), undefined)).toMatchObject({
             resend: false,
             retry: null,
             review: true,
@@ -89,6 +95,66 @@ describe('discrepancyActions', () => {
         expect(
             discrepancyActions(cancelled, [invoice('authorized')]).resend
         ).toBe(false)
+    })
+
+    it('a credit note of the sale does not count as its invoice', () => {
+        const creditNote = {
+            ...invoice('pending', '2026-10-31'),
+            docType: '04' as const,
+        }
+
+        const actions = discrepancyActions(discrepancy(), [
+            invoice('rejected'),
+            creditNote,
+        ])
+
+        expect(actions).toMatchObject({ resend: true, retry: null })
+    })
+
+    it('offers the credit note of an authorized invoice of a cancelled sale', () => {
+        const cancelled = (overrides = {}) =>
+            discrepancy({ kind: 'authorized_on_cancelled', ...overrides })
+        const sale = { ...discrepancy().sale!, status: 'CANCELLED' as const }
+
+        expect(
+            discrepancyActions(
+                cancelled({ sale: { ...sale, customerId: 5 } }),
+                undefined
+            )
+        ).toMatchObject({ creditNote: true, creditNoteNotAllowed: false })
+        // Once asked for, its state shows instead
+        expect(
+            discrepancyActions(
+                cancelled({
+                    sale: { ...sale, customerId: 5 },
+                    creditNote: { id: 1, status: 'PENDING' },
+                }),
+                undefined
+            ).creditNote
+        ).toBe(false)
+        expect(
+            discrepancyActions(cancelled({ status: 'resolved' }), undefined)
+                .creditNote
+        ).toBe(false)
+    })
+
+    it('says an invoice to the final consumer admits no credit note', () => {
+        const actions = discrepancyActions(
+            discrepancy({
+                kind: 'authorized_on_cancelled',
+                sale: { ...discrepancy().sale!, customerId: null },
+            }),
+            undefined
+        )
+
+        expect(actions).toMatchObject({
+            creditNote: false,
+            creditNoteNotAllowed: true,
+        })
+    })
+
+    it('never offers it for a sale without a result', () => {
+        expect(discrepancyActions(discrepancy(), []).creditNote).toBe(false)
     })
 
     it('reviews only an open one', () => {
@@ -104,5 +170,16 @@ describe('latestInvoice', () => {
 
         expect(latestInvoice([invoice('rejected'), newer])).toBe(newer)
         expect(latestInvoice([])).toBeNull()
+    })
+
+    it('leaves out the credit notes of the sale', () => {
+        const older = invoice('authorized', '2026-10-29')
+
+        expect(
+            latestInvoice([
+                older,
+                { ...invoice('pending', '2026-10-31'), docType: '04' },
+            ])
+        ).toBe(older)
     })
 })

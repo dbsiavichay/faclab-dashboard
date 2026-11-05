@@ -11,8 +11,11 @@ export const INVOICING_ERROR_MESSAGES: ErrorMessages = {
     CERTIFICATE_IN_USE:
         'El certificado está en uso: selecciona otro en el Perfil fiscal antes de eliminarlo.',
     SEQUENCE_CANNOT_GO_BACK:
-        'Ya se emitió una factura con ese número o uno mayor: el secuencial no retrocede.',
+        'Ya se emitió un comprobante con ese número o uno mayor: el secuencial no retrocede.',
     INVOICE_NOT_AUTHORIZED: 'La factura todavía no está autorizada por el SRI.',
+    CREDIT_NOTE_ALREADY_AUTHORIZED: 'La nota de crédito ya está autorizada.',
+    CREDIT_NOTES_DISABLED: 'Las notas de crédito están desactivadas.',
+    INVOICING_DISABLED: 'La facturación electrónica está desactivada.',
     EMAIL_DISABLED:
         'El envío de facturas por correo está desactivado en este servidor.',
     BUYER_EMAIL_MISSING:

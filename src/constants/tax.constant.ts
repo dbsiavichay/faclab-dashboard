@@ -43,3 +43,60 @@ export const TAX_CODE_RATES: Record<TaxCode, number> = {
     EXEMPT: 0,
     NOT_TAXED: 0,
 }
+
+/**
+ * Subcategorías de materiales de construcción. Espejo de
+ * `ConstructionMaterialCode` en faclab-core (src/shared/domain/tax.py): Tabla 31
+ * del Anexo 23 de la ficha técnica offline 2.34, con el texto de la Res.
+ * NAC-DGERCGC24-00000013. El código va exacto en la factura.
+ */
+export const CONSTRUCTION_MATERIAL_CODES = [
+    'F010101',
+    'F010201',
+    'F010202',
+    'F010203',
+    'F010204',
+    'F010205',
+    'F010301',
+    'F010401',
+    'F010402',
+    'F010501',
+    'F010601',
+    'F010701',
+    'F010702',
+    'F010703',
+    'F010801',
+    'F010802',
+    'F010803',
+    'F010804',
+] as const
+
+export type ConstructionMaterialCode =
+    (typeof CONSTRUCTION_MATERIAL_CODES)[number]
+
+export const CONSTRUCTION_MATERIAL_LABELS: Record<
+    ConstructionMaterialCode,
+    string
+> = {
+    F010101: 'Varilla laminada corrugada AS42 de 8, 10 y 12 mm',
+    F010201: 'Arcilla',
+    F010202: 'Arena',
+    F010203: 'Cal',
+    F010204: 'Caliza',
+    F010205: 'Pétreos',
+    F010301: 'Hormigón premezclado',
+    F010401: 'Cemento y sus derivados',
+    F010402: 'Residuo cementero',
+    F010501: 'Chatarra ferrosa',
+    F010601: 'Morteros',
+    F010701: 'Clinker',
+    F010702: 'Puzolana',
+    F010703: 'Yeso',
+    F010801: 'Adoquín',
+    F010802: 'Bloques',
+    F010803: 'Ladrillos',
+    F010804: 'Productos de hormigón prefabricado',
+}
+
+/** La tarifa de esos materiales: `CONSTRUCTION_MATERIAL_TAX_CODE` en faclab-core. */
+export const CONSTRUCTION_MATERIAL_TAX_CODE: TaxCode = 'VAT_5'

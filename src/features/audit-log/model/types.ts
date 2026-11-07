@@ -110,6 +110,7 @@ const FIELD_LABELS: Record<string, string> = {
     purchase_price: 'Costo',
     sale_price: 'Precio de venta',
     tax_code: 'IVA',
+    construction_material_code: 'Material de construcción',
     is_active: 'Activo',
     active: 'Activo',
     status: 'Estado',

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { type TaxCode } from '@/constants/tax.constant'
 import { roundMoney } from '@shared/lib/money'
+import { roundQuantity } from '@shared/lib/quantity'
 import { discountFactor, taxBreakdown } from '../model/totals'
 
 export interface POSCartItem {
@@ -12,8 +13,11 @@ export interface POSCartItem {
     listPrice: number
     overrideReason?: string
     taxCode: TaxCode
+    // Decimal (S5.1): up to the decimals of the product's unit of measure
     quantity: number
     discount: number
+    unitSymbol: string | null
+    quantityDecimals: number
 }
 
 export const isPriceOverridden = (item: POSCartItem): boolean =>
@@ -40,6 +44,9 @@ interface POSState {
         // Defaults to salePrice (no override)
         listPrice?: number
         overrideReason?: string
+        // The product's unit; without one it takes whole quantities
+        unitSymbol?: string | null
+        quantityDecimals?: number
     }) => void
     updateItemQuantity: (productId: number, quantity: number) => void
     updateItemDiscount: (productId: number, discount: number) => void
@@ -75,7 +82,10 @@ export const usePOSStore = create<POSState>()((set) => ({
                 return {
                     cartItems: state.cartItems.map((item) =>
                         item.productId === product.productId
-                            ? { ...item, quantity: item.quantity + 1 }
+                            ? {
+                                  ...item,
+                                  quantity: roundQuantity(item.quantity + 1),
+                              }
                             : item
                     ),
                 }
@@ -86,6 +96,8 @@ export const usePOSStore = create<POSState>()((set) => ({
                     {
                         ...product,
                         listPrice: product.listPrice ?? product.salePrice,
+                        unitSymbol: product.unitSymbol ?? null,
+                        quantityDecimals: product.quantityDecimals ?? 0,
                         quantity: 1,
                         discount: 0,
                     },
@@ -104,7 +116,9 @@ export const usePOSStore = create<POSState>()((set) => ({
             }
             return {
                 cartItems: state.cartItems.map((item) =>
-                    item.productId === productId ? { ...item, quantity } : item
+                    item.productId === productId
+                        ? { ...item, quantity: roundQuantity(quantity) }
+                        : item
                 ),
             }
         }),

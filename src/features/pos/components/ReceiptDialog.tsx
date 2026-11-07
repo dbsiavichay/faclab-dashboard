@@ -6,6 +6,7 @@ import { HiOutlineCheckCircle } from 'react-icons/hi'
 import { InvoiceReceiptNote } from '@features/invoicing'
 import { formatCurrency } from '@shared/lib/format'
 import { saleLabel } from '../lib/saleLabel'
+import { formatQuantity } from '@shared/lib/quantity'
 
 interface ReceiptDialogProps {
     isOpen: boolean
@@ -80,7 +81,8 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                         {receipt.items.map((item, i) => (
                             <div key={i} className="flex justify-between">
                                 <span>
-                                    {item.quantity}x {item.productName}
+                                    {formatQuantity(item.quantity)} x{' '}
+                                    {item.productName}
                                 </span>
                                 <span>{formatCurrency(item.subtotal)}</span>
                             </div>

@@ -136,7 +136,9 @@ test.describe('Punto de venta', () => {
         await product(page, 'Bisagra cazoleta 35mm').click()
 
         const panel = order(page)
-        await expect(panel.getByLabel('Cantidad: 2')).toBeVisible()
+        await expect(
+            panel.getByRole('textbox', { name: 'Cantidad de Tablero MDF 15mm' })
+        ).toHaveValue('2')
         await expect(panel.getByText('Bisagra cazoleta 35mm')).toBeVisible()
 
         const pay = panel.getByRole('button', { name: 'Cobrar' })
@@ -174,7 +176,7 @@ test.describe('Punto de venta', () => {
         const receipt = page.getByRole('dialog', { name: 'Venta completada' })
         await expect(receipt).toContainText(`Venta ${SALE_NUMBER}`)
         await expect(receipt).toContainText('Caja Caja 1 (CAJA-01)')
-        await expect(receipt).toContainText('2x Tablero MDF 15mm')
+        await expect(receipt).toContainText('2 x Tablero MDF 15mm')
 
         const [quickSale] = api.callsTo('POST', `${POS}/sales/quick`)
         // La venta sale de la caja vinculada: su punto de emisión y su stock
@@ -195,6 +197,63 @@ test.describe('Punto de venta', () => {
 
         await receipt.getByRole('button', { name: 'Cerrar' }).first().click()
         await expect(panel.getByText('Carrito vacío')).toBeVisible()
+    })
+
+    test('vende 2,5 m de cable y cobra lo que calcula faclab-core', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        await product(page, 'Cable gemelo 2x14 AWG').click()
+        const panel = order(page)
+        const quantity = panel.getByRole('textbox', {
+            name: 'Cantidad de Cable gemelo 2x14 AWG',
+        })
+        await quantity.fill('2,5')
+        await quantity.press('Enter')
+        await expect(quantity).toHaveValue('2,5')
+        await expect(panel.getByText('m', { exact: true })).toBeVisible()
+        await panel.getByText('Consumidor final').click()
+
+        await panel.getByRole('button', { name: 'Cobrar' }).click()
+        const payment = page.getByRole('dialog', { name: 'Cobrar' })
+        await payment.getByRole('button', { name: 'Completar venta' }).click()
+
+        const receipt = page.getByRole('dialog', { name: 'Venta completada' })
+        await expect(receipt).toContainText('2,5 x Cable gemelo 2x14 AWG')
+        const [quickSale] = api.callsTo('POST', `${POS}/sales/quick`)
+        const sale = quickSale.body as {
+            items: unknown[]
+            payments: { amount: number }[]
+        }
+        expect(sale.items).toEqual([
+            { productId: 4, quantity: 2.5, unitPrice: 0.85 },
+        ])
+        // 2,5 × 0,85 = 2,125 → 2,13 más 0,32 de IVA, como en faclab-core
+        expect(sale.payments[0].amount).toBe(2.45)
+    })
+
+    test('una unidad sin decimales no acepta 1,5 en el carrito', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        await product(page, 'Tablero MDF 15mm').click()
+        const panel = order(page)
+        const quantity = panel.getByRole('textbox', {
+            name: 'Cantidad de Tablero MDF 15mm',
+        })
+
+        await quantity.fill('1,5')
+        await quantity.press('Enter')
+
+        await expect(panel.getByRole('alert')).toHaveText(
+            'Solo cantidades enteras'
+        )
+        await quantity.press('Escape')
+        await expect(quantity).toHaveValue('1')
     })
 
     test('en efectivo envía lo entregado y el recibo muestra el vuelto', async ({

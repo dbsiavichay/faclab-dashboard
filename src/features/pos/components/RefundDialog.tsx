@@ -31,10 +31,54 @@ import {
 } from '../model/types'
 import { HiOutlineSearch, HiMinus, HiPlus } from 'react-icons/hi'
 import { formatCurrency } from '@shared/lib/format'
+import {
+    formatQuantity,
+    parseQuantity,
+    roundQuantity,
+} from '@shared/lib/quantity'
 
 interface RefundDialogProps {
     isOpen: boolean
     onClose: () => void
+}
+
+/**
+ * La cantidad a devolver de un ítem (S5.1): se escribe con decimales (1,25 m) o
+ * se cambia de uno en uno; el diálogo la limita a lo que queda por devolver y
+ * faclab-core valida los decimales de la unidad
+ */
+const RefundQuantityInput = ({
+    label,
+    value,
+    onChange,
+}: {
+    label: string
+    value: number
+    onChange: (quantity: number) => void
+}) => {
+    const [draft, setDraft] = useState<string | null>(null)
+    const commit = () => {
+        if (draft === null) return
+        const quantity = parseQuantity(draft)
+        if (quantity !== null) onChange(quantity)
+        setDraft(null)
+    }
+    return (
+        <Input
+            size="sm"
+            inputMode="decimal"
+            autoComplete="off"
+            className="w-16 text-center tabular-nums"
+            aria-label={label}
+            value={draft ?? formatQuantity(value)}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commit}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter') commit()
+                if (e.key === 'Escape') setDraft(null)
+            }}
+        />
+    )
 }
 
 interface RefundItemSelection {
@@ -117,9 +161,12 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                 selections.push({
                     saleItem: item,
                     productName: product.name,
-                    maxQuantity: Math.max(
-                        0,
-                        item.quantity - (refunded.get(item.id) ?? 0)
+                    // Decimal quantities (S5.1): no float noise in 2,5 - 1,25
+                    maxQuantity: roundQuantity(
+                        Math.max(
+                            0,
+                            item.quantity - (refunded.get(item.id) ?? 0)
+                        )
                     ),
                     selectedQuantity: 0,
                 })
@@ -141,9 +188,8 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                 i === index
                     ? {
                           ...item,
-                          selectedQuantity: Math.max(
-                              0,
-                              Math.min(qty, item.maxQuantity)
+                          selectedQuantity: roundQuantity(
+                              Math.max(0, Math.min(qty, item.maxQuantity))
                           ),
                       }
                     : item
@@ -334,7 +380,8 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                                         {formatCurrency(
                                             item.saleItem.unitPrice
                                         )}{' '}
-                                        x {item.maxQuantity} (máx)
+                                        x {formatQuantity(item.maxQuantity)}{' '}
+                                        (máx)
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -350,9 +397,13 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                                             )
                                         }
                                     />
-                                    <span className="w-8 text-center text-sm font-medium">
-                                        {item.selectedQuantity}
-                                    </span>
+                                    <RefundQuantityInput
+                                        label={`Cantidad a devolver de ${item.productName}`}
+                                        value={item.selectedQuantity}
+                                        onChange={(qty) =>
+                                            updateQuantity(index, qty)
+                                        }
+                                    />
                                     <Button
                                         size="xs"
                                         variant="plain"

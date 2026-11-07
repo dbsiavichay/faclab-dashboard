@@ -36,6 +36,8 @@ export const POS_ERROR_MESSAGES: ErrorMessages = {
         'Escribe el motivo: va en la nota de crédito que recibe el comprador.',
     EXCEEDS_ORIGINAL_QUANTITY:
         'La cantidad supera lo que queda sin devolver de esa venta.',
+    QUANTITY_PRECISION_EXCEEDED:
+        'La cantidad tiene más decimales de los que admite la unidad del producto (por ejemplo, un producto por unidades no se vende en fracciones).',
     SALE_NOT_CONFIRMED: 'La venta no está confirmada o ya se anuló.',
     REFUND_OUTSIDE_BRANCH:
         'La venta es de otra sucursal: la devolución se hace en esa sucursal.',

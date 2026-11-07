@@ -3,6 +3,7 @@ import Table from '@/components/ui/Table'
 import { formatCurrency } from '@shared/lib/format'
 import { paymentMethodLabel } from '../lib/labels'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -69,7 +70,7 @@ export const ProductsSoldTable = ({
                         <Tr key={row.sku}>
                             <Td>{row.productName}</Td>
                             <Td className="font-mono text-sm">{row.sku}</Td>
-                            <Td>{row.quantity}</Td>
+                            <Td>{formatQuantity(row.quantity)}</Td>
                             <Td>{formatCurrency(row.total)}</Td>
                         </Tr>
                     ))}

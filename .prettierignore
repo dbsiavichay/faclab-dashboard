@@ -8,3 +8,6 @@
 /src/index.css
 package.json
 package.lock.json
+
+# Copia idéntica de faclab-core/tests/fixtures/sale_totals_cases.json (S5.1): no se reformatea
+src/features/pos/model/__tests__/sale-totals.cases.json

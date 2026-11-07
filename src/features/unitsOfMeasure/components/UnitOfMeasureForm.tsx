@@ -1,5 +1,6 @@
 import Input from '@/components/ui/Input'
 import { FormItem, FormContainer } from '@/components/ui/Form'
+import { makeNumberRegister } from '@/components/ui/Form/utils'
 import { ControlledSwitcher } from '@/components/ui/Form/controlled'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -21,6 +22,7 @@ const emptyValues: UnitOfMeasureFormValues = {
     symbol: '',
     description: '',
     isActive: true,
+    decimals: 0,
 }
 
 export const UnitOfMeasureForm = ({
@@ -35,6 +37,7 @@ export const UnitOfMeasureForm = ({
               symbol: unitOfMeasure.symbol,
               description: unitOfMeasure.description ?? '',
               isActive: unitOfMeasure.isActive,
+              decimals: unitOfMeasure.decimals,
           }
         : emptyValues
 
@@ -47,6 +50,7 @@ export const UnitOfMeasureForm = ({
         resolver: zodResolver(unitOfMeasureSchema),
         defaultValues,
     })
+    const numberRegister = makeNumberRegister(register)
 
     return (
         <form id={formId} onSubmit={handleSubmit(onSubmit)}>
@@ -81,6 +85,29 @@ export const UnitOfMeasureForm = ({
                         invalid={!!errors.symbol}
                         {...register('symbol')}
                     />
+                </FormItem>
+
+                <FormItem
+                    asterisk
+                    htmlFor="decimals"
+                    label="Decimales en las cantidades"
+                    invalid={!!errors.decimals}
+                    errorMessage={errors.decimals?.message}
+                >
+                    <Input
+                        id="decimals"
+                        type="number"
+                        min={0}
+                        max={6}
+                        step={1}
+                        disabled={isSubmitting}
+                        invalid={!!errors.decimals}
+                        {...numberRegister('decimals', { integer: true })}
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        0 para unidades enteras, 2 para metros (2,50 m), 3 para
+                        kilos (1,250 kg)
+                    </p>
                 </FormItem>
 
                 <FormItem

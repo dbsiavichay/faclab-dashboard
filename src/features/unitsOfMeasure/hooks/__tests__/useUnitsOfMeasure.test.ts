@@ -16,6 +16,7 @@ const mockUnit = {
     symbol: 'kg',
     description: null,
     isActive: true,
+    decimals: 0,
 }
 
 const mockPaginatedResponse = {

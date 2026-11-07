@@ -6,6 +6,8 @@ export type UnitOfMeasure = {
     symbol: string
     description?: string | null
     isActive: boolean
+    // Decimales que admite una cantidad en esta unidad (S5.1): 0 = enteras
+    decimals: number
 }
 
 export type UnitOfMeasureInput = {
@@ -13,6 +15,7 @@ export type UnitOfMeasureInput = {
     symbol: string
     description?: string | null
     isActive?: boolean
+    decimals?: number
     [key: string]: unknown
 }
 

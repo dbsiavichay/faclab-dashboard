@@ -9,8 +9,8 @@ export const categories = (): Category[] => [
 ]
 
 export const unitsOfMeasure = (): UnitOfMeasure[] => [
-    { id: 1, name: 'Unidad', symbol: 'u', isActive: true },
-    { id: 2, name: 'Metro', symbol: 'm', isActive: true },
+    { id: 1, name: 'Unidad', symbol: 'u', isActive: true, decimals: 0 },
+    { id: 2, name: 'Metro', symbol: 'm', isActive: true, decimals: 2 },
 ]
 
 export const buildProduct = (overrides: Partial<Product> = {}): Product => ({
@@ -31,6 +31,8 @@ export const buildProduct = (overrides: Partial<Product> = {}): Product => ({
     maxStock: 200,
     reorderPoint: 25,
     leadTimeDays: 5,
+    unitSymbol: 'u',
+    quantityDecimals: 0,
     ...overrides,
 })
 

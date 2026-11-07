@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import type { Stock } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const StockPage = () => {
     const [productId, setProductId] = useState<string>('')
@@ -59,7 +60,7 @@ const StockPage = () => {
                                 : 'text-green-600 font-semibold'
                         }
                     >
-                        {quantity}
+                        {formatQuantity(quantity)}
                     </span>
                 )
             },

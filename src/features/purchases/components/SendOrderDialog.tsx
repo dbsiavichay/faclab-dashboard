@@ -2,6 +2,7 @@ import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { formatCurrency } from '@shared/lib/format'
 import type { PurchaseOrder, PurchaseOrderItem } from '../model/types'
+import { formatQuantity } from '@shared/lib/quantity'
 
 type Props = {
     open: boolean
@@ -39,7 +40,7 @@ export const SendOrderDialog = ({
                             </span>
                             :{' '}
                             <span className="text-blue-600 dark:text-blue-400">
-                                {item.quantityOrdered} uds. x{' '}
+                                {formatQuantity(item.quantityOrdered)} x{' '}
                                 {formatCurrency(item.unitCost)}
                             </span>
                         </li>

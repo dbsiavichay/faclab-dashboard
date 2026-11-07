@@ -1,6 +1,7 @@
 import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import type { TransferItem } from '../model/types'
+import { formatQuantity } from '@shared/lib/quantity'
 
 type Props = {
     open: boolean
@@ -36,7 +37,7 @@ export const ConfirmTransferDialog = ({
                             </span>
                             :{' '}
                             <span className="text-blue-600 dark:text-blue-400">
-                                {item.quantity} unidades
+                                {formatQuantity(item.quantity)}
                             </span>
                         </li>
                     ))}

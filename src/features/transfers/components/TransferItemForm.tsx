@@ -138,12 +138,12 @@ const TransferItemCreateForm = ({
                         >
                             <Input
                                 type="number"
-                                min={1}
+                                step="any"
+                                min={0}
                                 placeholder="1"
                                 disabled={isSubmitting}
                                 invalid={!!errors.quantity}
                                 {...numberRegister('quantity', {
-                                    integer: true,
                                     emptyValue: 1,
                                 })}
                             />
@@ -279,12 +279,12 @@ const TransferItemUpdateForm = ({
                         >
                             <Input
                                 type="number"
-                                min={1}
+                                step="any"
+                                min={0}
                                 placeholder="1"
                                 disabled={isSubmitting}
                                 invalid={!!errors.quantity}
                                 {...numberRegister('quantity', {
-                                    integer: true,
                                     emptyValue: 1,
                                 })}
                             />

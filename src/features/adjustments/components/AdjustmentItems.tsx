@@ -5,6 +5,7 @@ import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import { getDifferenceColor, getDifferenceLabel } from './utils'
 import type { AdjustmentItem } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -69,8 +70,8 @@ export const AdjustmentItems = ({
                         <Tr key={item.id}>
                             <Td>{getProductName(item.productId)}</Td>
                             <Td>{getLocationName(item.locationId)}</Td>
-                            <Td>{item.expectedQuantity}</Td>
-                            <Td>{item.actualQuantity}</Td>
+                            <Td>{formatQuantity(item.expectedQuantity)}</Td>
+                            <Td>{formatQuantity(item.actualQuantity)}</Td>
                             <Td>
                                 <span
                                     className={`font-semibold ${getDifferenceColor(

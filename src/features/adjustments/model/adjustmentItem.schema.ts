@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { quantitySchema } from '@shared/lib/quantity'
 
 export const adjustmentItemCreateSchema = z.object({
     productId: z
@@ -9,13 +10,13 @@ export const adjustmentItemCreateSchema = z.object({
         .number({ error: 'Debe seleccionar una ubicación' })
         .int()
         .min(1, 'Debe seleccionar una ubicación'),
-    actualQuantity: z.number().int().min(0),
+    actualQuantity: quantitySchema({ allowZero: true }),
     lotId: z.number().int().positive().nullable().optional(),
     notes: z.string().optional(),
 })
 
 export const adjustmentItemUpdateSchema = z.object({
-    actualQuantity: z.number().int().min(0),
+    actualQuantity: quantitySchema({ allowZero: true }),
     notes: z.string().optional(),
 })
 

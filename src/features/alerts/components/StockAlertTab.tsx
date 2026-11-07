@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { type StockAlert } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 interface StockAlertTabProps {
     data: StockAlert[]
@@ -45,7 +46,7 @@ const StockAlertTab = ({
             accessorKey: 'currentQuantity',
             cell: (props) => (
                 <span className="font-semibold text-red-600 dark:text-red-400">
-                    {props.row.original.currentQuantity}
+                    {formatQuantity(props.row.original.currentQuantity)}
                 </span>
             ),
         },
@@ -54,7 +55,7 @@ const StockAlertTab = ({
             accessorKey: 'threshold',
             cell: (props) => (
                 <span className="text-gray-700 dark:text-gray-300">
-                    {props.row.original.threshold}
+                    {formatQuantity(props.row.original.threshold)}
                 </span>
             ),
         },

@@ -5,6 +5,7 @@ import { formatCurrency } from '@shared/lib/format'
 import { useWarehouseSummary } from '../hooks/useReports'
 import type { WarehouseSummary } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
+import { formatQuantity } from '@shared/lib/quantity'
 
 type Option = { value: string; label: string }
 
@@ -55,7 +56,7 @@ const WarehouseSummaryTab = ({ warehouseOptions }: Props) => {
             accessorKey: 'totalQuantity',
             cell: (props) => (
                 <span className="font-medium">
-                    {props.row.original.totalQuantity}
+                    {formatQuantity(props.row.original.totalQuantity)}
                 </span>
             ),
         },
@@ -64,7 +65,7 @@ const WarehouseSummaryTab = ({ warehouseOptions }: Props) => {
             accessorKey: 'reservedQuantity',
             cell: (props) => (
                 <span className="text-amber-600 dark:text-amber-400">
-                    {props.row.original.reservedQuantity}
+                    {formatQuantity(props.row.original.reservedQuantity)}
                 </span>
             ),
         },
@@ -73,7 +74,7 @@ const WarehouseSummaryTab = ({ warehouseOptions }: Props) => {
             accessorKey: 'availableQuantity',
             cell: (props) => (
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    {props.row.original.availableQuantity}
+                    {formatQuantity(props.row.original.availableQuantity)}
                 </span>
             ),
         },

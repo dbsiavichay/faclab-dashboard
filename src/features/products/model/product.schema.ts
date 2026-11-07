@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { quantitySchema } from '@shared/lib/quantity'
 import {
     CONSTRUCTION_MATERIAL_CODES,
     CONSTRUCTION_MATERIAL_TAX_CODE,
@@ -37,22 +38,10 @@ export const productSchema = z
             .nullable(),
         isActive: z.boolean().optional(),
         isService: z.boolean().optional(),
-        minStock: z
-            .number()
-            .int('Debe ser entero')
-            .min(0, 'Debe ser mayor o igual a 0')
-            .optional(),
-        maxStock: z
-            .number()
-            .int('Debe ser entero')
-            .min(0, 'Debe ser mayor o igual a 0')
-            .optional()
-            .nullable(),
-        reorderPoint: z
-            .number()
-            .int('Debe ser entero')
-            .min(0, 'Debe ser mayor o igual a 0')
-            .optional(),
+        // Stock thresholds: decimal like any quantity (S5.1)
+        minStock: quantitySchema({ allowZero: true }).optional(),
+        maxStock: quantitySchema({ allowZero: true }).optional().nullable(),
+        reorderPoint: quantitySchema({ allowZero: true }).optional(),
         leadTimeDays: z
             .number()
             .int('Debe ser entero')

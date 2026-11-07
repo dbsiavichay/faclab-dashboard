@@ -2,6 +2,7 @@ import Button from '@/components/ui/Button'
 import Dialog from '@/components/ui/Dialog'
 import { getDifferenceColor } from './utils'
 import type { AdjustmentItem } from '../model/types'
+import { formatQuantity } from '@shared/lib/quantity'
 
 type Props = {
     open: boolean
@@ -42,8 +43,12 @@ export const ConfirmAdjustmentDialog = ({
                                 className={getDifferenceColor(item.difference)}
                             >
                                 {item.difference > 0
-                                    ? `+${item.difference} (entrada)`
-                                    : `${item.difference} (salida)`}
+                                    ? `+${formatQuantity(
+                                          item.difference
+                                      )} (entrada)`
+                                    : `${formatQuantity(
+                                          item.difference
+                                      )} (salida)`}
                             </span>
                         </li>
                     ))}

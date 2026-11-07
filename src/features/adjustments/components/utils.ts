@@ -1,3 +1,5 @@
+import { formatQuantity } from '@shared/lib/quantity'
+
 export const getDifferenceColor = (diff: number): string => {
     if (diff > 0) return 'text-emerald-600 dark:text-emerald-400'
     if (diff < 0) return 'text-red-600 dark:text-red-400'
@@ -5,6 +7,6 @@ export const getDifferenceColor = (diff: number): string => {
 }
 
 export const getDifferenceLabel = (diff: number): string => {
-    if (diff > 0) return `+${diff}`
-    return diff.toString()
+    if (diff > 0) return `+${formatQuantity(diff)}`
+    return formatQuantity(diff)
 }

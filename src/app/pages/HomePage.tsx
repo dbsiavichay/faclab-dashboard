@@ -23,6 +23,7 @@ import { useDashboard } from '@features/reports'
 import { InvoicingSummaryCard } from '@features/invoicing'
 import type { ReactNode } from 'react'
 import type { StatusTone } from '@shared/lib/statusTone'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const { THead, TBody, Th, Tr, Td } = Table
 
@@ -247,8 +248,16 @@ const HomePage = () => {
                                                 </span>
                                             </Td>
                                             <Td>{ws.totalProducts}</Td>
-                                            <Td>{ws.totalQuantity}</Td>
-                                            <Td>{ws.availableQuantity}</Td>
+                                            <Td>
+                                                {formatQuantity(
+                                                    ws.totalQuantity
+                                                )}
+                                            </Td>
+                                            <Td>
+                                                {formatQuantity(
+                                                    ws.availableQuantity
+                                                )}
+                                            </Td>
                                             <Td>
                                                 <span className="font-medium">
                                                     {formatCurrency(

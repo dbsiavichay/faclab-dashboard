@@ -6,6 +6,7 @@ import { useRotation } from '../hooks/useReports'
 import type { ProductRotation } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
 import Input from '@/components/ui/Input'
+import { formatQuantity } from '@shared/lib/quantity'
 
 type Option = { value: string; label: string }
 
@@ -50,7 +51,7 @@ const RotationTab = ({ warehouseOptions }: Props) => {
             accessorKey: 'totalIn',
             cell: (props) => (
                 <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                    +{props.row.original.totalIn}
+                    +{formatQuantity(props.row.original.totalIn)}
                 </span>
             ),
         },
@@ -59,7 +60,7 @@ const RotationTab = ({ warehouseOptions }: Props) => {
             accessorKey: 'totalOut',
             cell: (props) => (
                 <span className="text-red-600 dark:text-red-400 font-medium">
-                    -{props.row.original.totalOut}
+                    -{formatQuantity(props.row.original.totalOut)}
                 </span>
             ),
         },
@@ -68,7 +69,7 @@ const RotationTab = ({ warehouseOptions }: Props) => {
             accessorKey: 'currentStock',
             cell: (props) => (
                 <span className="font-medium">
-                    {props.row.original.currentStock}
+                    {formatQuantity(props.row.original.currentStock)}
                 </span>
             ),
         },

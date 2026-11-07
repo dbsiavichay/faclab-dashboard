@@ -99,13 +99,12 @@ const LotCreateForm = ({
                     <Input
                         id="initialQuantity"
                         type="number"
-                        min={1}
+                        step="any"
+                        min={0}
                         placeholder="1"
                         disabled={isSubmitting}
                         invalid={!!errors.initialQuantity}
-                        {...numberRegister('initialQuantity', {
-                            integer: true,
-                        })}
+                        {...numberRegister('initialQuantity', {})}
                     />
                 </FormItem>
 
@@ -209,12 +208,12 @@ const LotUpdateForm = ({
                     <Input
                         id="currentQuantity"
                         type="number"
+                        step="any"
                         min={0}
                         placeholder="0"
                         disabled={isSubmitting}
                         invalid={!!errors.currentQuantity}
                         {...numberRegister('currentQuantity', {
-                            integer: true,
                             emptyValue: 0,
                         })}
                     />

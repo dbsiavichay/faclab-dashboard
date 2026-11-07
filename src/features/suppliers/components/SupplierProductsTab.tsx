@@ -13,6 +13,7 @@ import SupplierProductForm from './SupplierProductForm'
 import DeleteConfirmDialog from './DeleteConfirmDialog'
 import type { SupplierProduct } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -108,7 +109,11 @@ const SupplierProductsTab = ({ supplierId }: SupplierProductsTabProps) => {
                                 <Td>
                                     {formatCurrency(Number(sp.purchasePrice))}
                                 </Td>
-                                <Td>{sp.minOrderQuantity || '-'}</Td>
+                                <Td>
+                                    {sp.minOrderQuantity
+                                        ? formatQuantity(sp.minOrderQuantity)
+                                        : '-'}
+                                </Td>
                                 <Td>
                                     {sp.leadTimeDays
                                         ? `${sp.leadTimeDays} días`

@@ -355,11 +355,11 @@ export const ProductForm = ({
                         <Input
                             id="minStock"
                             type="number"
+                            step="any"
                             placeholder="0"
                             disabled={isSubmitting}
                             invalid={!!errors.minStock}
                             {...numberRegister('minStock', {
-                                integer: true,
                                 emptyValue: 0,
                             })}
                         />
@@ -373,10 +373,11 @@ export const ProductForm = ({
                         <Input
                             id="maxStock"
                             type="number"
+                            step="any"
                             placeholder="Sin límite"
                             disabled={isSubmitting}
                             invalid={!!errors.maxStock}
-                            {...numberRegister('maxStock', { integer: true })}
+                            {...numberRegister('maxStock')}
                         />
                     </FormItem>
                     <FormItem
@@ -388,11 +389,11 @@ export const ProductForm = ({
                         <Input
                             id="reorderPoint"
                             type="number"
+                            step="any"
                             placeholder="0"
                             disabled={isSubmitting}
                             invalid={!!errors.reorderPoint}
                             {...numberRegister('reorderPoint', {
-                                integer: true,
                                 emptyValue: 0,
                             })}
                         />

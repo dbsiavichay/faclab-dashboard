@@ -4,6 +4,7 @@ import Table from '@/components/ui/Table'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import type { TransferItem } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -65,7 +66,7 @@ export const TransferItems = ({
                     {items.map((item) => (
                         <Tr key={item.id}>
                             <Td>{getProductName(item.productId)}</Td>
-                            <Td>{item.quantity}</Td>
+                            <Td>{formatQuantity(item.quantity)}</Td>
                             <Td>{item.lotId ? `#${item.lotId}` : '-'}</Td>
                             <Td>
                                 <span className="text-sm text-gray-600 dark:text-gray-400">

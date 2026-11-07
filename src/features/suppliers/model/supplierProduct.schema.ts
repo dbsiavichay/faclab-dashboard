@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { quantitySchema } from '@shared/lib/quantity'
 
 export const supplierProductSchema = z.object({
     productId: z
@@ -7,7 +8,7 @@ export const supplierProductSchema = z.object({
         .min(1, 'Debe seleccionar un producto'),
     purchasePrice: z.number().min(0),
     supplierSku: z.string().optional(),
-    minOrderQuantity: z.number().int().min(1).optional(),
+    minOrderQuantity: quantitySchema().optional(),
     leadTimeDays: z.number().int().min(0).optional(),
     isPreferred: z.boolean().optional(),
 })

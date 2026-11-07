@@ -176,12 +176,11 @@ const SupplierProductForm = ({
                             >
                                 <Input
                                     type="number"
+                                    step="any"
                                     placeholder="1"
                                     disabled={isSubmitting}
                                     invalid={!!errors.minOrderQuantity}
-                                    {...numberRegister('minOrderQuantity', {
-                                        integer: true,
-                                    })}
+                                    {...numberRegister('minOrderQuantity', {})}
                                 />
                             </FormItem>
 

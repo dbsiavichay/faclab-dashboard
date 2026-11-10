@@ -1,3 +1,4 @@
+import type { ProductPresentation } from '@features/products'
 import type { Meta } from '@/@types/api'
 import type { TaxCode } from '@/constants/tax.constant'
 import type { TaxType } from '@features/customers'
@@ -169,7 +170,15 @@ export interface POSSaleItem {
     id: number
     saleId: number
     productId: number
+    /** In its presentation (S5.2), like the price */
     quantity: number
+    /** Null in lines from before S5.2, in base units */
+    presentationId?: number | null
+    presentationName?: string | null
+    /** Base units in one of its presentation */
+    unitFactor?: number
+    /** What moved the stock: quantity × unitFactor */
+    baseQuantity?: number
     unitPrice: number
     discount: number
     taxCode: TaxCode
@@ -212,10 +221,12 @@ export interface QuickSaleInput {
 
 export interface QuickSaleItemInput {
     productId: number
+    /** The presentation it is sold in (S5.2); omitted: the base unit */
+    presentationId?: number | null
     quantity: number
     unitPrice?: number
     discount?: number
-    // Required by faclab-core when unitPrice differs from the product price
+    // Required by faclab-core when unitPrice differs from the presentation price
     overrideReason?: string
 }
 
@@ -229,6 +240,7 @@ export interface QuickSalePaymentInput {
 
 export interface AddSaleItemInput {
     productId: number
+    presentationId?: number | null
     quantity: number
     unitPrice: number
     discount?: number
@@ -346,7 +358,10 @@ export interface CashSummary {
 // === RECEIPT ===
 export interface ReceiptItem {
     productName: string
+    /** Presentation it was sold in (Caja x100); null in the base unit */
+    presentationName?: string | null
     quantity: number
+    baseQuantity?: number
     unitPrice: number
     discount: number
     discountAmount: number
@@ -473,9 +488,17 @@ export interface POSProduct {
     taxCode: TaxCode
     isActive: boolean
     image: string | null
-    // Its unit of measure (S5.1): 2,5 m of cable; without one, whole quantities
+    // Its unit of measure (S5.1): 2,5 m of cable
     unitSymbol: string | null
     quantityDecimals: number
+    /** Its presentations (S5.2): the base unit first, then boxes and rolls */
+    presentations?: ProductPresentation[]
+}
+
+/** What a scanned barcode is: the product and the presentation it sells */
+export interface POSBarcodeMatch {
+    product: POSProduct
+    presentation: ProductPresentation
 }
 
 // === POS CUSTOMER ===

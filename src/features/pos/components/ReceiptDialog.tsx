@@ -83,6 +83,8 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                                 <span>
                                     {formatQuantity(item.quantity)} x{' '}
                                     {item.productName}
+                                    {item.presentationName &&
+                                        ` (${item.presentationName})`}
                                 </span>
                                 <span>{formatCurrency(item.subtotal)}</span>
                             </div>

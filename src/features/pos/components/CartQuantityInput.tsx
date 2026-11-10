@@ -39,7 +39,7 @@ const CartQuantityInput = ({ item }: CartQuantityInputProps) => {
             return
         }
         // Cero quita la línea, como el botón de disminuir
-        updateItemQuantity(item.productId, quantity)
+        updateItemQuantity(item.lineKey, quantity)
         discard()
     }
 
@@ -64,7 +64,8 @@ const CartQuantityInput = ({ item }: CartQuantityInputProps) => {
                         if (e.key === 'Escape') discard()
                     }}
                 />
-                {item.unitSymbol && (
+                {/* A box is counted in boxes; its units go in the line's name */}
+                {item.unitSymbol && !item.presentationId && (
                     <span className="text-xs text-gray-500 dark:text-gray-400">
                         {item.unitSymbol}
                     </span>

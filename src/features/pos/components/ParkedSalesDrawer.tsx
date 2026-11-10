@@ -3,7 +3,8 @@ import Button from '@/components/ui/Button'
 import Spinner from '@/components/ui/Spinner'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { useParkedSales, useResumeSale, useCancelSale } from '../hooks/usePOS'
-import { usePOSStore } from '../store/usePOSStore'
+import { cartLineKey, usePOSStore } from '../store/usePOSStore'
+import { toCartInput } from '../lib/cartLine'
 import { getSale, getSaleItems, getProduct, getCustomer } from '../api/client'
 import { useCan } from '@/stores'
 import { formatCurrency } from '@shared/lib/format'
@@ -45,27 +46,29 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
             for (const item of saleItems) {
                 const productResponse = await getProduct(item.productId)
                 const product = productResponse.data
+                // The presentation it was sold in (S5.2), with its price
+                const presentation = product.presentations?.find(
+                    (p) => p.id === item.presentationId
+                )
+                const line = toCartInput(product, presentation)
                 addItem({
-                    productId: product.id,
-                    name: product.name,
-                    sku: product.sku,
+                    ...line,
                     salePrice: item.unitPrice,
-                    listPrice: product.salePrice ?? item.unitPrice,
+                    listPrice: line.salePrice || item.unitPrice,
                     overrideReason: item.overrideReason ?? undefined,
                     taxCode: item.taxCode,
-                    unitSymbol: product.unitSymbol,
-                    quantityDecimals: product.quantityDecimals,
                 })
+                const lineKey = cartLineKey(product.id, line.presentationId)
                 // addItem starts at 1: 0,5 m or 2,5 m have to be set too
                 if (item.quantity !== 1) {
                     usePOSStore
                         .getState()
-                        .updateItemQuantity(product.id, item.quantity)
+                        .updateItemQuantity(lineKey, item.quantity)
                 }
                 if (item.discount > 0) {
                     usePOSStore
                         .getState()
-                        .updateItemDiscount(product.id, item.discount)
+                        .updateItemDiscount(lineKey, item.discount)
                 }
             }
 

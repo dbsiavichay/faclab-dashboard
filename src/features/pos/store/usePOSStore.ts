@@ -5,23 +5,56 @@ import { roundQuantity } from '@shared/lib/quantity'
 import { discountFactor, taxBreakdown } from '../model/totals'
 
 export interface POSCartItem {
+    /** Product and presentation: a box and a unit of the same product are two lines */
+    lineKey: string
     productId: number
     name: string
     sku: string
+    /** Price of one unit of its presentation (one box) */
     salePrice: number
-    // Product price; selling at another one is an override with a reason
+    // Presentation price; selling at another one is an override with a reason
     listPrice: number
     overrideReason?: string
     taxCode: TaxCode
-    // Decimal (S5.1): up to the decimals of the product's unit of measure
+    // Decimal (S5.1): in its presentation, up to the decimals it takes
     quantity: number
     discount: number
     unitSymbol: string | null
     quantityDecimals: number
+    /** Presentation it is sold in (S5.2); null: the base unit */
+    presentationId: number | null
+    presentationName: string | null
+    /** Base units in one of its presentation: stock moves quantity × it */
+    unitFactor: number
 }
+
+/** The key of a cart line: product and presentation (`base` for the unit) */
+export const cartLineKey = (
+    productId: number,
+    presentationId?: number | null
+): string => `${productId}:${presentationId ?? 'base'}`
 
 export const isPriceOverridden = (item: POSCartItem): boolean =>
     item.salePrice !== item.listPrice
+
+/** What a line is added with: a product, in its base unit or a presentation */
+export interface CartProductInput {
+    productId: number
+    name: string
+    sku: string
+    salePrice: number
+    taxCode: TaxCode
+    // Defaults to salePrice (no override)
+    listPrice?: number
+    overrideReason?: string
+    // The product's unit; a presentation takes its own decimals
+    unitSymbol?: string | null
+    quantityDecimals?: number
+    // A presentation other than the base unit (S5.2)
+    presentationId?: number | null
+    presentationName?: string | null
+    unitFactor?: number
+}
 
 interface POSState {
     cartItems: POSCartItem[]
@@ -35,23 +68,12 @@ interface POSState {
     selectedCategoryId: number | null
     searchTerm: string
 
-    addItem: (product: {
-        productId: number
-        name: string
-        sku: string
-        salePrice: number
-        taxCode: TaxCode
-        // Defaults to salePrice (no override)
-        listPrice?: number
-        overrideReason?: string
-        // The product's unit; without one it takes whole quantities
-        unitSymbol?: string | null
-        quantityDecimals?: number
-    }) => void
-    updateItemQuantity: (productId: number, quantity: number) => void
-    updateItemDiscount: (productId: number, discount: number) => void
-    updateItemPrice: (productId: number, price: number, reason?: string) => void
-    removeItem: (productId: number) => void
+    /** Adds one of the product (or of its presentation), or one more to its line */
+    addItem: (product: CartProductInput) => void
+    updateItemQuantity: (lineKey: string, quantity: number) => void
+    updateItemDiscount: (lineKey: string, discount: number) => void
+    updateItemPrice: (lineKey: string, price: number, reason?: string) => void
+    removeItem: (lineKey: string) => void
     setCustomer: (id: number | null, name: string | null) => void
     setFinalConsumer: (value: boolean) => void
     applyDiscount: (type: 'PERCENTAGE' | 'AMOUNT', value: number) => void
@@ -75,13 +97,15 @@ export const usePOSStore = create<POSState>()((set) => ({
 
     addItem: (product) =>
         set((state) => {
+            const presentationId = product.presentationId ?? null
+            const lineKey = cartLineKey(product.productId, presentationId)
             const existing = state.cartItems.find(
-                (item) => item.productId === product.productId
+                (item) => item.lineKey === lineKey
             )
             if (existing) {
                 return {
                     cartItems: state.cartItems.map((item) =>
-                        item.productId === product.productId
+                        item.lineKey === lineKey
                             ? {
                                   ...item,
                                   quantity: roundQuantity(item.quantity + 1),
@@ -95,9 +119,13 @@ export const usePOSStore = create<POSState>()((set) => ({
                     ...state.cartItems,
                     {
                         ...product,
+                        lineKey,
                         listPrice: product.listPrice ?? product.salePrice,
                         unitSymbol: product.unitSymbol ?? null,
                         quantityDecimals: product.quantityDecimals ?? 0,
+                        presentationId,
+                        presentationName: product.presentationName ?? null,
+                        unitFactor: product.unitFactor ?? 1,
                         quantity: 1,
                         discount: 0,
                     },
@@ -105,35 +133,35 @@ export const usePOSStore = create<POSState>()((set) => ({
             }
         }),
 
-    updateItemQuantity: (productId, quantity) =>
+    updateItemQuantity: (lineKey, quantity) =>
         set((state) => {
             if (quantity <= 0) {
                 return {
                     cartItems: state.cartItems.filter(
-                        (item) => item.productId !== productId
+                        (item) => item.lineKey !== lineKey
                     ),
                 }
             }
             return {
                 cartItems: state.cartItems.map((item) =>
-                    item.productId === productId
+                    item.lineKey === lineKey
                         ? { ...item, quantity: roundQuantity(quantity) }
                         : item
                 ),
             }
         }),
 
-    updateItemDiscount: (productId, discount) =>
+    updateItemDiscount: (lineKey, discount) =>
         set((state) => ({
             cartItems: state.cartItems.map((item) =>
-                item.productId === productId ? { ...item, discount } : item
+                item.lineKey === lineKey ? { ...item, discount } : item
             ),
         })),
 
-    updateItemPrice: (productId, price, reason) =>
+    updateItemPrice: (lineKey, price, reason) =>
         set((state) => ({
             cartItems: state.cartItems.map((item) =>
-                item.productId === productId
+                item.lineKey === lineKey
                     ? {
                           ...item,
                           salePrice: price,
@@ -144,10 +172,10 @@ export const usePOSStore = create<POSState>()((set) => ({
             ),
         })),
 
-    removeItem: (productId) =>
+    removeItem: (lineKey) =>
         set((state) => ({
             cartItems: state.cartItems.filter(
-                (item) => item.productId !== productId
+                (item) => item.lineKey !== lineKey
             ),
         })),
 

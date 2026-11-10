@@ -1,5 +1,11 @@
 import { test, expect } from '../support/test'
-import { SALE_NUMBER, mockPOS, openShift, posTerminal } from '../fixtures/pos'
+import {
+    HINGE_BOX_BARCODE,
+    SALE_NUMBER,
+    mockPOS,
+    openShift,
+    posTerminal,
+} from '../fixtures/pos'
 import { MAIN_BRANCH, SECOND_BRANCH } from '../support/session'
 import { POS, apiError, ok } from '../support/mockApi'
 import { ROLE } from '@/constants/roles.constant'
@@ -232,6 +238,70 @@ test.describe('Punto de venta', () => {
         ])
         // 2,5 × 0,85 = 2,125 → 2,13 más 0,32 de IVA, como en faclab-core
         expect(sale.payments[0].amount).toBe(2.45)
+    })
+
+    test('escanear el código de la caja agrega la caja con su precio', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        const search = page.getByRole('searchbox', { name: 'Buscar productos' })
+
+        // Un lector de códigos escribe el código y Enter
+        await search.fill(HINGE_BOX_BARCODE)
+        await search.press('Enter')
+
+        const panel = order(page)
+        await expect(panel).toContainText('Bisagra cazoleta 35mm')
+        await expect(panel).toContainText('Caja x50')
+        await expect(search).toHaveValue('')
+        // Una segunda caja suma a la misma línea; una unidad va aparte
+        await search.fill(HINGE_BOX_BARCODE)
+        await search.press('Enter')
+        await product(page, 'Bisagra cazoleta 35mm').click()
+        const quantities = panel.getByRole('textbox', {
+            name: 'Cantidad de Bisagra cazoleta 35mm',
+        })
+        await expect(quantities).toHaveCount(2)
+        await expect(quantities.first()).toHaveValue('2')
+
+        await panel.getByText('Consumidor final').click()
+        await panel.getByRole('button', { name: 'Cobrar' }).click()
+        const payment = page.getByRole('dialog', { name: 'Cobrar' })
+        await payment.getByRole('button', { name: 'Completar venta' }).click()
+
+        const receipt = page.getByRole('dialog', { name: 'Venta completada' })
+        await expect(receipt).toContainText(
+            '2 x Bisagra cazoleta 35mm (Caja x50)'
+        )
+        const [quickSale] = api.callsTo('POST', `${POS}/sales/quick`)
+        const sale = quickSale.body as {
+            items: unknown[]
+            payments: { amount: number }[]
+        }
+        expect(sale.items).toEqual([
+            { productId: 2, presentationId: 250, quantity: 2, unitPrice: 20 },
+            { productId: 2, quantity: 1, unitPrice: 0.95 },
+        ])
+        // 40 + 0,95 = 40,95 más 6,14 de IVA
+        expect(sale.payments[0].amount).toBe(47.09)
+    })
+
+    test('un código que no es de barras deja la búsqueda', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        const search = page.getByRole('searchbox', { name: 'Buscar productos' })
+
+        await search.fill('tirador')
+        await search.press('Enter')
+
+        await expect(search).toHaveValue('tirador')
+        await expect(product(page, 'Tirador acero 128mm')).toBeVisible()
+        await expect(order(page).getByText('Carrito vacío')).toBeVisible()
     })
 
     test('una unidad sin decimales no acepta 1,5 en el carrito', async ({

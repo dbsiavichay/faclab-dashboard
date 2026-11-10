@@ -31,6 +31,7 @@ const cases = (shared as { cases: SharedCase[] }).cases
 
 const cart = (c: SharedCase): POSCartItem[] =>
     c.items.map((line, index) => ({
+        lineKey: `${index + 1}:base`,
         productId: index + 1,
         name: `Producto ${index + 1}`,
         sku: `SKU-${index + 1}`,
@@ -41,6 +42,9 @@ const cart = (c: SharedCase): POSCartItem[] =>
         discount: Number(line.discount),
         unitSymbol: null,
         quantityDecimals: 6,
+        presentationId: null,
+        presentationName: null,
+        unitFactor: 1,
     }))
 
 describe('cart totals shared with faclab-core', () => {

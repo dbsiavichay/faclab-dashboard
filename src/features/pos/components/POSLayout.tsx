@@ -72,6 +72,7 @@ const POSLayout = () => {
                     saleId: sale.id,
                     data: {
                         productId: item.productId,
+                        presentationId: item.presentationId ?? undefined,
                         quantity: item.quantity,
                         unitPrice: item.salePrice,
                         discount: item.discount > 0 ? item.discount : undefined,

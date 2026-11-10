@@ -108,7 +108,13 @@ export interface SaleItem {
     productId: number
     productName: string | null
     productSku: string | null
+    /** In its presentation (S5.2), like the price */
     quantity: number
+    presentationId?: number | null
+    presentationName?: string | null
+    unitFactor?: number
+    /** What moved the stock: quantity × unitFactor */
+    baseQuantity?: number
     unitPrice: number
     discount: number
     taxCode: TaxCode

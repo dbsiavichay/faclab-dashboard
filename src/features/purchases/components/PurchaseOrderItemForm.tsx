@@ -10,7 +10,9 @@ import {
     useAddPurchaseOrderItem,
     useUpdatePurchaseOrderItem,
 } from '../hooks/usePurchaseOrders'
-import { ProductSelect } from '@features/products'
+import { ProductSelect, useProduct } from '@features/products'
+import Select from '@/components/ui/Select'
+import { formatQuantity } from '@shared/lib/quantity'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { formatCurrency } from '@shared/lib/format'
 import {
@@ -41,11 +43,13 @@ const PurchaseOrderItemCreateForm = ({
         handleSubmit,
         control,
         reset,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<PurchaseOrderItemCreateFormValues>({
         resolver: zodResolver(purchaseOrderItemCreateSchema),
         defaultValues: {
             productId: undefined,
+            presentationId: null,
             quantityOrdered: 1,
             unitCost: 0,
         },
@@ -53,21 +57,46 @@ const PurchaseOrderItemCreateForm = ({
 
     const numberRegister = makeNumberRegister(register)
 
-    const [quantityOrdered, unitCost] = useWatch({
+    const [productId, presentationId, quantityOrdered, unitCost] = useWatch({
         control,
-        name: ['quantityOrdered', 'unitCost'],
+        name: ['productId', 'presentationId', 'quantityOrdered', 'unitCost'],
     })
     const subtotal = (quantityOrdered ?? 0) * (unitCost ?? 0)
+
+    // Its presentations (S5.2): bought by the box, received in base units
+    const { data: product } = useProduct(productId ?? 0)
+    const presentations = (product?.presentations ?? []).filter(
+        (p) => p.isActive
+    )
+    const presentation = presentations.find((p) =>
+        presentationId ? p.id === presentationId : p.isBase
+    )
+    const presentationOptions = presentations.map((p) => ({
+        value: p.isBase ? null : p.id,
+        label: p.isBase
+            ? `${p.name} (unidad base)`
+            : `${p.name} · ${formatQuantity(p.factor, product?.unitSymbol)}`,
+    }))
 
     useEffect(() => {
         if (open) {
             reset({
                 productId: undefined,
+                presentationId: null,
                 quantityOrdered: 1,
                 unitCost: 0,
             })
         }
     }, [open, orderId, reset])
+
+    // The cost of the chosen presentation: its own or factor × the product's
+    useEffect(() => {
+        if (!product) return
+        const cost = presentation
+            ? presentation.effectivePurchasePrice
+            : product.purchasePrice
+        if (cost != null) setValue('unitCost', cost)
+    }, [product, presentation, setValue])
 
     const handleClose = () => {
         if (!isSubmitting) onClose()
@@ -78,6 +107,7 @@ const PurchaseOrderItemCreateForm = ({
             await addItem.mutateAsync({
                 purchaseOrderId: orderId,
                 productId: values.productId,
+                presentationId: values.presentationId ?? undefined,
                 quantityOrdered: values.quantityOrdered,
                 unitCost: values.unitCost,
             })
@@ -113,18 +143,65 @@ const PurchaseOrderItemCreateForm = ({
                                         inputId="productId"
                                         value={field.value}
                                         isDisabled={isSubmitting}
-                                        onChange={field.onChange}
+                                        onChange={(value) => {
+                                            field.onChange(value)
+                                            setValue('presentationId', null)
+                                        }}
                                         onBlur={field.onBlur}
                                     />
                                 )}
                             />
                         </FormItem>
 
+                        {presentations.length > 1 && (
+                            <FormItem label="Presentación">
+                                <Controller
+                                    name="presentationId"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            inputId="presentationId"
+                                            options={presentationOptions}
+                                            value={
+                                                presentationOptions.find(
+                                                    (o) =>
+                                                        o.value ===
+                                                        (field.value ?? null)
+                                                ) ?? null
+                                            }
+                                            isDisabled={isSubmitting}
+                                            onChange={(option) =>
+                                                field.onChange(
+                                                    option?.value ?? null
+                                                )
+                                            }
+                                        />
+                                    )}
+                                />
+                            </FormItem>
+                        )}
+
                         <FormItem
                             asterisk
-                            label="Cantidad"
+                            label={
+                                presentation && !presentation.isBase
+                                    ? `Cantidad (${presentation.name})`
+                                    : 'Cantidad'
+                            }
                             invalid={!!errors.quantityOrdered}
                             errorMessage={errors.quantityOrdered?.message}
+                            extra={
+                                presentation && !presentation.isBase ? (
+                                    <span className="text-xs text-gray-500 ml-2">
+                                        ={' '}
+                                        {formatQuantity(
+                                            (quantityOrdered ?? 0) *
+                                                presentation.factor,
+                                            product?.unitSymbol
+                                        )}
+                                    </span>
+                                ) : undefined
+                            }
                         >
                             <Input
                                 type="number"

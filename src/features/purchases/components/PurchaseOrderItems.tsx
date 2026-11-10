@@ -71,7 +71,20 @@ export const PurchaseOrderItems = ({
                         const subtotal = item.unitCost * item.quantityOrdered
                         return (
                             <Tr key={item.id}>
-                                <Td>{getProductName(item.productId)}</Td>
+                                <Td>
+                                    {getProductName(item.productId)}
+                                    {item.presentationName &&
+                                        (item.unitFactor ?? 1) !== 1 && (
+                                            <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                                {item.presentationName} ·{' '}
+                                                {formatQuantity(
+                                                    item.quantityOrdered *
+                                                        (item.unitFactor ?? 1)
+                                                )}{' '}
+                                                en unidades base
+                                            </span>
+                                        )}
+                                </Td>
                                 <Td>{formatQuantity(item.quantityOrdered)}</Td>
                                 <Td>{formatQuantity(item.quantityReceived)}</Td>
                                 <Td>

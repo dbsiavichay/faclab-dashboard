@@ -20,7 +20,8 @@ export const productSchema = z
         description: z.string().optional().nullable(),
         barcode: z.string().optional().nullable(),
         categoryId: z.number().optional().nullable(),
-        unitOfMeasureId: z.number().optional().nullable(),
+        // The base unit, the one stock is kept in: required since S5.2
+        unitOfMeasureId: z.number({ error: 'Seleccione la unidad de medida' }),
         purchasePrice: z
             .number()
             .min(0, 'Debe ser mayor o igual a 0')

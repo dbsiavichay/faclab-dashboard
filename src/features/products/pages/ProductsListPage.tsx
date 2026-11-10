@@ -13,8 +13,14 @@ import ListSearchInput from '@shared/ui/ListSearchInput'
 import { FormModal, DeleteConfirmDialog } from '@/components/shared'
 import type { Product, ProductInput } from '../model/types'
 import { ProductForm } from '../components/ProductForm'
+import { ProductPresentationsDialog } from '../components/ProductPresentationsDialog'
 import Select from '@/components/ui/Select'
-import { HiOutlinePencil, HiOutlineTrash, HiPlus } from 'react-icons/hi'
+import {
+    HiOutlineCube,
+    HiOutlinePencil,
+    HiOutlineTrash,
+    HiPlus,
+} from 'react-icons/hi'
 import StatusBadge, { ActiveBadge } from '@/components/shared/StatusBadge'
 import { formatCurrency } from '@shared/lib/format'
 
@@ -24,6 +30,8 @@ const ProductsListPage = () => {
         number | undefined
     >(undefined)
     const [search, setSearch] = useState('')
+    // Product whose presentations (boxes, rolls) are being managed
+    const [presentationsOf, setPresentationsOf] = useState<Product | null>(null)
     const searchTerm = useDebouncedValue(search.trim())
     const offset = (crud.pageIndex - 1) * crud.pageSize
 
@@ -152,9 +160,9 @@ const ProductsListPage = () => {
             header: 'Unidad',
             accessorKey: 'unitOfMeasureId',
             cell: (props) => {
-                const unitSymbol = props.row.original.unitOfMeasureId
-                    ? unitMap.get(props.row.original.unitOfMeasureId)
-                    : null
+                const unitSymbol =
+                    props.row.original.unitSymbol ??
+                    unitMap.get(props.row.original.unitOfMeasureId)
                 return unitSymbol ? (
                     <span className="font-mono text-sm px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
                         {unitSymbol}
@@ -194,6 +202,14 @@ const ProductsListPage = () => {
                         aria-label={`Editar ${props.row.original.name}`}
                         icon={<HiOutlinePencil />}
                         onClick={() => crud.openEdit(props.row.original)}
+                    />
+                    <Button
+                        size="sm"
+                        variant="plain"
+                        title="Presentaciones"
+                        aria-label={`Presentaciones de ${props.row.original.name}`}
+                        icon={<HiOutlineCube />}
+                        onClick={() => setPresentationsOf(props.row.original)}
                     />
                     <Button
                         size="sm"
@@ -283,6 +299,11 @@ const ProductsListPage = () => {
                     onSubmit={handleFormSubmit}
                 />
             </FormModal>
+
+            <ProductPresentationsDialog
+                product={presentationsOf}
+                onClose={() => setPresentationsOf(null)}
+            />
 
             <DeleteConfirmDialog
                 isOpen={crud.isDeleteOpen}

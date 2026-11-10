@@ -23,7 +23,7 @@ test.describe('Productos', () => {
         await expect(row(page, 'Servicio de corte')).toContainText('Inactivo')
     })
 
-    test('exige nombre y SKU', async ({ page, api }) => {
+    test('exige nombre, SKU y unidad', async ({ page, api }) => {
         await page.goto('/catalog/products')
         await page.getByRole('button', { name: 'Nuevo producto' }).click()
         const dialog = page.getByRole('dialog', { name: 'Nuevo producto' })
@@ -32,6 +32,9 @@ test.describe('Productos', () => {
 
         await expect(dialog.getByText('Nombre requerido')).toBeVisible()
         await expect(dialog.getByText('SKU requerido')).toBeVisible()
+        await expect(
+            dialog.getByText('Seleccione la unidad de medida')
+        ).toBeVisible()
         await expect(
             dialog.getByLabel('Nombre', { exact: true })
         ).toHaveAttribute('aria-invalid', 'true')
@@ -109,6 +112,8 @@ test.describe('Productos', () => {
         const dialog = page.getByRole('dialog', { name: 'Nuevo producto' })
         await dialog.getByLabel('Nombre', { exact: true }).fill('Cemento 50 kg')
         await dialog.getByLabel('SKU').fill('CEM-50')
+        await dialog.getByLabel('Unidad de Medida').click()
+        await page.getByRole('option', { name: 'Unidad (u)' }).click()
         await expect(dialog).toContainText('IVA 15%')
 
         await dialog.getByLabel('Material de construcción').click()
@@ -136,6 +141,8 @@ test.describe('Productos', () => {
         const dialog = page.getByRole('dialog', { name: 'Nuevo producto' })
         await dialog.getByLabel('Nombre', { exact: true }).fill('Arena')
         await dialog.getByLabel('SKU').fill('ARE-1')
+        await dialog.getByLabel('Unidad de Medida').click()
+        await page.getByRole('option', { name: 'Unidad (u)' }).click()
         await dialog.getByLabel('Material de construcción').click()
         await page.getByRole('option', { name: 'F010202 · Arena' }).click()
         await expect(dialog).toContainText('IVA 5%')
@@ -185,5 +192,61 @@ test.describe('Productos', () => {
         await page.keyboard.press('Escape')
 
         await expect(dialog).toBeHidden()
+    })
+
+    test('agrega una caja con su código de barras y su precio', async ({
+        page,
+        api,
+    }) => {
+        await page.goto('/catalog/products')
+        await page
+            .getByRole('button', { name: 'Presentaciones de Tablero MDF 15mm' })
+            .click()
+        const list = page.getByRole('dialog', { name: 'Presentaciones' })
+        await expect(
+            list.getByRole('row').filter({ hasText: '(base)' })
+        ).toContainText('7861234567890')
+
+        await list.getByRole('button', { name: 'Agregar' }).click()
+        const form = page.getByRole('dialog', { name: 'Nueva presentación' })
+        await form.getByLabel('Nombre', { exact: true }).fill('Paquete x10')
+        await form.getByLabel(/Unidades que trae/).fill('10')
+        await expect(form).toContainText('1 de esta presentación = 10 u')
+        await form.getByLabel('Código de barras').fill('7861234567899')
+        await form.getByLabel('Precio de venta').fill('115')
+        await form.getByRole('button', { name: 'Guardar' }).click()
+
+        await expect(page.getByText('Presentación agregada')).toBeVisible()
+        await expect(
+            list.getByRole('row').filter({ hasText: 'Paquete x10' })
+        ).toContainText('7861234567899')
+        expect(
+            api.callsTo('POST', `${ADMIN}/products/:id/presentations`)[0].body
+        ).toMatchObject({
+            name: 'Paquete x10',
+            factor: 10,
+            barcode: '7861234567899',
+            salePrice: 115,
+        })
+    })
+
+    test('no acepta un factor de cero', async ({ page, api }) => {
+        await page.goto('/catalog/products')
+        await page
+            .getByRole('button', { name: 'Presentaciones de Tablero MDF 15mm' })
+            .click()
+        await page
+            .getByRole('dialog', { name: 'Presentaciones' })
+            .getByRole('button', { name: 'Agregar' })
+            .click()
+        const form = page.getByRole('dialog', { name: 'Nueva presentación' })
+        await form.getByLabel('Nombre', { exact: true }).fill('Caja')
+        await form.getByLabel(/Unidades que trae/).fill('0')
+        await form.getByRole('button', { name: 'Guardar' }).click()
+
+        await expect(form.getByText('Debe ser mayor a cero')).toBeVisible()
+        expect(
+            api.callsTo('POST', `${ADMIN}/products/:id/presentations`)
+        ).toHaveLength(0)
     })
 })

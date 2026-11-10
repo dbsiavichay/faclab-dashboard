@@ -5,6 +5,7 @@ describe('productSchema', () => {
     const material = {
         name: 'Cemento 50 kg',
         sku: 'CEM-50',
+        unitOfMeasureId: 1,
         constructionMaterialCode: 'F010401',
     }
 
@@ -53,9 +54,23 @@ describe('productSchema', () => {
         const result = productSchema.safeParse({
             name: 'Producto X',
             sku: 'SKU-001',
+            unitOfMeasureId: 1,
             taxCode: 'VAT_15',
         })
         expect(result.success).toBe(true)
+    })
+
+    it('requires the base unit (S5.2)', () => {
+        const result = productSchema.safeParse({
+            name: 'Producto X',
+            sku: 'SKU-001',
+            taxCode: 'VAT_15',
+        })
+        expect(result.success).toBe(false)
+        expect(result.error?.issues[0]).toMatchObject({
+            path: ['unitOfMeasureId'],
+            message: 'Seleccione la unidad de medida',
+        })
     })
 
     it('accepts full valid data', () => {
@@ -112,6 +127,7 @@ describe('productSchema', () => {
         const result = productSchema.safeParse({
             name: 'X',
             sku: 'SKU',
+            unitOfMeasureId: 1,
             taxCode: 'VAT_15',
             minStock: 1.5,
         })

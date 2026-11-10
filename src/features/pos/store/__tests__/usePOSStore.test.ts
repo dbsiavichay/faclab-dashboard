@@ -10,6 +10,7 @@ import {
 } from '../usePOSStore'
 
 const item = (overrides: Partial<POSCartItem>): POSCartItem => ({
+    lineKey: `${overrides.productId ?? 1}:base`,
     productId: 1,
     name: 'Producto',
     sku: 'SKU',
@@ -20,6 +21,9 @@ const item = (overrides: Partial<POSCartItem>): POSCartItem => ({
     discount: 0,
     unitSymbol: null,
     quantityDecimals: 0,
+    presentationId: null,
+    presentationName: null,
+    unitFactor: 1,
     ...overrides,
 })
 
@@ -116,7 +120,7 @@ describe('price overrides', () => {
     })
 
     it('stores the reason of another price', () => {
-        usePOSStore.getState().updateItemPrice(1, 8, 'Empaque dañado')
+        usePOSStore.getState().updateItemPrice('1:base', 8, 'Empaque dañado')
 
         const [cartItem] = usePOSStore.getState().cartItems
         expect(cartItem.salePrice).toBe(8)
@@ -125,11 +129,64 @@ describe('price overrides', () => {
     })
 
     it('drops the reason when going back to the list price', () => {
-        usePOSStore.getState().updateItemPrice(1, 8, 'Empaque dañado')
-        usePOSStore.getState().updateItemPrice(1, 10, 'Empaque dañado')
+        usePOSStore.getState().updateItemPrice('1:base', 8, 'Empaque dañado')
+        usePOSStore.getState().updateItemPrice('1:base', 10, 'Empaque dañado')
 
         const [cartItem] = usePOSStore.getState().cartItems
         expect(cartItem.overrideReason).toBeUndefined()
         expect(isPriceOverridden(cartItem)).toBe(false)
+    })
+})
+
+describe('cart lines by presentation (S5.2)', () => {
+    const screw = {
+        productId: 7,
+        name: 'Tornillo 1/2',
+        sku: 'TOR-1',
+        salePrice: 0.05,
+        taxCode: 'VAT_15' as const,
+        unitSymbol: 'und',
+        quantityDecimals: 0,
+    }
+    const box = {
+        ...screw,
+        salePrice: 4.5,
+        presentationId: 70,
+        presentationName: 'Caja x100',
+        unitFactor: 100,
+    }
+
+    beforeEach(() => {
+        usePOSStore.getState().clearCart()
+    })
+
+    it('keeps the unit and the box of a product in two lines', () => {
+        const { addItem } = usePOSStore.getState()
+        addItem(screw)
+        addItem(box)
+        addItem(box)
+
+        const lines = usePOSStore.getState().cartItems
+        expect(
+            lines.map((l) => [l.lineKey, l.quantity, l.salePrice, l.unitFactor])
+        ).toEqual([
+            ['7:base', 1, 0.05, 1],
+            ['7:70', 2, 4.5, 100],
+        ])
+        expect(getCartSubtotal(lines)).toBe(9.05)
+    })
+
+    it('changes and removes only the line it is told', () => {
+        const store = usePOSStore.getState()
+        store.addItem(screw)
+        store.addItem(box)
+
+        store.updateItemQuantity('7:base', 15)
+        store.removeItem('7:70')
+
+        const lines = usePOSStore.getState().cartItems
+        expect(lines.map((l) => [l.lineKey, l.quantity])).toEqual([
+            ['7:base', 15],
+        ])
     })
 })

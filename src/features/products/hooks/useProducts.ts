@@ -5,7 +5,11 @@ import {
     keepPreviousData,
 } from '@tanstack/react-query'
 import * as api from '../api/client'
-import type { ProductInput, ProductListParams } from '../model/types'
+import type {
+    ProductInput,
+    ProductListParams,
+    ProductPresentationInput,
+} from '../model/types'
 
 const KEY = ['products'] as const
 
@@ -54,6 +58,51 @@ export const useProductMutations = () => {
         }),
         delete: useMutation({
             mutationFn: (id: number) => api.deleteProduct(id),
+            onSuccess: invalidate,
+        }),
+    }
+}
+
+/** The presentations of a product (S5.2): the base one first, then by factor */
+export const useProductPresentations = (productId: number | undefined) =>
+    useQuery({
+        queryKey: [...KEY, productId, 'presentations'],
+        queryFn: async () => {
+            const response = await api.getProductPresentations(productId!)
+            return response.data
+        },
+        enabled: !!productId,
+    })
+
+export const useProductPresentationMutations = (productId: number) => {
+    const qc = useQueryClient()
+    // The product's responses carry its presentations too
+    const invalidate = () => qc.invalidateQueries({ queryKey: KEY })
+
+    return {
+        create: useMutation({
+            mutationFn: (data: ProductPresentationInput) =>
+                api
+                    .createProductPresentation(productId, data)
+                    .then((r) => r.data),
+            onSuccess: invalidate,
+        }),
+        update: useMutation({
+            mutationFn: ({
+                id,
+                data,
+            }: {
+                id: number
+                data: ProductPresentationInput
+            }) =>
+                api
+                    .updateProductPresentation(productId, id, data)
+                    .then((r) => r.data),
+            onSuccess: invalidate,
+        }),
+        delete: useMutation({
+            mutationFn: (id: number) =>
+                api.deleteProductPresentation(productId, id),
             onSuccess: invalidate,
         }),
     }

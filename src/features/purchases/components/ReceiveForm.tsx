@@ -77,6 +77,11 @@ const ReceiveForm = ({
                     quantityPending: roundQuantity(
                         item.quantityOrdered - item.quantityReceived
                     ),
+                    presentationName:
+                        (item.unitFactor ?? 1) !== 1
+                            ? item.presentationName ?? null
+                            : null,
+                    unitFactor: item.unitFactor ?? 1,
                     quantityToReceive: 0,
                     locationId: null,
                     lotNumber: '',
@@ -179,6 +184,20 @@ const ReceiveForm = ({
                                                             field.productId
                                                         )}
                                                     </span>
+                                                    {field.presentationName && (
+                                                        <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                                            En{' '}
+                                                            {
+                                                                field.presentationName
+                                                            }{' '}
+                                                            (×
+                                                            {formatQuantity(
+                                                                field.unitFactor ??
+                                                                    1
+                                                            )}
+                                                            )
+                                                        </span>
+                                                    )}
                                                 </Td>
                                                 <Td>
                                                     {formatQuantity(

@@ -14,7 +14,7 @@ const mockProduct = {
     description: null,
     barcode: null,
     categoryId: null,
-    unitOfMeasureId: null,
+    unitOfMeasureId: 1,
     purchasePrice: null,
     salePrice: null,
     taxCode: 'VAT_15' as const,
@@ -25,8 +25,9 @@ const mockProduct = {
     maxStock: null,
     reorderPoint: 0,
     leadTimeDays: null,
-    unitSymbol: null,
+    unitSymbol: 'und',
     quantityDecimals: 0,
+    presentations: [],
 }
 
 const mockPaginatedResponse = {
@@ -87,13 +88,18 @@ describe('useProductMutations.create', () => {
 
         const { result } = renderHook(() => useProductMutations(), { wrapper })
 
-        result.current.create.mutate({ name: 'Producto X', sku: 'SKU-001' })
+        result.current.create.mutate({
+            name: 'Producto X',
+            sku: 'SKU-001',
+            unitOfMeasureId: 1,
+        })
 
         await waitFor(() => expect(result.current.create.isSuccess).toBe(true))
 
         expect(api.createProduct).toHaveBeenCalledWith({
             name: 'Producto X',
             sku: 'SKU-001',
+            unitOfMeasureId: 1,
         })
         expect(result.current.create.data?.sku).toBe('SKU-001')
     })

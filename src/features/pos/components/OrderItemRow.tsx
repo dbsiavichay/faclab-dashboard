@@ -37,11 +37,11 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
             setReasonMissing(true)
             return
         }
-        updateItemPrice(item.productId, price, reason.trim() || undefined)
+        updateItemPrice(item.lineKey, price, reason.trim() || undefined)
         setEditingPrice(false)
         setNewPrice('')
         setReasonMissing(false)
-    }, [newPrice, reason, updateItemPrice, item.productId, item.listPrice])
+    }, [newPrice, reason, updateItemPrice, item.lineKey, item.listPrice])
 
     const handleToggleEdit = useCallback(() => {
         setNewPrice(item.salePrice.toString())
@@ -51,18 +51,18 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
     }, [item.salePrice, item.overrideReason])
 
     const handleDecreaseQty = useCallback(
-        () => updateItemQuantity(item.productId, item.quantity - 1),
-        [updateItemQuantity, item.productId, item.quantity]
+        () => updateItemQuantity(item.lineKey, item.quantity - 1),
+        [updateItemQuantity, item.lineKey, item.quantity]
     )
 
     const handleIncreaseQty = useCallback(
-        () => updateItemQuantity(item.productId, item.quantity + 1),
-        [updateItemQuantity, item.productId, item.quantity]
+        () => updateItemQuantity(item.lineKey, item.quantity + 1),
+        [updateItemQuantity, item.lineKey, item.quantity]
     )
 
     const handleRemove = useCallback(
-        () => removeItem(item.productId),
-        [removeItem, item.productId]
+        () => removeItem(item.lineKey),
+        [removeItem, item.lineKey]
     )
 
     const handleKeyDown = useCallback(
@@ -77,7 +77,14 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
         <div className="space-y-1">
             <div className="flex items-center gap-3">
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{item.name}</p>
+                    <p className="text-sm font-medium truncate">
+                        {item.name}
+                        {item.presentationName && (
+                            <span className="ml-1 text-xs font-normal text-gray-500 dark:text-gray-400">
+                                · {item.presentationName}
+                            </span>
+                        )}
+                    </p>
                     <div className="flex items-center gap-1">
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                             {isPriceOverridden(item) && (

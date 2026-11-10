@@ -62,14 +62,22 @@ export interface PurchaseOrderItem {
     // Only in the item list of an order
     productName?: string | null
     productSku?: string | null
+    /** In its presentation (S5.2): ordered, received and pending, like the cost */
     quantityOrdered: number
     quantityReceived: number
     unitCost: number
+    /** The presentation it is bought in; null before S5.2 (the base unit) */
+    presentationId?: number | null
+    presentationName?: string | null
+    /** Base units in one of its presentation */
+    unitFactor?: number
 }
 
 export interface PurchaseOrderItemInput {
     purchaseOrderId: number
     productId: number
+    /** Omitted: the base unit */
+    presentationId?: number | null
     quantityOrdered: number
     unitCost: number
 }

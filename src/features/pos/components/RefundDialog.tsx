@@ -160,7 +160,11 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                 const product = productResponse.data
                 selections.push({
                     saleItem: item,
-                    productName: product.name,
+                    // The box or roll it was sold in (S5.2): it is refunded in it
+                    productName:
+                        item.presentationName && item.unitFactor !== 1
+                            ? `${product.name} (${item.presentationName})`
+                            : product.name,
                     // Decimal quantities (S5.1): no float noise in 2,5 - 1,25
                     maxQuantity: roundQuantity(
                         Math.max(

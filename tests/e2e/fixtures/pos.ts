@@ -1,3 +1,4 @@
+import type { ProductPresentation } from '@/features/products/model/types'
 import type {
     POSProduct,
     POSSale,
@@ -9,6 +10,7 @@ import type {
 import {
     ADMIN,
     POS,
+    apiError,
     created,
     ok,
     paginated,
@@ -107,6 +109,24 @@ export const posProducts = (): POSProduct[] => [
     },
 ]
 
+/** Las bisagras también vienen en caja de 50, con su código y su precio (S5.2) */
+export const HINGE_BOX_BARCODE = '7861000000500'
+
+export const hingeBox = (): ProductPresentation => ({
+    id: 250,
+    productId: 2,
+    name: 'Caja x50',
+    factor: 50,
+    barcode: HINGE_BOX_BARCODE,
+    salePrice: 20,
+    purchasePrice: null,
+    isBase: false,
+    isActive: true,
+    effectiveSalePrice: 20,
+    effectivePurchasePrice: null,
+    quantityDecimals: 0,
+})
+
 const SALE_ID = 901
 
 // Como roundMoney: 2,5 × 0,85 = 2,125 sube a 2,13 aunque el float diga 2,1249…
@@ -157,6 +177,8 @@ const receiptFor = (input: QuickSaleInput, total: number): Receipt => ({
         productName:
             posProducts().find((product) => product.id === item.productId)
                 ?.name ?? `#${item.productId}`,
+        presentationName:
+            item.presentationId === hingeBox().id ? hingeBox().name : null,
         quantity: item.quantity,
         unitPrice: item.unitPrice ?? 0,
         discount: 0,
@@ -205,6 +227,14 @@ export const mockPOS = (
                     product.sku.toLowerCase().includes(term)
             )
         )
+    })
+    // Escanear la caja de bisagras la agrega con su precio
+    api.get(`${POS}/products/barcode`, ({ query }) => {
+        if (query.get('code') !== HINGE_BOX_BARCODE) {
+            return apiError(404, 'NOT_FOUND', 'No product with that barcode')
+        }
+        const hinge = posProducts().find((product) => product.id === 2)!
+        return ok({ product: hinge, presentation: hingeBox() })
     })
     api.get(`${POS}/sales/parked`, () => ok([]))
     api.get(`${POS}/shifts/:id/cash-summary`, ({ params }) =>

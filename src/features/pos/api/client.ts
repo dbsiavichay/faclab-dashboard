@@ -31,6 +31,7 @@ import type {
     PaymentMethodSummary,
     ShiftListParams,
     CashSummary,
+    POSBarcodeMatch,
     POSProduct,
     POSCustomer,
     QuickCustomerInput,
@@ -261,6 +262,12 @@ export const searchProducts = (term: string, limit?: number) =>
 
 export const getProduct = (id: number) =>
     httpClient.get<DataResponse<POSProduct>>(`${HOST}/products/${id}`)
+
+/** The product and presentation of a scanned barcode (S5.2); 404 if none */
+export const getProductByBarcode = (code: string) =>
+    httpClient.get<DataResponse<POSBarcodeMatch>>(`${HOST}/products/barcode`, {
+        params: { code },
+    })
 
 // === CUSTOMERS ===
 

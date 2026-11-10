@@ -1,5 +1,8 @@
 import type { Category } from '@/features/categories/model/types'
-import type { Product } from '@/features/products/model/types'
+import type {
+    Product,
+    ProductPresentation,
+} from '@/features/products/model/types'
 import type { UnitOfMeasure } from '@/features/unitsOfMeasure/model/types'
 import { ADMIN, created, ok, paginated, type MockApi } from '../support/mockApi'
 
@@ -33,7 +36,24 @@ export const buildProduct = (overrides: Partial<Product> = {}): Product => ({
     leadTimeDays: 5,
     unitSymbol: 'u',
     quantityDecimals: 0,
+    presentations: [],
     ...overrides,
+})
+
+/** The base presentation of a product: its unit, with its barcode and prices */
+export const basePresentation = (product: Product): ProductPresentation => ({
+    id: product.id * 100,
+    productId: product.id,
+    name: 'Unidad',
+    factor: 1,
+    barcode: product.barcode,
+    salePrice: null,
+    purchasePrice: null,
+    isBase: true,
+    isActive: true,
+    effectiveSalePrice: product.salePrice,
+    effectivePurchasePrice: product.purchasePrice,
+    quantityDecimals: product.quantityDecimals,
 })
 
 export const productList = (): Product[] => [
@@ -97,6 +117,44 @@ export const mockCatalog = (
         const product = rows.find((row) => row.id === Number(params.id))!
         Object.assign(product, body)
         return ok(product)
+    })
+
+    // Presentations (S5.2): the base one plus what each test adds
+    const presentations = new Map<number, ProductPresentation[]>()
+    const presentationsOf = (productId: number) => {
+        const product = rows.find((row) => row.id === productId)!
+        if (!presentations.has(productId)) {
+            presentations.set(productId, [basePresentation(product)])
+        }
+        return presentations.get(productId)!
+    }
+    api.get(`${ADMIN}/products/:id/presentations`, ({ params }) =>
+        ok(presentationsOf(Number(params.id)))
+    )
+    api.post(`${ADMIN}/products/:id/presentations`, ({ params, body }) => {
+        const productId = Number(params.id)
+        const product = rows.find((row) => row.id === productId)!
+        const input = body as Partial<ProductPresentation>
+        const list = presentationsOf(productId)
+        const factor = input.factor ?? 1
+        const presentation: ProductPresentation = {
+            id: productId * 100 + list.length,
+            productId,
+            name: input.name ?? '',
+            factor,
+            barcode: input.barcode ?? null,
+            salePrice: input.salePrice ?? null,
+            purchasePrice: input.purchasePrice ?? null,
+            isBase: false,
+            isActive: input.isActive ?? true,
+            effectiveSalePrice:
+                input.salePrice ?? (product.salePrice ?? 0) * factor,
+            effectivePurchasePrice:
+                input.purchasePrice ?? (product.purchasePrice ?? 0) * factor,
+            quantityDecimals: product.quantityDecimals,
+        }
+        list.push(presentation)
+        return created(presentation)
     })
 
     return rows

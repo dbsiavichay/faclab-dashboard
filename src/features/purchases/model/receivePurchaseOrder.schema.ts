@@ -7,6 +7,9 @@ export const receiveItemSchema = z
         quantityOrdered: z.number(),
         quantityReceived: z.number(),
         quantityPending: z.number(),
+        // Its presentation (S5.2): quantities are in it, stock in base units
+        presentationName: z.string().nullable().optional(),
+        unitFactor: z.number().optional(),
         quantityToReceive: z.number().min(0, 'Mínimo 0'),
         locationId: z.number().nullable(),
         lotNumber: z.string(),

@@ -40,7 +40,7 @@ const OrderPanel = ({
                 ) : (
                     <ul className="space-y-3">
                         {cartItems.map((item) => (
-                            <li key={item.productId}>
+                            <li key={item.lineKey}>
                                 <OrderItemRow item={item} />
                             </li>
                         ))}

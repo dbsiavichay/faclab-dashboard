@@ -6,7 +6,7 @@ import {
     ControlledSelect,
     ControlledSwitcher,
 } from '@/components/ui/Form/controlled'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm, useWatch, type DefaultValues } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useCategoriesList } from '@features/categories'
 import { useUnitsOfMeasureList } from '@features/unitsOfMeasure'
@@ -29,7 +29,7 @@ interface ProductFormProps {
     onSubmit: (data: ProductFormValues) => void
 }
 
-const emptyValues: ProductFormValues = {
+const emptyValues: DefaultValues<ProductFormValues> = {
     name: '',
     sku: '',
     description: '',
@@ -83,24 +83,21 @@ export const ProductForm = ({
         })),
     ]
 
-    const unitOptions = [
-        { value: undefined, label: 'Sin unidad' },
-        ...unitsOfMeasure
-            .filter((u) => u.isActive)
-            .map((u) => ({
-                value: u.id as number | undefined,
-                label: `${u.name} (${u.symbol})`,
-            })),
-    ]
+    const unitOptions = unitsOfMeasure
+        .filter((u) => u.isActive || u.id === product?.unitOfMeasureId)
+        .map((u) => ({
+            value: u.id,
+            label: `${u.name} (${u.symbol})`,
+        }))
 
-    const defaultValues: ProductFormValues = product
+    const defaultValues: DefaultValues<ProductFormValues> = product
         ? {
               name: product.name,
               sku: product.sku,
               description: product.description || '',
               barcode: product.barcode || '',
               categoryId: product.categoryId ?? undefined,
-              unitOfMeasureId: product.unitOfMeasureId ?? undefined,
+              unitOfMeasureId: product.unitOfMeasureId,
               purchasePrice: product.purchasePrice ?? undefined,
               salePrice: product.salePrice ?? undefined,
               taxCode: product.taxCode ?? DEFAULT_TAX_CODE,
@@ -199,6 +196,12 @@ export const ProductForm = ({
                     label="Código de barras"
                     invalid={!!errors.barcode}
                     errorMessage={errors.barcode?.message}
+                    extra={
+                        <span className="text-xs text-gray-500 ml-2">
+                            De la unidad; las cajas y rollos llevan el suyo en
+                            sus presentaciones
+                        </span>
+                    }
                 >
                     <Input
                         id="barcode"
@@ -230,13 +233,14 @@ export const ProductForm = ({
                 </FormItem>
 
                 <FormItem
+                    asterisk
                     htmlFor="unitOfMeasureId"
                     label="Unidad de Medida"
                     invalid={!!errors.unitOfMeasureId}
                     errorMessage={errors.unitOfMeasureId?.message}
                     extra={
                         <span className="text-xs text-gray-500 ml-2">
-                            Opcional
+                            En ella se lleva el stock
                         </span>
                     }
                 >

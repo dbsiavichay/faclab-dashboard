@@ -85,6 +85,8 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                 customerId: customerId || undefined,
                 items: cartItems.map((item) => ({
                     productId: item.productId,
+                    // The box or roll it is sold in (S5.2); none: the unit
+                    presentationId: item.presentationId ?? undefined,
                     quantity: item.quantity,
                     unitPrice: item.salePrice,
                     discount: item.discount > 0 ? item.discount : undefined,

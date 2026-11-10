@@ -43,8 +43,25 @@ const SaleItemsTab = ({ saleId }: SaleItemsTabProps) => {
             <TBody>
                 {items.map((item) => (
                     <Tr key={item.id}>
-                        <Td>{formatProductLabel(item)}</Td>
-                        <Td>{formatQuantity(item.quantity)}</Td>
+                        <Td>
+                            {formatProductLabel(item)}
+                            {item.presentationName &&
+                                (item.unitFactor ?? 1) !== 1 && (
+                                    <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                        {item.presentationName}
+                                    </span>
+                                )}
+                        </Td>
+                        <Td>
+                            {formatQuantity(item.quantity)}
+                            {(item.unitFactor ?? 1) !== 1 &&
+                                item.baseQuantity != null && (
+                                    <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                        = {formatQuantity(item.baseQuantity)} en
+                                        unidades base
+                                    </span>
+                                )}
+                        </Td>
                         <Td>{formatCurrency(item.unitPrice)}</Td>
                         <Td>{item.discount > 0 ? `${item.discount}%` : '-'}</Td>
                         <Td className="font-medium">

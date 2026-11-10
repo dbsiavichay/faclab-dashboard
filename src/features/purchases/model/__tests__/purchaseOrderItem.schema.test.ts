@@ -76,9 +76,18 @@ describe('purchaseOrderItemUpdateSchema', () => {
         expect(result.success).toBe(false)
     })
 
-    it('rejects non-integer quantityOrdered', () => {
+    // S5.1: 1,5 m of cable; the product's unit decides in faclab-core
+    it('accepts a decimal quantityOrdered', () => {
         const result = purchaseOrderItemUpdateSchema.safeParse({
             quantityOrdered: 1.5,
+            unitCost: 10,
+        })
+        expect(result.success).toBe(true)
+    })
+
+    it('rejects more than six decimals', () => {
+        const result = purchaseOrderItemUpdateSchema.safeParse({
+            quantityOrdered: 1.1234567,
             unitCost: 10,
         })
         expect(result.success).toBe(false)

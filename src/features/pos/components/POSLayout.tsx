@@ -44,7 +44,8 @@ const POSLayout = () => {
     const [mobileView, setMobileView] = useState<'products' | 'order'>(
         'products'
     )
-    const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+    // Lines, not units: 2,5 m of cable and 3 hammers don't add up (S5.1)
+    const itemCount = cartItems.length
 
     const createSale = useCreateSale()
     const addSaleItem = useAddSaleItem()

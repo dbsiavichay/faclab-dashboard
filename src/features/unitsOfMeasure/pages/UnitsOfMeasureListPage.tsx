@@ -97,6 +97,15 @@ const UnitsOfMeasureListPage = () => {
             ),
         },
         {
+            header: 'Decimales',
+            accessorKey: 'decimals',
+            cell: (props) => (
+                <span className="text-sm tabular-nums">
+                    {props.row.original.decimals}
+                </span>
+            ),
+        },
+        {
             header: 'Descripción',
             accessorKey: 'description',
             cell: (props) => (

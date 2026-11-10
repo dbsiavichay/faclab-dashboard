@@ -18,6 +18,8 @@ const item = (overrides: Partial<POSCartItem>): POSCartItem => ({
     taxCode: 'VAT_15',
     quantity: 1,
     discount: 0,
+    unitSymbol: null,
+    quantityDecimals: 0,
     ...overrides,
 })
 

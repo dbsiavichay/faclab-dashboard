@@ -5,6 +5,7 @@ import { formatCurrency } from '@shared/lib/format'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import type { PurchaseOrder, PurchaseOrderItem } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 
@@ -71,8 +72,8 @@ export const PurchaseOrderItems = ({
                         return (
                             <Tr key={item.id}>
                                 <Td>{getProductName(item.productId)}</Td>
-                                <Td>{item.quantityOrdered}</Td>
-                                <Td>{item.quantityReceived}</Td>
+                                <Td>{formatQuantity(item.quantityOrdered)}</Td>
+                                <Td>{formatQuantity(item.quantityReceived)}</Td>
                                 <Td>
                                     {pending > 0 ? (
                                         <span className="text-amber-600 dark:text-amber-400 font-medium">

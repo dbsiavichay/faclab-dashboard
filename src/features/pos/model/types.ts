@@ -473,6 +473,9 @@ export interface POSProduct {
     taxCode: TaxCode
     isActive: boolean
     image: string | null
+    // Its unit of measure (S5.1): 2,5 m of cable; without one, whole quantities
+    unitSymbol: string | null
+    quantityDecimals: number
 }
 
 // === POS CUSTOMER ===

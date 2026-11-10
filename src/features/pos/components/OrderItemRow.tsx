@@ -10,6 +10,7 @@ import {
     HiOutlinePencil,
 } from 'react-icons/hi'
 import { formatCurrency } from '@shared/lib/format'
+import CartQuantityInput from './CartQuantityInput'
 
 interface OrderItemRowProps {
     item: POSCartItem
@@ -114,12 +115,7 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
                         icon={<HiMinus />}
                         onClick={handleDecreaseQty}
                     />
-                    <span
-                        className="w-8 text-center text-sm font-medium tabular-nums"
-                        aria-label={`Cantidad: ${item.quantity}`}
-                    >
-                        {item.quantity}
-                    </span>
+                    <CartQuantityInput item={item} />
                     <Button
                         size="xs"
                         variant="plain"

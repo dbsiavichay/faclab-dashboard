@@ -22,6 +22,9 @@ export type Product = {
     maxStock: number | null
     reorderPoint: number
     leadTimeDays: number | null
+    // Its unit of measure (S5.1): the decimals its quantities take
+    unitSymbol: string | null
+    quantityDecimals: number
 }
 
 export type ProductInput = {

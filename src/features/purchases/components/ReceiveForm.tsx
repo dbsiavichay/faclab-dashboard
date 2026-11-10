@@ -17,6 +17,7 @@ import {
 import type { PurchaseOrderItem } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity, roundQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -72,8 +73,10 @@ const ReceiveForm = ({
                     productId: item.productId,
                     quantityOrdered: item.quantityOrdered,
                     quantityReceived: item.quantityReceived,
-                    quantityPending:
-                        item.quantityOrdered - item.quantityReceived,
+                    // 2,5 - 1,25 without float noise (S5.1)
+                    quantityPending: roundQuantity(
+                        item.quantityOrdered - item.quantityReceived
+                    ),
                     quantityToReceive: 0,
                     locationId: null,
                     lotNumber: '',
@@ -177,18 +180,27 @@ const ReceiveForm = ({
                                                         )}
                                                     </span>
                                                 </Td>
-                                                <Td>{field.quantityOrdered}</Td>
                                                 <Td>
-                                                    {field.quantityReceived}
+                                                    {formatQuantity(
+                                                        field.quantityOrdered
+                                                    )}
+                                                </Td>
+                                                <Td>
+                                                    {formatQuantity(
+                                                        field.quantityReceived
+                                                    )}
                                                 </Td>
                                                 <Td>
                                                     <span className="font-medium text-amber-600 dark:text-amber-400">
-                                                        {field.quantityPending}
+                                                        {formatQuantity(
+                                                            field.quantityPending
+                                                        )}
                                                     </span>
                                                 </Td>
                                                 <Td>
                                                     <Input
                                                         type="number"
+                                                        step="any"
                                                         min={0}
                                                         max={
                                                             field.quantityPending
@@ -208,11 +220,10 @@ const ReceiveForm = ({
                                                                     v ===
                                                                         undefined
                                                                         ? 0
-                                                                        : parseInt(
+                                                                        : parseFloat(
                                                                               String(
                                                                                   v
-                                                                              ),
-                                                                              10
+                                                                              )
                                                                           ) ||
                                                                           0,
                                                             }

@@ -118,12 +118,11 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                         >
                             <Input
                                 type="number"
+                                step="any"
                                 placeholder="Ej: 100"
                                 disabled={isSubmitting}
                                 invalid={!!errors.quantity}
-                                {...numberRegister('quantity', {
-                                    integer: true,
-                                })}
+                                {...numberRegister('quantity', {})}
                             />
                         </FormItem>
 

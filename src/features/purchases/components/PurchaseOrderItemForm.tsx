@@ -128,12 +128,12 @@ const PurchaseOrderItemCreateForm = ({
                         >
                             <Input
                                 type="number"
-                                min={1}
+                                step="any"
+                                min={0}
                                 placeholder="1"
                                 disabled={isSubmitting}
                                 invalid={!!errors.quantityOrdered}
                                 {...numberRegister('quantityOrdered', {
-                                    integer: true,
                                     emptyValue: 1,
                                 })}
                             />
@@ -273,12 +273,12 @@ const PurchaseOrderItemUpdateForm = ({
                         >
                             <Input
                                 type="number"
-                                min={1}
+                                step="any"
+                                min={0}
                                 placeholder="1"
                                 disabled={isSubmitting}
                                 invalid={!!errors.quantityOrdered}
                                 {...numberRegister('quantityOrdered', {
-                                    integer: true,
                                     emptyValue: 1,
                                 })}
                             />

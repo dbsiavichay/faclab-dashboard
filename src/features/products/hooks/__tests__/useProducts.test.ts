@@ -25,6 +25,8 @@ const mockProduct = {
     maxStock: null,
     reorderPoint: 0,
     leadTimeDays: null,
+    unitSymbol: null,
+    quantityDecimals: 0,
 }
 
 const mockPaginatedResponse = {

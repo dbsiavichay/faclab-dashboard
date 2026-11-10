@@ -107,12 +107,23 @@ describe('productSchema', () => {
         expect(result.success).toBe(false)
     })
 
-    it('rejects non-integer minStock', () => {
+    // S5.1: thresholds take the decimals of the product's unit
+    it('accepts a decimal minStock', () => {
         const result = productSchema.safeParse({
             name: 'X',
             sku: 'SKU',
             taxCode: 'VAT_15',
             minStock: 1.5,
+        })
+        expect(result.success).toBe(true)
+    })
+
+    it('rejects a negative minStock', () => {
+        const result = productSchema.safeParse({
+            name: 'X',
+            sku: 'SKU',
+            taxCode: 'VAT_15',
+            minStock: -1,
         })
         expect(result.success).toBe(false)
     })

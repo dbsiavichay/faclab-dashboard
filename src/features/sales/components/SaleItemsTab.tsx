@@ -2,6 +2,7 @@ import Table from '@/components/ui/Table'
 import { formatCurrency, formatProductLabel } from '@shared/lib/format'
 import { useSaleItems } from '../hooks/useSales'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
 
@@ -43,7 +44,7 @@ const SaleItemsTab = ({ saleId }: SaleItemsTabProps) => {
                 {items.map((item) => (
                     <Tr key={item.id}>
                         <Td>{formatProductLabel(item)}</Td>
-                        <Td>{item.quantity}</Td>
+                        <Td>{formatQuantity(item.quantity)}</Td>
                         <Td>{formatCurrency(item.unitPrice)}</Td>
                         <Td>{item.discount > 0 ? `${item.discount}%` : '-'}</Td>
                         <Td className="font-medium">

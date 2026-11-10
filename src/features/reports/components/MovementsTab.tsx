@@ -8,6 +8,7 @@ import { useMovementHistory } from '../hooks/useReports'
 import type { MovementHistoryItem, MovementHistoryParams } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
 import Input from '@/components/ui/Input'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const movementTypeOptions = [
     { value: '', label: 'Todos' },
@@ -97,7 +98,7 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
                         }
                     >
                         {type === 'IN' ? '+' : '-'}
-                        {Math.abs(quantity)}
+                        {formatQuantity(Math.abs(quantity))}
                     </span>
                 )
             },

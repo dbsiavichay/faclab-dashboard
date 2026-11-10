@@ -170,12 +170,12 @@ const AdjustmentItemCreateForm = ({
                         >
                             <Input
                                 type="number"
+                                step="any"
                                 min={0}
                                 placeholder="0"
                                 disabled={isSubmitting}
                                 invalid={!!errors.actualQuantity}
                                 {...numberRegister('actualQuantity', {
-                                    integer: true,
                                     emptyValue: 0,
                                 })}
                             />
@@ -311,12 +311,12 @@ const AdjustmentItemUpdateForm = ({
                         >
                             <Input
                                 type="number"
+                                step="any"
                                 min={0}
                                 placeholder="0"
                                 disabled={isSubmitting}
                                 invalid={!!errors.actualQuantity}
                                 {...numberRegister('actualQuantity', {
-                                    integer: true,
                                     emptyValue: 0,
                                 })}
                             />

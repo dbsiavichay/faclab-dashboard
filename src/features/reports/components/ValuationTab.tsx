@@ -6,6 +6,7 @@ import { useValuation } from '../hooks/useReports'
 import type { ValuationItem } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
 import Input from '@/components/ui/Input'
+import { formatQuantity } from '@shared/lib/quantity'
 
 type Option = { value: string; label: string }
 
@@ -48,7 +49,7 @@ const ValuationTab = ({ warehouseOptions }: Props) => {
             accessorKey: 'quantity',
             cell: (props) => (
                 <span className="font-medium">
-                    {props.row.original.quantity}
+                    {formatQuantity(props.row.original.quantity)}
                 </span>
             ),
         },

@@ -8,6 +8,7 @@ describe('unitOfMeasureSchema', () => {
             symbol: 'kg',
             description: 'Unidad de masa',
             isActive: true,
+            decimals: 3,
         })
         expect(result.success).toBe(true)
     })
@@ -16,8 +17,18 @@ describe('unitOfMeasureSchema', () => {
         const result = unitOfMeasureSchema.safeParse({
             name: 'Litro',
             symbol: 'L',
+            decimals: 2,
         })
         expect(result.success).toBe(true)
+    })
+
+    it.each([-1, 7, 1.5])('rejects %s decimals', (decimals) => {
+        const result = unitOfMeasureSchema.safeParse({
+            name: 'Metro',
+            symbol: 'm',
+            decimals,
+        })
+        expect(result.success).toBe(false)
     })
 
     it('rejects empty name', () => {

@@ -3,6 +3,7 @@ import StatusBadge from '@/components/shared/StatusBadge'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
 import { type StockAlert } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
+import { formatQuantity } from '@shared/lib/quantity'
 
 interface ExpiringLotsTabProps {
     data: StockAlert[]
@@ -53,7 +54,7 @@ const ExpiringLotsTab = ({ data, loading }: ExpiringLotsTabProps) => {
             accessorKey: 'currentQuantity',
             cell: (props) => (
                 <span className="font-medium">
-                    {props.row.original.currentQuantity}
+                    {formatQuantity(props.row.original.currentQuantity)}
                 </span>
             ),
         },

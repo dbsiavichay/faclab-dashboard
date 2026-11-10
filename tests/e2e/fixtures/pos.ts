@@ -15,6 +15,7 @@ import {
     type MockApi,
 } from '../support/mockApi'
 import { categories } from './catalog'
+import { roundMoney } from '@shared/lib/money'
 
 /** Caja de la matriz (sucursal 1 de la sesión por defecto) */
 export const posTerminal = (
@@ -61,6 +62,8 @@ export const posProducts = (): POSProduct[] => [
         taxCode: 'VAT_15',
         isActive: true,
         image: null,
+        unitSymbol: 'u',
+        quantityDecimals: 0,
     },
     {
         id: 2,
@@ -72,6 +75,8 @@ export const posProducts = (): POSProduct[] => [
         taxCode: 'VAT_15',
         isActive: true,
         image: null,
+        unitSymbol: 'u',
+        quantityDecimals: 0,
     },
     {
         id: 3,
@@ -83,12 +88,29 @@ export const posProducts = (): POSProduct[] => [
         taxCode: 'VAT_15',
         isActive: true,
         image: null,
+        unitSymbol: 'u',
+        quantityDecimals: 0,
+    },
+    // Por metros (S5.1): se vende 2,5 m
+    {
+        id: 4,
+        name: 'Cable gemelo 2x14 AWG',
+        sku: 'ELE-CAB-214',
+        barcode: null,
+        categoryId: 1,
+        salePrice: 0.85,
+        taxCode: 'VAT_15',
+        isActive: true,
+        image: null,
+        unitSymbol: 'm',
+        quantityDecimals: 2,
     },
 ]
 
 const SALE_ID = 901
 
-const cents = (value: number) => Math.round(value * 100) / 100
+// Como roundMoney: 2,5 × 0,85 = 2,125 sube a 2,13 aunque el float diga 2,1249…
+const cents = roundMoney
 
 /** Total de la venta como lo calcula faclab-core: los productos llevan IVA 15% */
 const totalOf = (input: QuickSaleInput) => {

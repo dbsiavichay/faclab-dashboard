@@ -53,8 +53,11 @@ const ParkedSalesDrawer = ({ isOpen, onClose }: ParkedSalesDrawerProps) => {
                     listPrice: product.salePrice ?? item.unitPrice,
                     overrideReason: item.overrideReason ?? undefined,
                     taxCode: item.taxCode,
+                    unitSymbol: product.unitSymbol,
+                    quantityDecimals: product.quantityDecimals,
                 })
-                if (item.quantity > 1) {
+                // addItem starts at 1: 0,5 m or 2,5 m have to be set too
+                if (item.quantity !== 1) {
                     usePOSStore
                         .getState()
                         .updateItemQuantity(product.id, item.quantity)

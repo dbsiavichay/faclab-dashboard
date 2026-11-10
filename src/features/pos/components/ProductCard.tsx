@@ -18,6 +18,8 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
             sku: product.sku,
             salePrice: product.salePrice ?? 0,
             taxCode: product.taxCode,
+            unitSymbol: product.unitSymbol,
+            quantityDecimals: product.quantityDecimals,
         })
     }, [addItem, product])
 

@@ -12,6 +12,7 @@ import { HiOutlinePlus } from 'react-icons/hi'
 import { formatDatetime } from '@shared/lib/format'
 import LabeledField from '@/components/shared/LabeledField'
 import StatusBadge from '@/components/shared/StatusBadge'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const MovementsListPage = () => {
     const [productId, setProductId] = useState<string>('')
@@ -81,7 +82,7 @@ const MovementsListPage = () => {
                         }
                     >
                         {quantity > 0 ? '+' : ''}
-                        {quantity}
+                        {formatQuantity(quantity)}
                     </span>
                 )
             },

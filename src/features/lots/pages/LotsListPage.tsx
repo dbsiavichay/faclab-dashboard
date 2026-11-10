@@ -18,6 +18,7 @@ import type {
 import { LotForm } from '../components/LotForm'
 import { HiOutlinePencil, HiPlus } from 'react-icons/hi'
 import LabeledField from '@/components/shared/LabeledField'
+import { formatQuantity } from '@shared/lib/quantity'
 
 const LotsListPage = () => {
     const crud = useCrudOperations<Lot>()
@@ -121,7 +122,7 @@ const LotsListPage = () => {
             accessorKey: 'initialQuantity',
             cell: (props) => (
                 <span className="text-sm">
-                    {props.row.original.initialQuantity}
+                    {formatQuantity(props.row.original.initialQuantity)}
                 </span>
             ),
         },
@@ -140,7 +141,7 @@ const LotsListPage = () => {
                                 : 'text-green-600'
                         }`}
                     >
-                        {currentQuantity}
+                        {formatQuantity(currentQuantity)}
                     </span>
                 )
             },

@@ -24,6 +24,7 @@ import ShiftCloseDialog from './ShiftCloseDialog'
 import CashMovementDialog from './CashMovementDialog'
 import RefundDialog from './RefundDialog'
 import QuotesDrawer from './QuotesDrawer'
+import PaymentOnAccountDialog from './PaymentOnAccountDialog'
 import QuotePricesDialog from './QuotePricesDialog'
 import { useLoadQuote } from '../hooks/usePosQuotes'
 
@@ -46,6 +47,7 @@ const POSLayout = () => {
     const [cashMovementOpen, setCashMovementOpen] = useState(false)
     const [refundOpen, setRefundOpen] = useState(false)
     const [quotesOpen, setQuotesOpen] = useState(false)
+    const [paymentOnAccountOpen, setPaymentOnAccountOpen] = useState(false)
     const loadQuote = useLoadQuote()
     const [searchParams, setSearchParams] = useSearchParams()
     const quoteParam = Number(searchParams.get('quote')) || 0
@@ -139,6 +141,7 @@ const POSLayout = () => {
                 onOpenCashMovement={() => setCashMovementOpen(true)}
                 onOpenRefund={() => setRefundOpen(true)}
                 onOpenQuotes={() => setQuotesOpen(true)}
+                onOpenPaymentOnAccount={() => setPaymentOnAccountOpen(true)}
             />
             <div
                 role="tablist"
@@ -235,6 +238,11 @@ const POSLayout = () => {
             <RefundDialog
                 isOpen={refundOpen}
                 onClose={() => setRefundOpen(false)}
+            />
+
+            <PaymentOnAccountDialog
+                isOpen={paymentOnAccountOpen}
+                onClose={() => setPaymentOnAccountOpen(false)}
             />
 
             <QuotesDrawer

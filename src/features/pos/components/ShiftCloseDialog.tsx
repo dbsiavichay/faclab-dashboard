@@ -113,6 +113,11 @@ const ShiftCloseDialog = ({ isOpen, onClose }: ShiftCloseDialogProps) => {
                     />
                     <SummaryRow
                         positive
+                        label="Abonos en efectivo"
+                        value={cashSummary.customerPayments}
+                    />
+                    <SummaryRow
+                        positive
                         label="Entradas de caja"
                         value={cashSummary.cashIn}
                     />

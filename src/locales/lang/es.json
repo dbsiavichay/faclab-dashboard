@@ -62,6 +62,7 @@
             "customers": "Clientes",
             "sales": "Ventas",
             "quotes": "Cotizaciones",
+            "receivables": "Cartera",
             "attention": "Requieren atención",
             "invoices": "Facturas"
         },

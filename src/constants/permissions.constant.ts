@@ -20,6 +20,11 @@ export const PERMISSION = {
     SALE_WRITE: 'sale:write',
     SALE_CANCEL: 'sale:cancel',
 
+    // Accounts receivable (S5.5): the portfolio and payments outside the cash
+    // register; the cashier takes them at the POS with pos:operate
+    RECEIVABLE_READ: 'receivable:read',
+    RECEIVABLE_WRITE: 'receivable:write',
+
     PURCHASE_READ: 'purchase:read',
     PURCHASE_WRITE: 'purchase:write',
     PURCHASE_CONFIRM: 'purchase:confirm',
@@ -71,6 +76,8 @@ export const ROLE_PERMISSIONS: Record<RoleCode, Permission[]> = {
         PERMISSION.SALE_READ,
         PERMISSION.SALE_WRITE,
         PERMISSION.SALE_CANCEL,
+        PERMISSION.RECEIVABLE_READ,
+        PERMISSION.RECEIVABLE_WRITE,
         PERMISSION.PURCHASE_READ,
         PERMISSION.PURCHASE_WRITE,
         PERMISSION.PURCHASE_CONFIRM,
@@ -98,6 +105,8 @@ export const ROLE_PERMISSIONS: Record<RoleCode, Permission[]> = {
         PERMISSION.ALERT_READ,
         PERMISSION.SALE_READ,
         PERMISSION.SALE_WRITE,
+        PERMISSION.RECEIVABLE_READ,
+        PERMISSION.RECEIVABLE_WRITE,
         PERMISSION.PURCHASE_READ,
         PERMISSION.PURCHASE_WRITE,
         PERMISSION.PURCHASE_RECEIVE,
@@ -113,6 +122,7 @@ export const ROLE_PERMISSIONS: Record<RoleCode, Permission[]> = {
         PERMISSION.STOCK_READ,
         PERMISSION.ALERT_READ,
         PERMISSION.SALE_READ,
+        PERMISSION.RECEIVABLE_READ,
         PERMISSION.PURCHASE_READ,
         PERMISSION.CUSTOMER_READ,
         PERMISSION.SUPPLIER_READ,

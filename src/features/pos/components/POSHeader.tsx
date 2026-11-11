@@ -10,6 +10,7 @@ import {
     HiOutlineHome,
     HiOutlineReceiptRefund,
     HiOutlineDocumentDuplicate,
+    HiOutlineCreditCard,
 } from 'react-icons/hi'
 import { useCan, useHasRole } from '@/stores'
 import { ROLE } from '@/constants/roles.constant'
@@ -22,6 +23,7 @@ interface POSHeaderProps {
     onOpenCashMovement?: () => void
     onOpenRefund?: () => void
     onOpenQuotes?: () => void
+    onOpenPaymentOnAccount?: () => void
 }
 
 const POSHeader = ({
@@ -29,6 +31,7 @@ const POSHeader = ({
     onOpenCashMovement,
     onOpenRefund,
     onOpenQuotes,
+    onOpenPaymentOnAccount,
 }: POSHeaderProps) => {
     const navigate = useNavigate()
     const shift = useShift()
@@ -105,6 +108,15 @@ const POSHeader = ({
                     onClick={onOpenQuotes}
                 >
                     <span className="hidden md:inline">Cotizaciones</span>
+                </Button>
+                <Button
+                    size="sm"
+                    variant="plain"
+                    aria-label="Abono"
+                    icon={<HiOutlineCreditCard />}
+                    onClick={onOpenPaymentOnAccount}
+                >
+                    <span className="hidden md:inline">Abono</span>
                 </Button>
                 {canRefund && (
                     <Button

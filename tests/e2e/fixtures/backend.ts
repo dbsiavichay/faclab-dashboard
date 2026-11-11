@@ -8,6 +8,7 @@ import {
     type MockApi,
 } from '../support/mockApi'
 import { emptyDailyReport, emptyDashboard, emptyValuation } from './dashboard'
+import { emptyAging } from './receivables'
 
 const EMPTY_ADMIN_LISTS = [
     'categories',
@@ -49,6 +50,7 @@ export const mockEmptyBackend = (api: MockApi): void => {
         api.get(`${ADMIN}/${resource}`, ({ query }) => paginated([], query))
     }
     api.get(`${ADMIN}/dashboard`, () => ok(emptyDashboard()))
+    api.get(`${ADMIN}/receivables/aging`, () => ok(emptyAging()))
     api.get(`${ADMIN}/reports/inventory/valuation`, () => ok(emptyValuation()))
 
     api.get(`${POS}/shifts`, ({ query }) => paginated([], query))

@@ -6,6 +6,10 @@ import { HiOutlineCheckCircle } from 'react-icons/hi'
 import { InvoiceReceiptNote } from '@features/invoicing'
 import { formatCurrency } from '@shared/lib/format'
 import { saleLabel } from '../lib/saleLabel'
+import {
+    POS_PAYMENT_METHOD_LABELS,
+    type POSPaymentMethod,
+} from '../model/types'
 import { formatQuantity } from '@shared/lib/quantity'
 
 interface ReceiptDialogProps {
@@ -127,7 +131,14 @@ const ReceiptDialog = ({ isOpen, saleId, onClose }: ReceiptDialogProps) => {
                                 key={i}
                                 className="flex justify-between text-gray-500 dark:text-gray-400"
                             >
-                                <span>{p.method}</span>
+                                <span>
+                                    {POS_PAYMENT_METHOD_LABELS[
+                                        p.method as POSPaymentMethod
+                                    ] ?? p.method}
+                                    {p.method === 'CREDIT' &&
+                                        p.termDays != null &&
+                                        ` (${p.termDays} días)`}
+                                </span>
                                 <span>{formatCurrency(p.amountTendered)}</span>
                             </div>
                         ))}

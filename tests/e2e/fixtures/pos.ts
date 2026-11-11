@@ -19,6 +19,7 @@ import {
     paginated,
     type MockApi,
 } from '../support/mockApi'
+import { builderAccount } from './receivables'
 import { categories } from './catalog'
 import { roundMoney } from '@shared/lib/money'
 
@@ -298,12 +299,42 @@ export const mockPOS = (
             : apiError(404, 'NOT_FOUND', 'Customer not found')
     )
     api.get(`${POS}/sales/parked`, () => ok([]))
+    // The builder buys on credit (S5.5): 380 available, 120 overdue
+    api.get(`${POS}/customer-accounts/:id`, ({ params }) =>
+        Number(params.id) === builder().id
+            ? ok(builderAccount())
+            : apiError(404, 'NOT_FOUND', 'Customer not found')
+    )
+    api.post(`${POS}/customer-payments`, ({ body }) => {
+        const input = body as {
+            customerId: number
+            amount: number
+            paymentMethod: string
+        }
+        return created({
+            id: 1,
+            number: 'AB-2026-0001',
+            customerId: input.customerId,
+            customerName: builder().name,
+            amount: input.amount,
+            paymentMethod: input.paymentMethod,
+            reference: null,
+            notes: null,
+            paidAt: '2026-11-11T10:00:00',
+            receivedBy: 'Ana',
+            branchId: 1,
+            terminalId: 11,
+            shiftId: shift?.id ?? null,
+            applications: [],
+        })
+    })
     api.get(`${POS}/shifts/:id/cash-summary`, ({ params }) =>
         ok({
             shiftId: Number(params.id),
             openingBalance: shift?.openingBalance ?? 0,
             cashSales: 0,
             cashRefunds: 0,
+            customerPayments: 0,
             cashIn: 0,
             cashOut: 0,
             expectedBalance: shift?.openingBalance ?? 0,

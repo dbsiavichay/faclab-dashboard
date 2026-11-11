@@ -14,7 +14,14 @@ interface SalePaymentsTabProps {
 const SalePaymentsTab = ({ saleId, saleTotal }: SalePaymentsTabProps) => {
     const { data: payments = [], isLoading } = useSalePayments(saleId)
 
-    const paymentsTotal = payments.reduce((sum, p) => sum + p.amount, 0)
+    // What is owed on credit (S5.5) is covered by the customer's receivable,
+    // not paid: its payments on account are in the portfolio
+    const paymentsTotal = payments
+        .filter((p) => p.paymentMethod !== 'CREDIT')
+        .reduce((sum, p) => sum + p.amount, 0)
+    const onCredit = payments
+        .filter((p) => p.paymentMethod === 'CREDIT')
+        .reduce((sum, p) => sum + p.amount, 0)
 
     if (isLoading) {
         return (
@@ -45,6 +52,9 @@ const SalePaymentsTab = ({ saleId, saleTotal }: SalePaymentsTabProps) => {
                         <Tr key={payment.id}>
                             <Td>
                                 {PAYMENT_METHOD_LABELS[payment.paymentMethod]}
+                                {payment.paymentMethod === 'CREDIT' &&
+                                    payment.termDays != null &&
+                                    ` · ${payment.termDays} días`}
                             </Td>
                             <Td className="font-medium">
                                 {formatCurrency(payment.amount)}
@@ -67,13 +77,24 @@ const SalePaymentsTab = ({ saleId, saleTotal }: SalePaymentsTabProps) => {
                         </Td>
                         <Td colSpan={3} />
                     </Tr>
+                    {onCredit > 0 && (
+                        <Tr>
+                            <Td className="font-medium">A crédito</Td>
+                            <Td className="font-semibold">
+                                {formatCurrency(onCredit)}
+                            </Td>
+                            <Td colSpan={3} className="text-sm text-gray-500">
+                                En la cuenta por cobrar del cliente
+                            </Td>
+                        </Tr>
+                    )}
                 </TFoot>
             </Table>
-            {paymentsTotal < saleTotal && (
+            {paymentsTotal + onCredit < saleTotal && (
                 <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-500/10 rounded-lg text-sm text-amber-700 dark:text-amber-400">
                     Saldo pendiente:{' '}
                     <span className="font-semibold">
-                        {formatCurrency(saleTotal - paymentsTotal)}
+                        {formatCurrency(saleTotal - paymentsTotal - onCredit)}
                     </span>
                 </div>
             )}

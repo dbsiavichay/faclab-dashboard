@@ -42,6 +42,11 @@ import type {
     PosQuoteParams,
     PosQuoteSummary,
 } from '../model/types'
+import type {
+    CustomerAccount,
+    CustomerPayment,
+    CustomerPaymentInput,
+} from '@features/receivables'
 
 const HOST = appConfig.posApiHost
 
@@ -312,3 +317,22 @@ export const getPosQuotes = (params?: PosQuoteParams) =>
 /** A quote of the terminal's branch with today's prices and stock */
 export const getPosQuote = (id: number) =>
     httpClient.get<DataResponse<PosQuote>>(`${HOST}/quotes/${id}`)
+
+// === CUSTOMER ACCOUNTS (S5.5) ===
+
+/** Si el cliente compra a crédito, cuánto le queda y sus cuentas abiertas */
+export const getPosCustomerAccount = (customerId: number) =>
+    httpClient.get<DataResponse<CustomerAccount>>(
+        `${HOST}/customer-accounts/${customerId}`
+    )
+
+/** Un abono en la caja del turno abierto de la terminal */
+export const createPosCustomerPayment = (
+    data: CustomerPaymentInput,
+    idempotencyKey: string
+) =>
+    httpClient.post<DataResponse<CustomerPayment>>(
+        `${HOST}/customer-payments`,
+        data,
+        idempotent(idempotencyKey)
+    )

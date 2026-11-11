@@ -18,14 +18,26 @@ describe('applyPayments', () => {
         ).toEqual({ owed: 0.01, change: 0, covered: false, exceeds: false })
     })
 
-    it.each(['CREDIT_CARD', 'DEBIT_CARD', 'TRANSFER', 'OTHER'] as const)(
-        'does not let %s exceed what is owed',
-        (paymentMethod) => {
-            expect(
-                applyPayments(24.15, [{ amount: 25, paymentMethod }]).exceeds
-            ).toBe(true)
-        }
-    )
+    it('leaves the rest on credit, which counts to cover the total (S5.5)', () => {
+        expect(
+            applyPayments(100, [
+                { amount: 30, paymentMethod: 'CASH' },
+                { amount: 70, paymentMethod: 'CREDIT' },
+            ])
+        ).toEqual({ owed: 0, change: 0, covered: true, exceeds: false })
+    })
+
+    it.each([
+        'CREDIT_CARD',
+        'DEBIT_CARD',
+        'TRANSFER',
+        'OTHER',
+        'CREDIT',
+    ] as const)('does not let %s exceed what is owed', (paymentMethod) => {
+        expect(
+            applyPayments(24.15, [{ amount: 25, paymentMethod }]).exceeds
+        ).toBe(true)
+    })
 
     it('rejects a payment after the total is covered', () => {
         expect(

@@ -4,13 +4,16 @@ import type { StatusTone } from '@shared/lib/statusTone'
 
 export type SaleStatus = 'DRAFT' | 'CONFIRMED' | 'INVOICED' | 'CANCELLED'
 export type PaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
-// SRI forms of payment, as defined by faclab-core
+// SRI forms of payment, as defined by faclab-core. CREDIT (S5.5) is what the
+// customer owes on its account: it goes to the cash register on payments on
+// account, not with the sale
 export const PAYMENT_METHODS = [
     'CASH',
     'CREDIT_CARD',
     'DEBIT_CARD',
     'TRANSFER',
     'OTHER',
+    'CREDIT',
 ] as const
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 
@@ -46,6 +49,7 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
     DEBIT_CARD: 'Tarjeta débito',
     TRANSFER: 'Transferencia',
     OTHER: 'Otro',
+    CREDIT: 'Crédito',
 }
 
 // Factura electrónica de la venta en faclab-invoicing (InvoiceStatus del core);
@@ -132,6 +136,8 @@ export interface Payment {
     paymentDate: string | null
     reference: string | null
     notes: string | null
+    /** Días de plazo de un pago CREDIT (S5.5) */
+    termDays?: number | null
     createdAt: string
 }
 

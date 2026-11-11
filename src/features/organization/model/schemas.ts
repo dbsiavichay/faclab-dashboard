@@ -12,6 +12,8 @@ export const branchSchema = z.object({
         .max(128, 'Máximo 128 caracteres'),
     address: z.string().trim().max(300, 'Máximo 300 caracteres'),
     isActive: z.boolean(),
+    // La lista de precios de sus ventas (S5.3); null: la general
+    priceListId: z.number().int().positive().nullable(),
 })
 
 export type BranchFormValues = z.infer<typeof branchSchema>

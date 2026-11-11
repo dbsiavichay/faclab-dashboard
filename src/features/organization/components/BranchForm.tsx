@@ -1,8 +1,9 @@
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Input from '@/components/ui/Input'
 import { FormContainer, FormItem } from '@/components/ui/Form'
 import { ControlledSwitcher } from '@/components/ui/Form/controlled'
+import { PriceListSelect } from '@features/price-lists'
 import { branchSchema, type BranchFormValues } from '../model/schemas'
 import type { BranchInput } from '../api/client'
 import type { Branch } from '../model/types'
@@ -32,6 +33,7 @@ const BranchForm = ({
             name: branch?.name ?? '',
             address: branch?.address ?? '',
             isActive: branch?.isActive ?? true,
+            priceListId: branch?.priceListId ?? null,
         },
     })
 
@@ -89,6 +91,28 @@ const BranchForm = ({
                         disabled={isSubmitting}
                         invalid={!!errors.address}
                         {...register('address')}
+                    />
+                </FormItem>
+                <FormItem
+                    htmlFor="branch-priceListId"
+                    label="Lista de precios"
+                    extra={
+                        <span className="ml-2 text-xs text-gray-500">
+                            para los clientes sin lista propia
+                        </span>
+                    }
+                >
+                    <Controller
+                        name="priceListId"
+                        control={control}
+                        render={({ field }) => (
+                            <PriceListSelect
+                                inputId="branch-priceListId"
+                                value={field.value}
+                                isDisabled={isSubmitting}
+                                onChange={field.onChange}
+                            />
+                        )}
                     />
                 </FormItem>
                 <FormItem htmlFor="branch-isActive" label="Activa">

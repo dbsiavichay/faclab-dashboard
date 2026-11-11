@@ -18,6 +18,7 @@ import {
     useCustomerContactMutations,
 } from '../hooks/useCustomerContacts'
 import { ContactForm } from '../components/ContactForm'
+import CustomerPriceListCard from '../components/CustomerPriceListCard'
 import type { CustomerContact } from '../model/types'
 import { TAX_TYPE_LABELS } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
@@ -184,6 +185,8 @@ const CustomerDetailPage = () => {
                     </div>
                 )}
             </Card>
+
+            <CustomerPriceListCard key={customer.id} customer={customer} />
 
             <Card>
                 <div className="flex items-center justify-between mb-4">

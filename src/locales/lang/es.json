@@ -41,6 +41,7 @@
             "title": "Catálogo",
             "categories": "Categorías",
             "products": "Productos",
+            "priceLists": "Listas de precios",
             "unitsOfMeasure": "Unidades de Medida"
         },
         "inventory": {

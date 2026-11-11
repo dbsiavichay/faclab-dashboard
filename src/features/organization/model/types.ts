@@ -8,6 +8,8 @@ export interface Branch {
     /** La matriz: una por empresa, no se puede eliminar */
     isMain: boolean
     isActive: boolean
+    /** Lista de precios de sus ventas cuando el cliente no tiene una (S5.3) */
+    priceListId?: number | null
 }
 
 /** Punto de emisión de una sucursal (código único en la sucursal) */

@@ -77,5 +77,19 @@ export const useCustomerMutations = () => {
                 api.deactivateCustomer(id).then((r) => r.data),
             onSuccess: invalidate,
         }),
+        // Changes its prices in the POS too (S5.3)
+        setPriceList: useMutation({
+            mutationFn: ({
+                id,
+                priceListId,
+            }: {
+                id: number
+                priceListId: number | null
+            }) => api.setCustomerPriceList(id, priceListId).then((r) => r.data),
+            onSuccess: () => {
+                invalidate()
+                qc.invalidateQueries({ queryKey: ['pos', 'prices'] })
+            },
+        }),
     }
 }

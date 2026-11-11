@@ -80,6 +80,8 @@ export interface Sale {
     branchId: number | null
     emissionPointId: number | null
     terminalId: number | null
+    /** La cotización que la venta cobró (S5.4); null en las demás */
+    quoteId: number | null
     customerId: number | null
     customerName: string | null
     status: SaleStatus

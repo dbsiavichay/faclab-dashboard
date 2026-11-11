@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import Card from '@/components/ui/Card'
 import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
 import type { Sale } from '../model/types'
@@ -23,6 +24,17 @@ const SaleInfoCard = ({ sale }: SaleInfoCardProps) => {
                         {sale.saleDate ? formatDate(sale.saleDate) : '-'}
                     </p>
                 </div>
+                {sale.quoteId && (
+                    <div>
+                        <p className="text-sm text-gray-500">Cotización</p>
+                        <Link
+                            className="font-medium text-primary-600 hover:underline dark:text-primary-400"
+                            to={`/quotes/${sale.quoteId}`}
+                        >
+                            Ver la cotización cobrada
+                        </Link>
+                    </div>
+                )}
                 <div>
                     <p className="text-sm text-gray-500">Creado por</p>
                     <p className="font-medium">{sale.createdBy ?? '-'}</p>

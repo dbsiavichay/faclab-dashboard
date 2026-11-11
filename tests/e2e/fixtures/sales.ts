@@ -6,6 +6,7 @@ export const buildSale = (overrides: Partial<Sale> = {}): Sale => ({
     branchId: 1,
     emissionPointId: 1,
     terminalId: 1,
+    quoteId: null,
     customerId: 10,
     customerName: 'Ana Pérez',
     status: 'CONFIRMED',

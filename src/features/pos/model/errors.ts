@@ -50,6 +50,14 @@ export const POS_ERROR_MESSAGES: ErrorMessages = {
         'El precio de un producto no es el de su lista: escribe el motivo del cambio o vuelve al precio de lista.',
     PRODUCT_WITHOUT_PRICE:
         'Un producto no tiene precio de venta ni precio en la lista: escríbelo en la línea.',
+    // Cobrar una cotización (S5.4)
+    QUOTE_EXPIRED: 'La cotización venció: renuévala antes de cobrarla.',
+    QUOTE_ITEMS_CHANGED:
+        'Los ítems no son los de la cotización: cóbrala con sus mismos ítems o quita la cotización.',
+    QUOTE_CUSTOMER_CHANGED: 'La venta debe ser del cliente de la cotización.',
+    QUOTE_OUTSIDE_BRANCH:
+        'La cotización es de otra sucursal: se cobra en una caja de esa sucursal.',
+    QUOTE_ALREADY_CONVERTED: 'La cotización ya se cobró.',
     // Un intento anterior de esta operación sí se registró (la red falló
     // antes de la respuesta) y este trae otros datos
     IDEMPOTENCY_KEY_REUSED:

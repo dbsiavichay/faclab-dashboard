@@ -4,6 +4,7 @@ import type { TaxCode } from '@/constants/tax.constant'
 import type { TaxType } from '@features/customers'
 import type { CreditNote } from '@features/invoicing'
 import type { SaleInvoiceStatus } from '@features/sales'
+import type { Quote, QuoteItem, QuoteSummary } from '@features/quotes'
 import type { StatusTone } from '@shared/lib/statusTone'
 
 // === ENUMS ===
@@ -217,6 +218,34 @@ export interface QuickSaleInput {
     discountType?: DiscountType
     discountValue?: number
     notes?: string
+    /** The quote it charges (S5.4): with its customer and its same items */
+    quoteId?: number
+}
+
+/** A quote line as the POS sees it before charging it (S5.4) */
+export interface PosQuoteItem extends QuoteItem {
+    /** Today's price for its customer (null: none) */
+    listPrice: number | null
+    priceListName: string | null
+    /** The quoted price is not today's */
+    priceChanged: boolean
+    /** Available at the terminal's location, base units, not reserved */
+    availableQuantity: number
+    /** It covers what the quote's lines of the product take together */
+    enoughStock: boolean
+}
+
+export interface PosQuote extends Omit<Quote, 'items'> {
+    items: PosQuoteItem[]
+    expired: boolean
+}
+
+export type PosQuoteSummary = QuoteSummary
+
+export interface PosQuoteParams {
+    search?: string
+    limit?: number
+    offset?: number
 }
 
 export interface QuickSaleItemInput {

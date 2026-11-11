@@ -39,6 +39,7 @@ import {
     SHIFT_STATUS_LABELS,
 } from '@features/pos/model/types'
 import { PURCHASE_ORDER_STATUS_LABELS } from '@features/purchases/model/types'
+import { QUOTE_STATUS_LABELS } from '@features/quotes/model/types'
 import {
     DISCREPANCY_KIND_LABELS,
     DISCREPANCY_STATUS_LABELS,
@@ -117,6 +118,7 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
         keys(DISCREPANCY_STATUS_LABELS),
     ],
     ['TenantSource', 'AUDIT_SOURCE_LABELS', keys(AUDIT_SOURCE_LABELS)],
+    ['QuoteStatus', 'QUOTE_STATUS_LABELS', keys(QUOTE_STATUS_LABELS)],
 ]
 
 /** Valores del backend que el front puede ignorar, con el motivo */

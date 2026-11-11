@@ -10,6 +10,7 @@ import { usePOSStore, type POSCartItem } from '../store/usePOSStore'
 
 interface CartQuantityInputProps {
     item: POSCartItem
+    disabled?: boolean
 }
 
 /**
@@ -17,7 +18,7 @@ interface CartQuantityInputProps {
  * 1,25 kg de clavos. Acepta coma o punto y los decimales de la unidad del
  * producto; se aplica al salir del campo o con Enter, y Escape la descarta.
  */
-const CartQuantityInput = ({ item }: CartQuantityInputProps) => {
+const CartQuantityInput = ({ item, disabled }: CartQuantityInputProps) => {
     const updateItemQuantity = usePOSStore((s) => s.updateItemQuantity)
     const [draft, setDraft] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -52,6 +53,7 @@ const CartQuantityInput = ({ item }: CartQuantityInputProps) => {
                     autoComplete="off"
                     className="w-16 text-center tabular-nums"
                     aria-label={`Cantidad de ${item.name}`}
+                    disabled={disabled}
                     value={draft ?? formatQuantity(item.quantity)}
                     invalid={error !== null}
                     onChange={(e) => {

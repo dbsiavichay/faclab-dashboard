@@ -252,3 +252,58 @@ describe('cart lines by presentation (S5.2)', () => {
         ])
     })
 })
+
+describe('a quote in the cart (S5.4)', () => {
+    const quoted = [item({ productId: 1 }), item({ productId: 2, discount: 5 })]
+
+    beforeEach(() => {
+        usePOSStore.getState().clearCart()
+        usePOSStore
+            .getState()
+            .loadQuote({ id: 7, number: 'COT-001-000007' }, null, quoted)
+    })
+
+    it('replaces the cart with its lines and customer', () => {
+        const state = usePOSStore.getState()
+
+        expect(state.quote).toEqual({ id: 7, number: 'COT-001-000007' })
+        expect(state.cartItems).toEqual(quoted)
+        expect(state.isFinalConsumer).toBe(true)
+    })
+
+    it('keeps its lines and customer as quoted, but not its prices', () => {
+        const store = usePOSStore.getState()
+        store.addItem({
+            productId: 9,
+            name: 'Clavos',
+            sku: 'FERR-010',
+            salePrice: 2,
+            taxCode: 'VAT_15',
+        })
+        store.updateItemQuantity('1:base', 5)
+        store.updateItemDiscount('1:base', 10)
+        store.removeItem('2:base')
+        store.setCustomer(3, 'Otro')
+        store.updateItemPrice('1:base', 90, 'Cotización COT-001-000007')
+
+        const state = usePOSStore.getState()
+        expect(state.cartItems.map((i) => [i.quantity, i.discount])).toEqual([
+            [1, 0],
+            [1, 5],
+        ])
+        expect(state.customerId).toBeNull()
+        expect(state.cartItems[0].salePrice).toBe(90)
+    })
+
+    it('becomes a plain sale once the quote is removed, and clearing empties it', () => {
+        usePOSStore.getState().clearQuote()
+        usePOSStore.getState().updateItemQuantity('1:base', 3)
+        expect(usePOSStore.getState().cartItems[0].quantity).toBe(3)
+
+        usePOSStore
+            .getState()
+            .loadQuote({ id: 7, number: 'COT-001-000007' }, null, quoted)
+        usePOSStore.getState().clearCart()
+        expect(usePOSStore.getState().quote).toBeNull()
+    })
+})

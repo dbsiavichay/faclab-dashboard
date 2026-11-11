@@ -21,6 +21,7 @@ const SCREENS = [
     { path: '/reports/inventory', heading: 'Reportes de Inventario' },
     { path: '/customers', heading: 'Clientes' },
     { path: '/sales', heading: 'Ventas' },
+    { path: '/quotes', heading: 'Cotizaciones' },
     { path: '/invoices', heading: 'Facturas' },
     { path: '/shifts', heading: 'Turnos' },
     { path: '/refunds', heading: 'Devoluciones' },

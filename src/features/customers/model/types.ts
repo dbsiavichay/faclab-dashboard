@@ -21,6 +21,8 @@ export type Customer = {
     creditLimit?: number | null
     paymentTerms?: number | null
     isActive: boolean
+    /** La lista de precios con que compra (S5.3); null: la de su sucursal o la general */
+    priceListId?: number | null
 }
 
 export type CustomerListParams = {

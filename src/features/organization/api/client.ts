@@ -19,6 +19,8 @@ export type BranchInput = {
     name: string
     address: string | null
     isActive: boolean
+    // El PUT la reemplaza: se envía siempre (null: la general)
+    priceListId: number | null
 }
 
 export type EmissionPointInput = {

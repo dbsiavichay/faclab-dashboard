@@ -12,6 +12,7 @@ import { emptyDailyReport, emptyDashboard, emptyValuation } from './dashboard'
 const EMPTY_ADMIN_LISTS = [
     'categories',
     'products',
+    'price-lists',
     'units-of-measure',
     'stock',
     'movements',

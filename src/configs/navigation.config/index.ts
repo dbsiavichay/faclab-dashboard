@@ -46,6 +46,16 @@ const navigationConfig: NavigationTree[] = [
                 subMenu: [],
             },
             {
+                key: 'catalog.priceLists',
+                path: '/catalog/price-lists',
+                title: 'Price Lists',
+                translateKey: 'nav.catalog.priceLists',
+                icon: 'catalogPriceLists',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['product:read'],
+                subMenu: [],
+            },
+            {
                 key: 'catalog.unitsOfMeasure',
                 path: '/catalog/units-of-measure',
                 title: 'Units of Measure',

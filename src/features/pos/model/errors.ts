@@ -45,6 +45,11 @@ export const POS_ERROR_MESSAGES: ErrorMessages = {
     PAYMENT_EXCEEDS_BALANCE:
         'Solo el pago en efectivo puede superar lo que falta por cobrar.',
     SALE_NOT_PAYABLE: 'La venta está cancelada o facturada: no recibe pagos.',
+    // El precio de lista cambió mientras se armaba el carrito (S5.3)
+    OVERRIDE_REASON_REQUIRED:
+        'El precio de un producto no es el de su lista: escribe el motivo del cambio o vuelve al precio de lista.',
+    PRODUCT_WITHOUT_PRICE:
+        'Un producto no tiene precio de venta ni precio en la lista: escríbelo en la línea.',
     // Un intento anterior de esta operación sí se registró (la red falló
     // antes de la respuesta) y este trae otros datos
     IDEMPOTENCY_KEY_REUSED:

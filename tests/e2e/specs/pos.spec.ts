@@ -2,6 +2,8 @@ import { test, expect } from '../support/test'
 import {
     HINGE_BOX_BARCODE,
     SALE_NUMBER,
+    WHOLESALE_PRICES,
+    builder,
     mockPOS,
     openShift,
     posTerminal,
@@ -203,6 +205,53 @@ test.describe('Punto de venta', () => {
 
         await receipt.getByRole('button', { name: 'Cerrar' }).first().click()
         await expect(panel.getByText('Carrito vacío')).toBeVisible()
+    })
+
+    test('un cliente con lista mayorista compra al precio de su lista', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api, openShift(), [posTerminal()], WHOLESALE_PRICES)
+        await page.goto('/pos')
+        await product(page, 'Tablero MDF 15mm').click()
+        await product(page, 'Bisagra cazoleta 35mm').click()
+        const panel = order(page)
+
+        await panel.getByRole('button', { name: 'Buscar' }).click()
+        const search = page.getByRole('dialog')
+        await search.getByLabel('RUC / Cedula').fill(builder().taxId)
+        await search.getByRole('button', { name: 'Seleccionar' }).click()
+
+        // El tablero sale de su lista; la bisagra, sin precio en ella, del general
+        await expect(panel.getByText('· Mayorista')).toHaveCount(1)
+        const pay = panel.getByRole('button', { name: 'Cobrar' })
+        await expect(pay).toBeEnabled()
+        const [resolve] = api.callsTo('POST', `${POS}/prices/resolve`).slice(-1)
+        expect(resolve.body).toEqual({
+            customerId: builder().id,
+            items: [
+                { productId: 1, presentationId: null, quantity: 1 },
+                { productId: 2, presentationId: null, quantity: 1 },
+            ],
+        })
+
+        await pay.click()
+        await page
+            .getByRole('dialog', { name: 'Cobrar' })
+            .getByRole('button', { name: 'Completar venta' })
+            .click()
+        await expect(
+            page.getByRole('dialog', { name: 'Venta completada' })
+        ).toBeVisible()
+
+        const [quickSale] = api.callsTo('POST', `${POS}/sales/quick`)
+        const sale = quickSale.body as { customerId: number; items: unknown[] }
+        // El precio de lista no es un cambio de precio: no lleva motivo
+        expect(sale.customerId).toBe(builder().id)
+        expect(sale.items).toEqual([
+            { productId: 1, quantity: 1, unitPrice: 11 },
+            { productId: 2, quantity: 1, unitPrice: 0.95 },
+        ])
     })
 
     test('vende 2,5 m de cable y cobra lo que calcula faclab-core', async ({

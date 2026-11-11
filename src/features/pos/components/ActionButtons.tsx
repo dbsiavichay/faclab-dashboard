@@ -15,12 +15,15 @@ const ActionButtons = ({
     onHold,
     onViewOrders,
 }: ActionButtonsProps) => {
-    const { cartItems, customerId, isFinalConsumer } = usePOSStore()
+    const { cartItems, customerId, isFinalConsumer, pricesPending } =
+        usePOSStore()
     const { total } = useCartTotals()
     const cartEmpty = cartItems.length === 0
     const requiresCustomer = total > 50
+    // The list prices are on their way: the total may still change (S5.3)
     const canPay =
         !cartEmpty &&
+        !pricesPending &&
         (customerId !== null || (isFinalConsumer && !requiresCustomer))
 
     return (
@@ -39,7 +42,7 @@ const ActionButtons = ({
                 block
                 size="sm"
                 variant="default"
-                disabled={cartEmpty}
+                disabled={cartEmpty || pricesPending}
                 onClick={onHold}
             >
                 Retener

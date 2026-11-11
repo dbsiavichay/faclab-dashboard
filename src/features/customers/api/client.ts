@@ -31,6 +31,13 @@ export const createCustomer = (data: CustomerFormValues) =>
 export const updateCustomer = (id: number, data: CustomerFormValues) =>
     httpClient.put<DataResponse<Customer>>(`${HOST}/customers/${id}`, data)
 
+/** Aparte de la edición: pide `product:write` y queda en la bitácora (S5.3) */
+export const setCustomerPriceList = (id: number, priceListId: number | null) =>
+    httpClient.put<DataResponse<Customer>>(
+        `${HOST}/customers/${id}/price-list`,
+        { priceListId }
+    )
+
 export const deleteCustomer = (id: number) =>
     httpClient.delete(`${HOST}/customers/${id}`)
 

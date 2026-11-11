@@ -37,6 +37,8 @@ test.describe('Sucursales', () => {
             name: 'Norte',
             address: 'Av. Ordóñez Lasso 4-56',
             isActive: true,
+            // Sin lista propia: sus ventas toman la general (S5.3)
+            priceListId: null,
         })
 
         await page.getByRole('link', { name: 'Norte' }).click()

@@ -11,6 +11,7 @@ describe('branchSchema', () => {
         name: 'Sucursal Norte',
         address: '',
         isActive: true,
+        priceListId: null,
     }
 
     it('accepts an SRI establishment code from 001 to 999', () => {
@@ -27,6 +28,15 @@ describe('branchSchema', () => {
                 branchSchema.safeParse({ ...valid, establishmentCode }).success
             ).toBe(false)
         }
+    })
+
+    it('takes a price list or none (S5.3)', () => {
+        expect(
+            branchSchema.safeParse({ ...valid, priceListId: 4 }).success
+        ).toBe(true)
+        expect(
+            branchSchema.safeParse({ ...valid, priceListId: 0 }).success
+        ).toBe(false)
     })
 
     it('requires a name and limits the address', () => {

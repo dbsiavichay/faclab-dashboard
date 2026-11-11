@@ -138,6 +138,68 @@ describe('price overrides', () => {
     })
 })
 
+describe('list prices (S5.3)', () => {
+    const cement = {
+        productId: 3,
+        name: 'Cemento',
+        sku: 'FERR-003',
+        salePrice: 9.5,
+        taxCode: 'VAT_15' as const,
+    }
+    const price = (unitPrice: number | null, quantity = 1) => ({
+        lineKey: '3:base',
+        quantity,
+        unitPrice,
+        priceListName: unitPrice === null ? null : 'Mayorista',
+    })
+
+    beforeEach(() => {
+        usePOSStore.getState().clearCart()
+        usePOSStore.getState().addItem(cement)
+    })
+
+    it('a line takes the price of its list', () => {
+        usePOSStore.getState().applyResolvedPrices([price(8.9)])
+
+        const [line] = usePOSStore.getState().cartItems
+        expect([line.salePrice, line.listPrice]).toEqual([8.9, 8.9])
+        expect(line.priceListName).toBe('Mayorista')
+        expect(isPriceOverridden(line)).toBe(false)
+    })
+
+    it('an overridden line keeps its price and reason', () => {
+        usePOSStore.getState().updateItemPrice('3:base', 8, 'Saco roto')
+        usePOSStore.getState().applyResolvedPrices([price(8.9)])
+
+        const [line] = usePOSStore.getState().cartItems
+        expect([line.salePrice, line.listPrice]).toEqual([8, 8.9])
+        expect(line.overrideReason).toBe('Saco roto')
+    })
+
+    it('an override equal to the new list price is no longer one', () => {
+        usePOSStore.getState().updateItemPrice('3:base', 8.9, 'Precio pactado')
+        usePOSStore.getState().applyResolvedPrices([price(8.9)])
+
+        const [line] = usePOSStore.getState().cartItems
+        expect(line.overrideReason).toBeUndefined()
+        expect(isPriceOverridden(line)).toBe(false)
+    })
+
+    it('waits for the price of the quantity the line has now', () => {
+        usePOSStore.getState().updateItemQuantity('3:base', 60)
+        usePOSStore.getState().applyResolvedPrices([price(8.9, 1)])
+
+        const [line] = usePOSStore.getState().cartItems
+        expect(line.salePrice).toBe(9.5)
+    })
+
+    it('a line without any price keeps the one it has', () => {
+        usePOSStore.getState().applyResolvedPrices([price(null)])
+
+        expect(usePOSStore.getState().cartItems[0].salePrice).toBe(9.5)
+    })
+})
+
 describe('cart lines by presentation (S5.2)', () => {
     const screw = {
         productId: 7,

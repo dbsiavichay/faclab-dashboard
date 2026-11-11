@@ -10,6 +10,7 @@ import { purchasesRoutes } from '@features/purchases'
 import { posRoutes } from '@features/pos'
 import { unitsOfMeasureRoutes } from '@features/unitsOfMeasure'
 import { productsRoutes } from '@features/products'
+import { priceListsRoutes } from '@features/price-lists'
 import { categoriesRoutes } from '@features/categories'
 import { suppliersRoutes } from '@features/suppliers'
 import { stockRoutes } from '@features/stock'
@@ -35,6 +36,7 @@ export const protectedRoutes: Routes = [
         authority: [],
     },
     ...productsRoutes,
+    ...priceListsRoutes,
     ...categoriesRoutes,
     ...unitsOfMeasureRoutes,
     ...stockRoutes,

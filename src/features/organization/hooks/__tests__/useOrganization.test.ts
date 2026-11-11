@@ -66,6 +66,7 @@ describe('useBranchMutations', () => {
                 name: 'Norte',
                 address: null,
                 isActive: true,
+                priceListId: null,
             })
         )
 

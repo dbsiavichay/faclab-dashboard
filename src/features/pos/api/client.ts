@@ -33,6 +33,8 @@ import type {
     CashSummary,
     POSBarcodeMatch,
     POSProduct,
+    ResolvePricesInput,
+    ResolvedPrice,
     POSCustomer,
     QuickCustomerInput,
     PosTerminal,
@@ -264,6 +266,16 @@ export const getProduct = (id: number) =>
     httpClient.get<DataResponse<POSProduct>>(`${HOST}/products/${id}`)
 
 /** The product and presentation of a scanned barcode (S5.2); 404 if none */
+// === PRICES (S5.3) ===
+
+/**
+ * El precio de cada línea en una venta de ese cliente en la sucursal de
+ * `X-Branch-Id`: la lista del cliente, la de la sucursal o la general. Es una
+ * lectura: no lleva clave de idempotencia
+ */
+export const resolvePrices = (data: ResolvePricesInput) =>
+    httpClient.post<ListResponse<ResolvedPrice>>(`${HOST}/prices/resolve`, data)
+
 export const getProductByBarcode = (code: string) =>
     httpClient.get<DataResponse<POSBarcodeMatch>>(`${HOST}/products/barcode`, {
         params: { code },

@@ -15,7 +15,7 @@ const ActionButtons = ({
     onHold,
     onViewOrders,
 }: ActionButtonsProps) => {
-    const { cartItems, customerId, isFinalConsumer, pricesPending } =
+    const { cartItems, customerId, isFinalConsumer, pricesPending, quote } =
         usePOSStore()
     const { total } = useCartTotals()
     const cartEmpty = cartItems.length === 0
@@ -42,7 +42,8 @@ const ActionButtons = ({
                 block
                 size="sm"
                 variant="default"
-                disabled={cartEmpty || pricesPending}
+                // A held sale doesn't keep its quote (S5.4)
+                disabled={cartEmpty || pricesPending || quote !== null}
                 onClick={onHold}
             >
                 Retener

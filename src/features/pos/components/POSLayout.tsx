@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import classNames from 'classnames'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { POS_ERROR_MESSAGES } from '../model/errors'
@@ -22,6 +23,9 @@ import ReceiptDialog from './ReceiptDialog'
 import ShiftCloseDialog from './ShiftCloseDialog'
 import CashMovementDialog from './CashMovementDialog'
 import RefundDialog from './RefundDialog'
+import QuotesDrawer from './QuotesDrawer'
+import QuotePricesDialog from './QuotePricesDialog'
+import { useLoadQuote } from '../hooks/usePosQuotes'
 
 const POSLayout = () => {
     const {
@@ -41,6 +45,29 @@ const POSLayout = () => {
     const [closeShiftOpen, setCloseShiftOpen] = useState(false)
     const [cashMovementOpen, setCashMovementOpen] = useState(false)
     const [refundOpen, setRefundOpen] = useState(false)
+    const [quotesOpen, setQuotesOpen] = useState(false)
+    const loadQuote = useLoadQuote()
+    const [searchParams, setSearchParams] = useSearchParams()
+    const quoteParam = Number(searchParams.get('quote')) || 0
+
+    // "Cobrar en el POS" from a quote's page opens the POS with ?quote=<id>
+    useEffect(() => {
+        if (!quoteParam) return
+        setSearchParams(
+            (params) => {
+                params.delete('quote')
+                return params
+            },
+            { replace: true }
+        )
+        void loadQuote.start(quoteParam)
+        // Only once per id that arrives in the URL
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [quoteParam])
+
+    const handleQuoteSelected = async (quoteId: number) => {
+        if (await loadQuote.start(quoteId)) setQuotesOpen(false)
+    }
     // En pantallas pequeñas no caben los dos paneles: se alterna entre ellos
     const [mobileView, setMobileView] = useState<'products' | 'order'>(
         'products'
@@ -111,6 +138,7 @@ const POSLayout = () => {
                 onOpenCloseShift={() => setCloseShiftOpen(true)}
                 onOpenCashMovement={() => setCashMovementOpen(true)}
                 onOpenRefund={() => setRefundOpen(true)}
+                onOpenQuotes={() => setQuotesOpen(true)}
             />
             <div
                 role="tablist"
@@ -207,6 +235,22 @@ const POSLayout = () => {
             <RefundDialog
                 isOpen={refundOpen}
                 onClose={() => setRefundOpen(false)}
+            />
+
+            <QuotesDrawer
+                isOpen={quotesOpen}
+                loading={loadQuote.loading}
+                onClose={() => setQuotesOpen(false)}
+                onSelect={handleQuoteSelected}
+            />
+
+            <QuotePricesDialog
+                quote={loadQuote.pending?.quote ?? null}
+                onClose={loadQuote.cancel}
+                onChoose={(choice) =>
+                    loadQuote.pending &&
+                    loadQuote.load(loadQuote.pending, choice)
+                }
             />
         </div>
     )

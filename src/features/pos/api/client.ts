@@ -38,6 +38,9 @@ import type {
     POSCustomer,
     QuickCustomerInput,
     PosTerminal,
+    PosQuote,
+    PosQuoteParams,
+    PosQuoteSummary,
 } from '../model/types'
 
 const HOST = appConfig.posApiHost
@@ -297,3 +300,15 @@ export const quickCreateCustomer = (data: QuickCustomerInput) =>
 
 export const getCustomer = (id: number) =>
     httpClient.get<DataResponse<POSCustomer>>(`${HOST}/customers/${id}`)
+
+// === QUOTES (S5.4) ===
+
+/** The quotes in force of the branch in `X-Branch-Id`, newest first */
+export const getPosQuotes = (params?: PosQuoteParams) =>
+    httpClient.get<PaginatedResponse<PosQuoteSummary>>(`${HOST}/quotes`, {
+        params,
+    })
+
+/** A quote of the terminal's branch with today's prices and stock */
+export const getPosQuote = (id: number) =>
+    httpClient.get<DataResponse<PosQuote>>(`${HOST}/quotes/${id}`)

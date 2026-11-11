@@ -5,6 +5,7 @@ import PaymentSummary from './PaymentSummary'
 import ActionButtons from './ActionButtons'
 import EmptyState from '@/components/shared/EmptyState'
 import { HiOutlineShoppingCart } from 'react-icons/hi'
+import Button from '@/components/ui/Button'
 
 interface OrderPanelProps {
     onPayment: () => void
@@ -19,13 +20,32 @@ const OrderPanel = ({
     onHold,
     onViewOrders,
 }: OrderPanelProps) => {
-    const { cartItems } = usePOSStore()
+    const { cartItems, quote, clearQuote } = usePOSStore()
 
     return (
         <div className="flex h-full flex-col">
             <div className="hidden border-b border-gray-200 px-4 py-3 dark:border-gray-700 lg:block">
                 <h2 className="text-base">Orden</h2>
             </div>
+
+            {quote && (
+                <div
+                    role="status"
+                    className="flex items-start justify-between gap-2 border-b border-primary-200 bg-primary-50 px-4 py-2 text-sm dark:border-primary-800 dark:bg-primary-900/30"
+                >
+                    <p>
+                        <span className="font-semibold">
+                            Cotización {quote.number}
+                        </span>
+                        <span className="block text-xs text-gray-600 dark:text-gray-300">
+                            Se cobra con sus mismos ítems y cliente.
+                        </span>
+                    </p>
+                    <Button size="xs" variant="plain" onClick={clearQuote}>
+                        Quitar cotización
+                    </Button>
+                </div>
+            )}
 
             <CustomerSelector />
 

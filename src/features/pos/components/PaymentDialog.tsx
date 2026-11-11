@@ -24,8 +24,14 @@ interface PaymentDialogProps {
 }
 
 const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
-    const { cartItems, customerId, discountType, discountValue, clearCart } =
-        usePOSStore()
+    const {
+        cartItems,
+        customerId,
+        discountType,
+        discountValue,
+        clearCart,
+        quote,
+    } = usePOSStore()
     const quickSale = useQuickSale()
     // Already in whole cents, computed like the backend total
     const { total } = useCartTotals()
@@ -95,6 +101,8 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                         : undefined,
                 })),
                 payments: finalPayments,
+                // The quote it charges, with its same items (S5.4)
+                ...(quote ? { quoteId: quote.id } : {}),
                 ...(discountType && discountValue > 0
                     ? { discountType, discountValue }
                     : {}),

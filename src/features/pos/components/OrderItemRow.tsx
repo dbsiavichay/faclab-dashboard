@@ -18,6 +18,8 @@ interface OrderItemRowProps {
 
 const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
     const updateItemQuantity = usePOSStore((s) => s.updateItemQuantity)
+    // A quote's lines keep their quantities (S5.4)
+    const locked = usePOSStore((s) => s.quote !== null)
     const removeItem = usePOSStore((s) => s.removeItem)
     const updateItemPrice = usePOSStore((s) => s.updateItemPrice)
     const [editingPrice, setEditingPrice] = useState(false)
@@ -125,14 +127,16 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
                         variant="plain"
                         aria-label={`Disminuir cantidad de ${item.name}`}
                         icon={<HiMinus />}
+                        disabled={locked}
                         onClick={handleDecreaseQty}
                     />
-                    <CartQuantityInput item={item} />
+                    <CartQuantityInput item={item} disabled={locked} />
                     <Button
                         size="xs"
                         variant="plain"
                         aria-label={`Aumentar cantidad de ${item.name}`}
                         icon={<HiPlus />}
+                        disabled={locked}
                         onClick={handleIncreaseQty}
                     />
                 </div>
@@ -146,6 +150,7 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
                     variant="plain"
                     aria-label={`Quitar ${item.name}`}
                     icon={<HiOutlineTrash className="text-red-500" />}
+                    disabled={locked}
                     onClick={handleRemove}
                 />
             </div>

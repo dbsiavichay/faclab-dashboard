@@ -9,6 +9,7 @@ import {
     HiOutlineLockClosed,
     HiOutlineHome,
     HiOutlineReceiptRefund,
+    HiOutlineDocumentDuplicate,
 } from 'react-icons/hi'
 import { useCan, useHasRole } from '@/stores'
 import { ROLE } from '@/constants/roles.constant'
@@ -20,12 +21,14 @@ interface POSHeaderProps {
     onOpenCloseShift?: () => void
     onOpenCashMovement?: () => void
     onOpenRefund?: () => void
+    onOpenQuotes?: () => void
 }
 
 const POSHeader = ({
     onOpenCloseShift,
     onOpenCashMovement,
     onOpenRefund,
+    onOpenQuotes,
 }: POSHeaderProps) => {
     const navigate = useNavigate()
     const shift = useShift()
@@ -94,6 +97,15 @@ const POSHeader = ({
 
             {/* En pantallas pequeñas solo queda el ícono; el nombre va en aria-label */}
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+                <Button
+                    size="sm"
+                    variant="plain"
+                    aria-label="Cotizaciones"
+                    icon={<HiOutlineDocumentDuplicate />}
+                    onClick={onOpenQuotes}
+                >
+                    <span className="hidden md:inline">Cotizaciones</span>
+                </Button>
                 {canRefund && (
                     <Button
                         size="sm"

@@ -68,8 +68,16 @@ export interface CartProductInput {
     unitFactor?: number
 }
 
+/** The quote the cart charges (S5.4): its lines and customer stay as quoted */
+export interface CartQuote {
+    id: number
+    number: string
+}
+
 interface POSState {
     cartItems: POSCartItem[]
+    /** The quote being charged; null: a plain sale */
+    quote: CartQuote | null
     customerId: number | null
     customerName: string | null
     isFinalConsumer: boolean
@@ -102,10 +110,23 @@ interface POSState {
     clearCart: () => void
     setSelectedCategory: (categoryId: number | null) => void
     setSearchTerm: (term: string) => void
+    /**
+     * Replaces the cart with a quote's lines and customer (S5.4). While it is
+     * loaded its lines, quantities, discounts and customer don't change
+     * (faclab-core charges the quote only with its same items); prices do.
+     */
+    loadQuote: (
+        quote: CartQuote,
+        customer: { id: number; name: string } | null,
+        lines: POSCartItem[]
+    ) => void
+    /** Keeps the lines as a plain sale, editable */
+    clearQuote: () => void
 }
 
 export const usePOSStore = create<POSState>()((set) => ({
     cartItems: [],
+    quote: null,
     customerId: null,
     customerName: null,
     isFinalConsumer: false,
@@ -119,6 +140,7 @@ export const usePOSStore = create<POSState>()((set) => ({
 
     addItem: (product) =>
         set((state) => {
+            if (state.quote) return {}
             const presentationId = product.presentationId ?? null
             const lineKey = cartLineKey(product.productId, presentationId)
             const existing = state.cartItems.find(
@@ -157,6 +179,7 @@ export const usePOSStore = create<POSState>()((set) => ({
 
     updateItemQuantity: (lineKey, quantity) =>
         set((state) => {
+            if (state.quote) return {}
             if (quantity <= 0) {
                 return {
                     cartItems: state.cartItems.filter(
@@ -174,11 +197,17 @@ export const usePOSStore = create<POSState>()((set) => ({
         }),
 
     updateItemDiscount: (lineKey, discount) =>
-        set((state) => ({
-            cartItems: state.cartItems.map((item) =>
-                item.lineKey === lineKey ? { ...item, discount } : item
-            ),
-        })),
+        set((state) =>
+            state.quote
+                ? {}
+                : {
+                      cartItems: state.cartItems.map((item) =>
+                          item.lineKey === lineKey
+                              ? { ...item, discount }
+                              : item
+                      ),
+                  }
+        ),
 
     updateItemPrice: (lineKey, price, reason) =>
         set((state) => ({
@@ -227,20 +256,25 @@ export const usePOSStore = create<POSState>()((set) => ({
     setPricesPending: (pending) => set({ pricesPending: pending }),
 
     removeItem: (lineKey) =>
-        set((state) => ({
-            cartItems: state.cartItems.filter(
-                (item) => item.lineKey !== lineKey
-            ),
-        })),
+        set((state) =>
+            state.quote
+                ? {}
+                : {
+                      cartItems: state.cartItems.filter(
+                          (item) => item.lineKey !== lineKey
+                      ),
+                  }
+        ),
 
     setCustomer: (id, name) =>
-        set({
-            customerId: id,
-            customerName: name,
-            isFinalConsumer: false,
-        }),
+        set((state) =>
+            state.quote
+                ? {}
+                : { customerId: id, customerName: name, isFinalConsumer: false }
+        ),
 
-    setFinalConsumer: (value) => set({ isFinalConsumer: value }),
+    setFinalConsumer: (value) =>
+        set((state) => (state.quote ? {} : { isFinalConsumer: value })),
 
     applyDiscount: (type, value) =>
         set({ discountType: type, discountValue: value }),
@@ -250,6 +284,7 @@ export const usePOSStore = create<POSState>()((set) => ({
     clearCart: () =>
         set({
             cartItems: [],
+            quote: null,
             customerId: null,
             customerName: null,
             isFinalConsumer: false,
@@ -261,6 +296,19 @@ export const usePOSStore = create<POSState>()((set) => ({
         set({ selectedCategoryId: categoryId }),
 
     setSearchTerm: (term) => set({ searchTerm: term }),
+
+    loadQuote: (quote, customer, lines) =>
+        set({
+            quote,
+            cartItems: lines,
+            customerId: customer?.id ?? null,
+            customerName: customer?.name ?? null,
+            isFinalConsumer: customer === null,
+            discountType: null,
+            discountValue: 0,
+        }),
+
+    clearQuote: () => set({ quote: null }),
 }))
 
 /*

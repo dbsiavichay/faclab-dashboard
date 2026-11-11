@@ -1,10 +1,13 @@
 import type { ProductPresentation } from '@/features/products/model/types'
 import type {
+    POSCustomer,
     POSProduct,
     POSSale,
     PosTerminal,
     QuickSaleInput,
     Receipt,
+    ResolvePricesInput,
+    ResolvedPrice,
     Shift,
 } from '@/features/pos/model/types'
 import {
@@ -129,6 +132,49 @@ export const hingeBox = (): ProductPresentation => ({
 
 const SALE_ID = 901
 
+/** Un maestro que compra con la lista "Mayorista" (S5.3) */
+export const builder = (): POSCustomer => ({
+    id: 70,
+    name: 'Ferretería El Maestro',
+    taxId: '1790012345001',
+    taxType: 'RUC',
+})
+
+/**
+ * Precios de lista por cliente y producto (S5.3): `{ [customerId]: {
+ * [productId]: [precio, lista] } }`. Sin precio en la lista, el del producto o
+ * el de su presentación, como la lista general sin escalas.
+ */
+export type ListPrices = Record<number, Record<number, [number, string]>>
+
+export const WHOLESALE_PRICES: ListPrices = {
+    70: { 1: [11, 'Mayorista'] },
+}
+
+const resolvedPrice = (
+    line: ResolvePricesInput['items'][number],
+    customerId: number | null,
+    prices: ListPrices
+): ResolvedPrice => {
+    const product = posProducts().find((p) => p.id === line.productId)
+    const box = line.presentationId === hingeBox().id ? hingeBox() : null
+    const listed =
+        customerId !== null && !box
+            ? prices[customerId]?.[line.productId]
+            : undefined
+    return {
+        productId: line.productId,
+        presentationId: line.presentationId ?? null,
+        quantity: line.quantity,
+        unitPrice:
+            listed?.[0] ??
+            (box ? box.effectiveSalePrice : product?.salePrice ?? null),
+        priceListId: listed ? 2 : null,
+        priceListName: listed?.[1] ?? null,
+        minQuantity: listed ? 0 : null,
+    }
+}
+
 // Como roundMoney: 2,5 × 0,85 = 2,125 sube a 2,13 aunque el float diga 2,1249…
 const cents = roundMoney
 
@@ -211,7 +257,8 @@ const receiptFor = (input: QuickSaleInput, total: number): Receipt => ({
 export const mockPOS = (
     api: MockApi,
     shift: Shift | null = openShift(),
-    terminals: PosTerminal[] = [posTerminal()]
+    terminals: PosTerminal[] = [posTerminal()],
+    listPrices: ListPrices = {}
 ) => {
     let receipt: Receipt | null = null
 
@@ -236,6 +283,20 @@ export const mockPOS = (
         const hinge = posProducts().find((product) => product.id === 2)!
         return ok({ product: hinge, presentation: hingeBox() })
     })
+    // El carrito pide el precio de lista de sus líneas (S5.3)
+    api.post(`${POS}/prices/resolve`, ({ body }) => {
+        const input = body as ResolvePricesInput
+        return ok(
+            input.items.map((line) =>
+                resolvedPrice(line, input.customerId ?? null, listPrices)
+            )
+        )
+    })
+    api.get(`${POS}/customers/search/by-tax-id`, ({ query }) =>
+        query.get('taxId') === builder().taxId
+            ? ok(builder())
+            : apiError(404, 'NOT_FOUND', 'Customer not found')
+    )
     api.get(`${POS}/sales/parked`, () => ok([]))
     api.get(`${POS}/shifts/:id/cash-summary`, ({ params }) =>
         ok({

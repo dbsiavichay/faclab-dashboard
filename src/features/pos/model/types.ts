@@ -242,8 +242,36 @@ export interface AddSaleItemInput {
     productId: number
     presentationId?: number | null
     quantity: number
-    unitPrice: number
+    /** Without it, the price of its list; another one needs `overrideReason` (S5.3) */
+    unitPrice?: number
     discount?: number
+    overrideReason?: string
+}
+
+/** A cart line whose price the POS asks for (S5.3) */
+export interface PriceLineInput {
+    productId: number
+    presentationId?: number | null
+    quantity: number
+}
+
+export interface ResolvePricesInput {
+    /** None: a final consumer (the branch's or the general list) */
+    customerId?: number | null
+    items: PriceLineInput[]
+}
+
+/** The price a line takes: its customer's list, its branch's or the general one */
+export interface ResolvedPrice {
+    productId: number
+    presentationId: number | null
+    quantity: number
+    /** Null when neither a list nor the product has a price */
+    unitPrice: number | null
+    /** Null: the product's price (the general list without a tier) */
+    priceListId: number | null
+    priceListName: string | null
+    minQuantity: number | null
 }
 
 export interface UpdateSaleItemInput {

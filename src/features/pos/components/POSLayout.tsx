@@ -2,7 +2,8 @@ import { useState } from 'react'
 import classNames from 'classnames'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
 import { POS_ERROR_MESSAGES } from '../model/errors'
-import { usePOSStore } from '../store/usePOSStore'
+import { isPriceOverridden, usePOSStore } from '../store/usePOSStore'
+import { useCartPricing } from '../hooks/useCartPricing'
 import {
     useCreateSale,
     useAddSaleItem,
@@ -47,6 +48,9 @@ const POSLayout = () => {
     // Lines, not units: 2,5 m of cable and 3 hammers don't add up (S5.1)
     const itemCount = cartItems.length
 
+    // The cart takes the prices of the customer's or the branch's list (S5.3)
+    useCartPricing()
+
     const createSale = useCreateSale()
     const addSaleItem = useAddSaleItem()
     const applySaleDiscount = useApplySaleDiscount()
@@ -76,6 +80,9 @@ const POSLayout = () => {
                         quantity: item.quantity,
                         unitPrice: item.salePrice,
                         discount: item.discount > 0 ? item.discount : undefined,
+                        overrideReason: isPriceOverridden(item)
+                            ? item.overrideReason
+                            : undefined,
                     },
                 })
             }

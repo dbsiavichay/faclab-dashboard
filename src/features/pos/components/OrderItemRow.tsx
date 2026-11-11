@@ -101,6 +101,11 @@ const OrderItemRow = memo(({ item }: OrderItemRowProps) => {
                                     -{item.discount}%
                                 </span>
                             )}
+                            {item.priceListName && !isPriceOverridden(item) && (
+                                <span className="ml-1 text-primary-600 dark:text-primary-300">
+                                    · {item.priceListName}
+                                </span>
+                            )}
                         </p>
                         <button
                             type="button"

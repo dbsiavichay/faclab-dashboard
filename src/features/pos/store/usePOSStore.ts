@@ -12,9 +12,13 @@ export interface POSCartItem {
     sku: string
     /** Price of one unit of its presentation (one box) */
     salePrice: number
-    // Presentation price; selling at another one is an override with a reason
+    // Price of its list (S5.3: the customer's, the branch's or the general one,
+    // as faclab-core resolves it); selling at another one is an override with
+    // a reason
     listPrice: number
     overrideReason?: string
+    /** The list that gave `listPrice`; null: the product's price */
+    priceListName?: string | null
     taxCode: TaxCode
     // Decimal (S5.1): in its presentation, up to the decimals it takes
     quantity: number
@@ -36,6 +40,14 @@ export const cartLineKey = (
 
 export const isPriceOverridden = (item: POSCartItem): boolean =>
     item.salePrice !== item.listPrice
+
+/** The list price faclab-core gave a line, for the quantity it had then */
+export interface CartLinePrice {
+    lineKey: string
+    quantity: number
+    unitPrice: number | null
+    priceListName: string | null
+}
 
 /** What a line is added with: a product, in its base unit or a presentation */
 export interface CartProductInput {
@@ -67,12 +79,21 @@ interface POSState {
 
     selectedCategoryId: number | null
     searchTerm: string
+    /** The cart's list prices are being asked for: don't charge yet (S5.3) */
+    pricesPending: boolean
 
     /** Adds one of the product (or of its presentation), or one more to its line */
     addItem: (product: CartProductInput) => void
     updateItemQuantity: (lineKey: string, quantity: number) => void
     updateItemDiscount: (lineKey: string, discount: number) => void
     updateItemPrice: (lineKey: string, price: number, reason?: string) => void
+    /**
+     * The list prices of the lines (S5.3). A line without an override takes
+     * its new list price; an overridden one keeps its price and reason. A line
+     * whose quantity changed since waits for the next answer.
+     */
+    applyResolvedPrices: (prices: CartLinePrice[]) => void
+    setPricesPending: (pending: boolean) => void
     removeItem: (lineKey: string) => void
     setCustomer: (id: number | null, name: string | null) => void
     setFinalConsumer: (value: boolean) => void
@@ -94,6 +115,7 @@ export const usePOSStore = create<POSState>()((set) => ({
 
     selectedCategoryId: null,
     searchTerm: '',
+    pricesPending: false,
 
     addItem: (product) =>
         set((state) => {
@@ -171,6 +193,38 @@ export const usePOSStore = create<POSState>()((set) => ({
                     : item
             ),
         })),
+
+    applyResolvedPrices: (prices) =>
+        set((state) => {
+            const byLine = new Map(prices.map((p) => [p.lineKey, p]))
+            return {
+                cartItems: state.cartItems.map((item) => {
+                    const resolved = byLine.get(item.lineKey)
+                    if (
+                        !resolved ||
+                        resolved.unitPrice === null ||
+                        resolved.quantity !== item.quantity
+                    ) {
+                        return item
+                    }
+                    const listPrice = resolved.unitPrice
+                    const overridden =
+                        item.overrideReason !== undefined &&
+                        item.salePrice !== listPrice
+                    return {
+                        ...item,
+                        listPrice,
+                        priceListName: resolved.priceListName,
+                        salePrice: overridden ? item.salePrice : listPrice,
+                        overrideReason: overridden
+                            ? item.overrideReason
+                            : undefined,
+                    }
+                }),
+            }
+        }),
+
+    setPricesPending: (pending) => set({ pricesPending: pending }),
 
     removeItem: (lineKey) =>
         set((state) => ({

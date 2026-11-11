@@ -41,6 +41,10 @@ import {
 import { PURCHASE_ORDER_STATUS_LABELS } from '@features/purchases/model/types'
 import { QUOTE_STATUS_LABELS } from '@features/quotes/model/types'
 import {
+    RECEIVABLE_APPLICATION_KINDS,
+    RECEIVABLE_STATUSES,
+} from '@features/receivables/model/types'
+import {
     DISCREPANCY_KIND_LABELS,
     DISCREPANCY_STATUS_LABELS,
     PAYMENT_METHODS,
@@ -119,6 +123,12 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
     ],
     ['TenantSource', 'AUDIT_SOURCE_LABELS', keys(AUDIT_SOURCE_LABELS)],
     ['QuoteStatus', 'QUOTE_STATUS_LABELS', keys(QUOTE_STATUS_LABELS)],
+    ['ReceivableStatus', 'RECEIVABLE_STATUSES', RECEIVABLE_STATUSES],
+    [
+        'ReceivableApplicationKind',
+        'RECEIVABLE_APPLICATION_KINDS',
+        RECEIVABLE_APPLICATION_KINDS,
+    ],
 ]
 
 /** Valores del backend que el front puede ignorar, con el motivo */

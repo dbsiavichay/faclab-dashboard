@@ -6,6 +6,8 @@ import {
 } from '@tanstack/react-query'
 import * as api from '../api/client'
 import { useIdempotencyKey } from '@shared/hooks/useIdempotencyKey'
+import { invalidateAfterPayment } from '@features/receivables'
+import type { CustomerPaymentInput } from '@features/receivables'
 import { useActiveBranch, useBoundTerminalId } from '@/stores'
 import type {
     OpenShiftInput,
@@ -244,6 +246,36 @@ export function useCloseShift() {
 // Las mutaciones que crean documentos o mueven dinero envían la clave de la
 // operación (`useIdempotencyKey`): la misma en cada intento hasta que sale bien
 
+/** El crédito del cliente en la caja (S5.5): cupo disponible y cuentas abiertas */
+export function usePOSCustomerAccount(customerId: number | null) {
+    return useQuery({
+        queryKey: ['pos', 'customerAccount', customerId],
+        queryFn: async () =>
+            (await api.getPosCustomerAccount(customerId ?? 0)).data,
+        enabled: (customerId ?? 0) > 0,
+    })
+}
+
+/** Un abono en la caja: en efectivo entra al resumen del turno */
+export function usePOSCustomerPayment() {
+    const queryClient = useQueryClient()
+    const operation = useIdempotencyKey()
+    return useMutation({
+        mutationFn: async (data: CustomerPaymentInput) =>
+            (await api.createPosCustomerPayment(data, operation.current()))
+                .data,
+        onSuccess: () => {
+            operation.reset()
+            queryClient.invalidateQueries({ queryKey: ['pos', 'cashSummary'] })
+            queryClient.invalidateQueries({
+                queryKey: ['pos', 'customerAccount'],
+            })
+            return invalidateAfterPayment(queryClient)
+        },
+        onError: operation.resetIfUsed,
+    })
+}
+
 export function useQuickSale() {
     const queryClient = useQueryClient()
     const operation = useIdempotencyKey()
@@ -255,6 +287,10 @@ export function useQuickSale() {
         onSuccess: () => {
             operation.reset()
             queryClient.invalidateQueries({ queryKey: ['pos', 'products'] })
+            // A sale on credit uses up the customer's credit (S5.5)
+            queryClient.invalidateQueries({
+                queryKey: ['pos', 'customerAccount'],
+            })
         },
         onError: operation.resetIfUsed,
     })

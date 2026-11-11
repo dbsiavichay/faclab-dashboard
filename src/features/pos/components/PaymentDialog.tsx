@@ -6,7 +6,7 @@ import { notifyError } from '@shared/ui/notify'
 import { POS_ERROR_MESSAGES } from '../model/errors'
 import { usePOSStore, isPriceOverridden } from '../store/usePOSStore'
 import { useCartTotals } from '../hooks/useCartTotals'
-import { useQuickSale } from '../hooks/usePOS'
+import { usePOSCustomerAccount, useQuickSale } from '../hooks/usePOS'
 import { applyPayments } from '../model/payments'
 import {
     POS_PAYMENT_METHOD_LABELS,
@@ -41,6 +41,9 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     const [amount, setAmount] = useState<string>('')
     const [reference, setReference] = useState('')
     const [payments, setPayments] = useState<QuickSalePaymentInput[]>([])
+    // A sale on credit (S5.5): a named customer with credit available
+    const { data: account } = usePOSCustomerAccount(customerId || null)
+    const creditAllowed = !!account?.hasCredit
 
     // Dividing the payment, the input is for the next one and only the added
     // payments are sent; otherwise the input is the only payment
@@ -50,10 +53,18 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
     const current = { amount: currentAmount, paymentMethod: selectedMethod }
     const sent = applyPayments(total, splitting ? payments : [current])
     const change = sent.change
-    const canComplete = sent.covered && !sent.exceeds
     // Like faclab-core: only cash can exceed what is still owed
     const currentExceeds = applyPayments(total, [...payments, current]).exceeds
-    const canAddPayment = currentAmount > 0 && !currentExceeds
+    // What goes on credit can't exceed what the customer has available
+    const creditOf = (list: QuickSalePaymentInput[]) =>
+        list
+            .filter((p) => p.paymentMethod === 'CREDIT')
+            .reduce((sum, p) => sum + p.amount, 0)
+    const onCredit = creditOf(splitting ? [...payments, current] : [current])
+    const creditExceeds =
+        onCredit > 0 && (!creditAllowed || onCredit > (account?.available ?? 0))
+    const canComplete = sent.covered && !sent.exceeds && !creditExceeds
+    const canAddPayment = currentAmount > 0 && !currentExceeds && !creditExceeds
 
     const handleAddPayment = () => {
         if (!canAddPayment) return
@@ -158,12 +169,22 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                         }
                         size="sm"
                         aria-pressed={selectedMethod === method}
+                        disabled={method === 'CREDIT' && !creditAllowed}
                         onClick={() => setSelectedMethod(method)}
                     >
                         {POS_PAYMENT_METHOD_LABELS[method]}
                     </Button>
                 ))}
             </div>
+
+            {selectedMethod === 'CREDIT' && account && (
+                <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                    Disponible a crédito: {formatCurrency(account.available)} ·{' '}
+                    {account.paymentTerms ?? 0} días de plazo
+                    {account.overdue > 0 &&
+                        ` · ${formatCurrency(account.overdue)} vencido`}
+                </p>
+            )}
 
             <Input
                 type="number"
@@ -175,7 +196,7 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
                 onChange={(e) => setAmount(e.target.value)}
             />
 
-            {selectedMethod !== 'CASH' && (
+            {selectedMethod !== 'CASH' && selectedMethod !== 'CREDIT' && (
                 <Input
                     className="mt-3"
                     value={reference}
@@ -188,6 +209,14 @@ const PaymentDialog = ({ isOpen, onClose, onComplete }: PaymentDialogProps) => {
             {currentExceeds && currentAmount > 0 && (
                 <p className="text-sm text-red-500 mt-2">
                     Solo el efectivo puede superar lo que falta por cobrar.
+                </p>
+            )}
+
+            {creditExceeds && (
+                <p className="text-sm text-red-500 mt-2">
+                    {creditAllowed
+                        ? 'El crédito supera el cupo disponible del cliente.'
+                        : 'Selecciona un cliente con crédito para vender a crédito.'}
                 </p>
             )}
 

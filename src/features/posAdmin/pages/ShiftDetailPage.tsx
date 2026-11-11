@@ -129,6 +129,13 @@ const ShiftDetailPage = () => {
                                     )}
                                 />
                                 <Row
+                                    label="Abonos en efectivo"
+                                    value={money(
+                                        zReport.cashReconciliation
+                                            .customerPayments
+                                    )}
+                                />
+                                <Row
                                     label="Entradas / salidas"
                                     value={`${money(
                                         zReport.cashReconciliation.cashIn

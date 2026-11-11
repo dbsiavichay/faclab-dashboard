@@ -17,13 +17,15 @@ export const REFUNDABLE_SALE_STATUSES: readonly POSSaleStatus[] = [
     'INVOICED',
 ]
 export type POSPaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID'
-// SRI forms of payment, as defined by faclab-core
+// SRI forms of payment, as defined by faclab-core. CREDIT (S5.5) leaves its
+// amount on the customer's account, within its credit limit
 export const POS_PAYMENT_METHODS = [
     'CASH',
     'CREDIT_CARD',
     'DEBIT_CARD',
     'TRANSFER',
     'OTHER',
+    'CREDIT',
 ] as const
 export type POSPaymentMethod = (typeof POS_PAYMENT_METHODS)[number]
 export type CashMovementType = 'IN' | 'OUT'
@@ -73,7 +75,13 @@ export const POS_PAYMENT_METHOD_LABELS: Record<POSPaymentMethod, string> = {
     DEBIT_CARD: 'Tarjeta débito',
     TRANSFER: 'Transferencia',
     OTHER: 'Otro',
+    CREDIT: 'Crédito',
 }
+
+/** Con qué se devuelve dinero: lo que va a la cuenta lo decide faclab-core */
+export const REFUND_PAYMENT_METHODS = POS_PAYMENT_METHODS.filter(
+    (method) => method !== 'CREDIT'
+)
 
 export const CASH_MOVEMENT_TYPE_LABELS: Record<CashMovementType, string> = {
     IN: 'Ingreso',
@@ -345,6 +353,11 @@ export interface Refund {
     createdAt: string | null
     /** Su nota de crédito; null si la venta aún no tiene factura autorizada */
     creditNote?: CreditNote | null
+    /**
+     * De una venta a crédito (S5.5): lo que procesarla acreditaría a la cuenta
+     * del cliente (después, lo que acreditó). Los pagos devuelven el resto
+     */
+    accountCredit?: number
 }
 
 export interface RefundDetail extends Refund {
@@ -407,6 +420,8 @@ export interface CashSummary {
     openingBalance: number
     cashSales: number
     cashRefunds: number
+    /** Abonos de clientes en efectivo recibidos en el turno (S5.5) */
+    customerPayments: number
     cashIn: number
     cashOut: number
     expectedBalance: number
@@ -465,6 +480,8 @@ export interface Receipt {
         amountTendered: number
         change: number
         reference: string | null
+        /** Días de plazo de un pago CREDIT (S5.5) */
+        termDays?: number | null
     }[]
     /** Lo aplicado por los pagos: el total de una venta confirmada */
     totalPaid: number
@@ -490,6 +507,12 @@ export interface XReport {
         total: number
     }
     paymentsByMethod: {
+        paymentMethod: string
+        count: number
+        total: number
+    }[]
+    /** Abonos de clientes del turno por medio de pago (S5.5) */
+    customerPaymentsByMethod: {
         paymentMethod: string
         count: number
         total: number

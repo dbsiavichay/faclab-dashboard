@@ -196,7 +196,7 @@ const navigationConfig: NavigationTree[] = [
         translateKey: 'nav.sales.title',
         icon: '',
         type: NAV_ITEM_TYPE_TITLE,
-        authority: ['sale:read', 'customer:read'],
+        authority: ['sale:read', 'customer:read', 'receivable:read'],
         subMenu: [
             {
                 key: 'sales.customers',
@@ -226,6 +226,16 @@ const navigationConfig: NavigationTree[] = [
                 icon: 'salesQuotes',
                 type: NAV_ITEM_TYPE_ITEM,
                 authority: ['sale:read'],
+                subMenu: [],
+            },
+            {
+                key: 'sales.receivables',
+                path: '/receivables',
+                title: 'Receivables',
+                translateKey: 'nav.sales.receivables',
+                icon: 'salesReceivables',
+                type: NAV_ITEM_TYPE_ITEM,
+                authority: ['receivable:read'],
                 subMenu: [],
             },
             {

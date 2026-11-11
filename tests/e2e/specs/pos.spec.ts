@@ -254,6 +254,86 @@ test.describe('Punto de venta', () => {
         ])
     })
 
+    test('vende a crédito a un cliente con cupo (S5.5)', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        await product(page, 'Tablero MDF 15mm').click()
+        const panel = order(page)
+
+        await panel.getByRole('button', { name: 'Buscar' }).click()
+        const search = page.getByRole('dialog')
+        await search.getByLabel('RUC / Cedula').fill(builder().taxId)
+        await search.getByRole('button', { name: 'Seleccionar' }).click()
+
+        await panel.getByRole('button', { name: 'Cobrar' }).click()
+        const payment = page.getByRole('dialog', { name: 'Cobrar' })
+        await payment
+            .getByRole('button', { name: 'Crédito', exact: true })
+            .click()
+        await expect(payment.getByText(/Disponible a crédito/)).toBeVisible()
+        await payment.getByRole('button', { name: 'Completar venta' }).click()
+        await expect(
+            page.getByRole('dialog', { name: 'Venta completada' })
+        ).toBeVisible()
+
+        const [quickSale] = api.callsTo('POST', `${POS}/sales/quick`)
+        const sale = quickSale.body as {
+            customerId: number
+            payments: { paymentMethod: string; amount: number }[]
+        }
+        expect(sale.customerId).toBe(builder().id)
+        // Todo el total, sin monto escrito, a la cuenta del cliente
+        expect(sale.payments).toHaveLength(1)
+        expect(sale.payments[0].paymentMethod).toBe('CREDIT')
+        expect(sale.payments[0].amount).toBeGreaterThan(0)
+    })
+
+    test('el consumidor final no compra a crédito', async ({ page, api }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+        await product(page, 'Tablero MDF 15mm').click()
+        const panel = order(page)
+        await panel.getByText('Consumidor final').click()
+
+        await panel.getByRole('button', { name: 'Cobrar' }).click()
+        const payment = page.getByRole('dialog', { name: 'Cobrar' })
+        await expect(
+            payment.getByRole('button', { name: 'Crédito', exact: true })
+        ).toBeDisabled()
+    })
+
+    test('recibe un abono del cliente en la caja del turno', async ({
+        page,
+        api,
+    }) => {
+        mockPOS(api)
+        await page.goto('/pos')
+
+        await page.getByRole('button', { name: 'Abono' }).click()
+        const dialog = page.getByRole('dialog', { name: 'Abono de cliente' })
+        await dialog.getByLabel('Buscar por RUC o cédula').fill(builder().taxId)
+        await dialog
+            .getByRole('button', { name: new RegExp(builder().name) })
+            .click()
+        await dialog.getByLabel('Monto').fill('50')
+        await dialog.getByRole('button', { name: 'Registrar abono' }).click()
+
+        await expect(dialog).toHaveCount(0)
+        const [post] = api.callsTo('POST', `${POS}/customer-payments`)
+        expect(post.headers['x-terminal-id']).toBe('11')
+        expect(post.headers['idempotency-key']).toBeTruthy()
+        expect(post.body).toEqual({
+            customerId: builder().id,
+            amount: 50,
+            paymentMethod: 'CASH',
+            reference: null,
+            notes: null,
+        })
+    })
+
     test('vende 2,5 m de cable y cobra lo que calcula faclab-core', async ({
         page,
         api,

@@ -19,10 +19,10 @@ import {
 } from '../hooks/useCustomerContacts'
 import { ContactForm } from '../components/ContactForm'
 import CustomerPriceListCard from '../components/CustomerPriceListCard'
+import { CustomerCreditCard } from '@features/receivables'
 import type { CustomerContact } from '../model/types'
 import { TAX_TYPE_LABELS } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
-import { formatCurrency } from '@shared/lib/format'
 import PageHeader from '@/components/shared/PageHeader'
 
 const { Tr, Th, Td, THead, TBody } = Table
@@ -157,26 +157,6 @@ const CustomerDetailPage = () => {
                         <p className="text-sm text-gray-500">País</p>
                         <p className="font-medium">{customer.country || '-'}</p>
                     </div>
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Límite de Crédito
-                        </p>
-                        <p className="font-medium">
-                            {customer.creditLimit
-                                ? formatCurrency(customer.creditLimit)
-                                : '-'}
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-gray-500">
-                            Términos de Pago
-                        </p>
-                        <p className="font-medium">
-                            {customer.paymentTerms
-                                ? `${customer.paymentTerms} días`
-                                : '-'}
-                        </p>
-                    </div>
                 </div>
                 {customer.address && (
                     <div className="mt-4">
@@ -185,6 +165,13 @@ const CustomerDetailPage = () => {
                     </div>
                 )}
             </Card>
+
+            {/* Its credit limit, terms, what it owes and the statement (S5.5) */}
+            <CustomerCreditCard
+                customerId={customer.id}
+                creditLimit={customer.creditLimit}
+                paymentTerms={customer.paymentTerms}
+            />
 
             <CustomerPriceListCard key={customer.id} customer={customer} />
 

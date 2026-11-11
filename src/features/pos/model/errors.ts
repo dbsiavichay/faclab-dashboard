@@ -1,4 +1,5 @@
 import { isApiError } from '@/utils/errors/ApiError'
+import { RECEIVABLE_ERROR_MESSAGES } from '@features/receivables'
 import {
     getErrorMessage,
     type ErrorMessages,
@@ -22,6 +23,8 @@ export const isTerminalUnavailable = (error: unknown): boolean =>
 
 // El backend responde en inglés: estos casos los ve el cajero
 export const POS_ERROR_MESSAGES: ErrorMessages = {
+    // Ventas a crédito, abonos y devoluciones de ventas a crédito (S5.5)
+    ...RECEIVABLE_ERROR_MESSAGES,
     SHIFT_ALREADY_OPEN: 'Ya hay un turno abierto en esta caja.',
     POS_TERMINAL_INACTIVE: 'La caja está desactivada. Elige otra caja.',
     POS_TERMINAL_OUTSIDE_BRANCH: 'La caja no pertenece a la sucursal elegida.',

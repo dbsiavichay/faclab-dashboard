@@ -23,7 +23,7 @@ import {
 import { discountFactor, taxBreakdown } from '../model/totals'
 import {
     POS_PAYMENT_METHOD_LABELS,
-    POS_PAYMENT_METHODS,
+    REFUND_PAYMENT_METHODS,
     REFUNDABLE_SALE_STATUSES,
     type POSSale,
     type POSSaleItem,
@@ -120,6 +120,10 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
     const [refundId, setRefundId] = useState<number | null>(null)
     // Amount computed by the backend once the refund exists
     const [refundTotal, setRefundTotal] = useState(0)
+    // Of a sale on credit (S5.5): what goes to the customer's account first;
+    // only the rest is given back
+    const [accountCredit, setAccountCredit] = useState(0)
+    const toGiveBack = roundMoney(refundTotal - accountCredit)
 
     const createRefund = useCreateRefund()
     const processRefund = useProcessRefund()
@@ -244,6 +248,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             })
             setRefundId(refund.id)
             setRefundTotal(refund.total)
+            setAccountCredit(refund.accountCredit ?? 0)
             setStep('payment')
         } catch (error: unknown) {
             notifyError(error, 'Error al crear la devolución', {
@@ -259,12 +264,11 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
             await processRefund.mutateAsync({
                 refundId,
                 data: {
-                    payments: [
-                        {
-                            amount: refundTotal,
-                            paymentMethod,
-                        },
-                    ],
+                    // The account takes its part: the payments give back the rest
+                    payments:
+                        toGiveBack > 0
+                            ? [{ amount: toGiveBack, paymentMethod }]
+                            : [],
                 },
             })
             notifySuccess(
@@ -290,6 +294,7 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
         setPaymentMethod('CASH')
         setRefundId(null)
         setRefundTotal(0)
+        setAccountCredit(0)
         onClose()
     }
 
@@ -479,32 +484,41 @@ const RefundDialog = ({ isOpen, onClose }: RefundDialogProps) => {
                             Total a devolver
                         </p>
                         <p className="text-3xl font-bold text-red-500">
-                            {formatCurrency(refundTotal)}
+                            {formatCurrency(toGiveBack)}
                         </p>
+                        {accountCredit > 0 && (
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                De {formatCurrency(refundTotal)},{' '}
+                                {formatCurrency(accountCredit)} se acreditan a
+                                la cuenta del cliente
+                            </p>
+                        )}
                     </div>
 
-                    <div>
-                        <p className="text-sm font-medium mb-2">
-                            Método de pago:
-                        </p>
-                        <div className="grid grid-cols-3 gap-2">
-                            {POS_PAYMENT_METHODS.map((method) => (
-                                <Button
-                                    key={method}
-                                    block
-                                    variant={
-                                        paymentMethod === method
-                                            ? 'solid'
-                                            : 'default'
-                                    }
-                                    size="sm"
-                                    onClick={() => setPaymentMethod(method)}
-                                >
-                                    {POS_PAYMENT_METHOD_LABELS[method]}
-                                </Button>
-                            ))}
+                    {toGiveBack > 0 && (
+                        <div>
+                            <p className="text-sm font-medium mb-2">
+                                Método de pago:
+                            </p>
+                            <div className="grid grid-cols-3 gap-2">
+                                {REFUND_PAYMENT_METHODS.map((method) => (
+                                    <Button
+                                        key={method}
+                                        block
+                                        variant={
+                                            paymentMethod === method
+                                                ? 'solid'
+                                                : 'default'
+                                        }
+                                        size="sm"
+                                        onClick={() => setPaymentMethod(method)}
+                                    >
+                                        {POS_PAYMENT_METHOD_LABELS[method]}
+                                    </Button>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <div className="flex gap-2">
                         <Button

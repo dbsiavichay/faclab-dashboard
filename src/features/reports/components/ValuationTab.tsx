@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Select from '@/components/ui/Select'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
-import { formatCurrency, formatDate } from '@shared/lib/format'
+import { formatCost, formatCurrency, formatDate } from '@shared/lib/format'
 import { useValuation } from '../hooks/useReports'
 import type { ValuationItem } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
@@ -54,9 +54,9 @@ const ValuationTab = ({ warehouseOptions }: Props) => {
             ),
         },
         {
-            header: 'Costo Promedio',
+            header: 'Costo promedio ponderado',
             accessorKey: 'averageCost',
-            cell: (props) => formatCurrency(props.row.original.averageCost),
+            cell: (props) => formatCost(props.row.original.averageCost),
         },
         {
             header: 'Valor Total',

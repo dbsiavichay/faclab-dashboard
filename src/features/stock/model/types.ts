@@ -6,6 +6,8 @@ export type Stock = {
     locationId: number | null
     locationName: string | null
     reservedQuantity: number
+    // Weighted average cost per base unit in this location (S5.6)
+    averageCost: number
 }
 
 export type StockListParams = {

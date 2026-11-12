@@ -5,6 +5,7 @@ import type {
     RotationParams,
     MovementHistoryParams,
     SummaryParams,
+    KardexParams,
 } from '../model/types'
 
 const KEY = ['reports'] as const
@@ -44,6 +45,18 @@ export const useWarehouseSummary = (params?: SummaryParams) =>
             const response = await api.getWarehouseSummary(params)
             return response.data
         },
+    })
+
+// Only with a product: the kardex is of one product
+export const useKardex = (params: Partial<KardexParams>) =>
+    useQuery({
+        queryKey: [...KEY, 'kardex', params],
+        queryFn: async () => {
+            const response = await api.getKardex(params as KardexParams)
+            return response.data
+        },
+        enabled: !!params.productId,
+        placeholderData: keepPreviousData,
     })
 
 export const useDashboard = (expiringDays = 30) =>

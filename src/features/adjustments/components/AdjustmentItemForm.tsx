@@ -56,6 +56,7 @@ const AdjustmentItemCreateForm = ({
             actualQuantity: 0,
             lotId: null,
             notes: '',
+            unitCost: undefined,
         },
     })
 
@@ -77,6 +78,7 @@ const AdjustmentItemCreateForm = ({
                 actualQuantity: 0,
                 lotId: null,
                 notes: '',
+                unitCost: undefined,
             })
         }
     }, [open, adjustmentId, reset])
@@ -107,6 +109,7 @@ const AdjustmentItemCreateForm = ({
                 actualQuantity: values.actualQuantity,
                 lotId: values.lotId,
                 notes: values.notes || undefined,
+                unitCost: values.unitCost,
             })
             notifySuccess('Item agregado')
             onClose()
@@ -196,6 +199,28 @@ const AdjustmentItemCreateForm = ({
                         </FormItem>
 
                         <FormItem
+                            label="Costo unitario (opcional)"
+                            invalid={!!errors.unitCost}
+                            errorMessage={errors.unitCost?.message}
+                            extra={
+                                <span className="text-xs text-gray-500 ml-2">
+                                    De lo que el conteo agrega; sin él, al costo
+                                    promedio
+                                </span>
+                            }
+                        >
+                            <Input
+                                type="number"
+                                step="any"
+                                min={0}
+                                placeholder="Costo por unidad base"
+                                disabled={isSubmitting}
+                                invalid={!!errors.unitCost}
+                                {...numberRegister('unitCost', {})}
+                            />
+                        </FormItem>
+
+                        <FormItem
                             label="Notas"
                             invalid={!!errors.notes}
                             errorMessage={errors.notes?.message}
@@ -258,6 +283,7 @@ const AdjustmentItemUpdateForm = ({
         defaultValues: {
             actualQuantity: item.actualQuantity,
             notes: item.notes ?? '',
+            unitCost: item.unitCost ?? undefined,
         },
     })
 
@@ -268,6 +294,7 @@ const AdjustmentItemUpdateForm = ({
             reset({
                 actualQuantity: item.actualQuantity,
                 notes: item.notes ?? '',
+                unitCost: item.unitCost ?? undefined,
             })
         }
     }, [open, item, reset])
@@ -283,6 +310,7 @@ const AdjustmentItemUpdateForm = ({
                 data: {
                     actualQuantity: values.actualQuantity,
                     notes: values.notes || undefined,
+                    unitCost: values.unitCost,
                 },
             })
             notifySuccess('Item actualizado')
@@ -319,6 +347,28 @@ const AdjustmentItemUpdateForm = ({
                                 {...numberRegister('actualQuantity', {
                                     emptyValue: 0,
                                 })}
+                            />
+                        </FormItem>
+
+                        <FormItem
+                            label="Costo unitario (opcional)"
+                            invalid={!!errors.unitCost}
+                            errorMessage={errors.unitCost?.message}
+                            extra={
+                                <span className="text-xs text-gray-500 ml-2">
+                                    De lo que el conteo agrega; sin él, al costo
+                                    promedio
+                                </span>
+                            }
+                        >
+                            <Input
+                                type="number"
+                                step="any"
+                                min={0}
+                                placeholder="Costo por unidad base"
+                                disabled={isSubmitting}
+                                invalid={!!errors.unitCost}
+                                {...numberRegister('unitCost', {})}
                             />
                         </FormItem>
 

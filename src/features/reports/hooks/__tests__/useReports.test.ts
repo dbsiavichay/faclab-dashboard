@@ -3,6 +3,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement } from 'react'
 import {
+    useKardex,
     useValuation,
     useRotation,
     useMovementHistory,
@@ -64,6 +65,7 @@ const mockMovementsResponse = {
             reason: null,
             date: '2025-01-01T10:00:00Z',
             createdAt: '2025-01-01T10:00:00Z',
+            unitCost: 6.5,
         },
     ],
     meta: {
@@ -212,5 +214,69 @@ describe('useWarehouseSummary', () => {
         await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
         expect(api.getWarehouseSummary).toHaveBeenCalledWith(params)
+    })
+})
+
+const mockKardexResponse = {
+    data: {
+        productId: 1,
+        productName: 'Cemento',
+        sku: 'CEM-50',
+        warehouseId: 1,
+        fromDate: '2026-04-01',
+        toDate: '2026-04-30',
+        opening: { quantity: 25, value: 162.5, averageCost: 6.5 },
+        entries: [
+            {
+                movementId: 4,
+                date: '2026-04-02T10:00:00',
+                type: 'OUT' as const,
+                locationId: 1,
+                locationName: 'Percha',
+                referenceType: 'transfer',
+                referenceId: 3,
+                reason: null,
+                inQuantity: 0,
+                outQuantity: 5,
+                unitCost: 6.5,
+                value: 32.5,
+                balanceQuantity: 20,
+                balanceValue: 130,
+                averageCost: 6.5,
+            },
+        ],
+        totalIn: { quantity: 0, value: 0 },
+        totalOut: { quantity: 5, value: 32.5 },
+        closing: { quantity: 20, value: 130, averageCost: 6.5 },
+    },
+    meta: META,
+}
+
+describe('useKardex', () => {
+    it('waits for a product: the kardex is of one product', () => {
+        const { result } = renderHook(() => useKardex({ warehouseId: 1 }), {
+            wrapper,
+        })
+
+        expect(result.current.fetchStatus).toBe('idle')
+        expect(api.getKardex).not.toHaveBeenCalled()
+    })
+
+    it('returns the balances and the entries of the product', async () => {
+        vi.mocked(api.getKardex).mockResolvedValue(mockKardexResponse)
+        const params = {
+            productId: 1,
+            warehouseId: 1,
+            fromDate: '2026-04-01',
+            toDate: '2026-04-30',
+        }
+
+        const { result } = renderHook(() => useKardex(params), { wrapper })
+
+        await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+        expect(api.getKardex).toHaveBeenCalledWith(params)
+        expect(result.current.data?.entries).toHaveLength(1)
+        expect(result.current.data?.closing.value).toBe(130)
     })
 })

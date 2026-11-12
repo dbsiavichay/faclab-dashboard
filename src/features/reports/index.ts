@@ -9,6 +9,9 @@ export type {
     WarehouseSummary,
     SummaryParams,
     Dashboard,
+    Kardex,
+    KardexEntry,
+    KardexParams,
 } from './model/types'
 
 export {
@@ -17,6 +20,7 @@ export {
     useMovementHistory,
     useWarehouseSummary,
     useDashboard,
+    useKardex,
 } from './hooks/useReports'
 
 export { reportsRoutes } from './routes'

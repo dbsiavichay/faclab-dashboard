@@ -6,6 +6,7 @@ import ValuationTab from '../components/ValuationTab'
 import RotationTab from '../components/RotationTab'
 import MovementsTab from '../components/MovementsTab'
 import WarehouseSummaryTab from '../components/WarehouseSummaryTab'
+import KardexTab from '../components/KardexTab'
 import PageHeader from '@/components/shared/PageHeader'
 
 const { TabList, TabNav, TabContent } = Tabs
@@ -28,12 +29,13 @@ const ReportsPage = () => {
             <PageHeader
                 className="!mb-1"
                 title="Reportes de Inventario"
-                description="Valorización, rotación, movimientos y resumen por almacén"
+                description="Valorización al costo promedio, kárdex, rotación, movimientos y resumen por almacén"
             />
             <Card>
                 <Tabs value={activeTab} onChange={setActiveTab}>
                     <TabList>
                         <TabNav value="valuation">Valorización</TabNav>
+                        <TabNav value="kardex">Kárdex</TabNav>
                         <TabNav value="rotation">Rotación</TabNav>
                         <TabNav value="movements">Movimientos</TabNav>
                         <TabNav value="summary">Resumen por Almacén</TabNav>
@@ -42,6 +44,10 @@ const ReportsPage = () => {
                     <div className="mt-4">
                         <TabContent value="valuation">
                             <ValuationTab warehouseOptions={warehouseOptions} />
+                        </TabContent>
+
+                        <TabContent value="kardex">
+                            <KardexTab warehouseOptions={warehouseOptions} />
                         </TabContent>
 
                         <TabContent value="rotation">

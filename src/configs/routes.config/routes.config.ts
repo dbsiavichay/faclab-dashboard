@@ -9,6 +9,7 @@ import { salesRoutes } from '@features/sales'
 import { quotesRoutes } from '@features/quotes'
 import { receivablesRoutes } from '@features/receivables'
 import { purchasesRoutes } from '@features/purchases'
+import { payablesRoutes } from '@features/payables'
 import { posRoutes } from '@features/pos'
 import { unitsOfMeasureRoutes } from '@features/unitsOfMeasure'
 import { productsRoutes } from '@features/products'
@@ -52,6 +53,7 @@ export const protectedRoutes: Routes = [
     ...transfersRoutes,
     ...suppliersRoutes,
     ...purchasesRoutes,
+    ...payablesRoutes,
     ...salesRoutes,
     ...quotesRoutes,
     ...receivablesRoutes,

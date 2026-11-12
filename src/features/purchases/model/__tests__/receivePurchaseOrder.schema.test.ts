@@ -69,3 +69,33 @@ describe('receiveFormSchema', () => {
         expect(result.success).toBe(true)
     })
 })
+
+describe('receiveFormSchema: supplier invoice (S5.7)', () => {
+    const item = {
+        purchaseOrderItemId: 1,
+        productId: 5,
+        quantityOrdered: 10,
+        quantityReceived: 0,
+        quantityPending: 10,
+        quantityToReceive: 5,
+        locationId: null,
+        lotNumber: '',
+        serialNumbers: '',
+    }
+
+    it('takes the supplier invoice number, up to 20 characters', () => {
+        const form = { items: [item], notes: '', receivedAt: '' }
+        expect(
+            receiveFormSchema.safeParse({
+                ...form,
+                supplierInvoiceNumber: '001-001-000000123',
+            }).success
+        ).toBe(true)
+        expect(
+            receiveFormSchema.safeParse({
+                ...form,
+                supplierInvoiceNumber: '001-001-0000001234567',
+            }).success
+        ).toBe(false)
+    })
+})

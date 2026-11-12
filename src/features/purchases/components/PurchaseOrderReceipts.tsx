@@ -1,5 +1,5 @@
 import Card from '@/components/ui/Card'
-import { formatDatetime } from '@shared/lib/format'
+import { formatCurrency, formatDatetime } from '@shared/lib/format'
 import type { PurchaseOrder, PurchaseReceipt } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
 
@@ -38,7 +38,24 @@ export const PurchaseOrderReceipts = ({ order, receipts }: Props) => {
                                             ? formatDatetime(receipt.createdAt)
                                             : '-'}
                                     </p>
+                                    {receipt.supplierInvoiceNumber && (
+                                        <p className="text-sm text-gray-500">
+                                            Factura{' '}
+                                            {receipt.supplierInvoiceNumber}
+                                        </p>
+                                    )}
                                 </div>
+                                {receipt.total !== undefined && (
+                                    <div className="text-right">
+                                        <p className="font-semibold">
+                                            {formatCurrency(receipt.total)}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            IVA{' '}
+                                            {formatCurrency(receipt.tax ?? 0)}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                             {receipt.notes && (
                                 <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">

@@ -25,6 +25,11 @@ export const receiveFormSchema = z
         items: z.array(receiveItemSchema),
         notes: z.string(),
         receivedAt: z.string(),
+        // The supplier's invoice for the delivery (S5.7): its account payable
+        supplierInvoiceNumber: z
+            .string()
+            .max(20, 'Máximo 20 caracteres')
+            .optional(),
     })
     .refine((d) => d.items.some((i) => i.quantityToReceive > 0), {
         message: 'Debe recibir al menos un item',

@@ -34,7 +34,25 @@ export type {
 export {
     PURCHASE_ORDER_STATUS_LABELS,
     PURCHASE_ORDER_STATUS_TONES,
+    SUPPLIER_RETURN_STATUSES,
+    SUPPLIER_RETURN_STATUS_LABELS,
+    SUPPLIER_RETURN_STATUS_TONES,
 } from './model/types'
+
+export type {
+    SupplierReturn,
+    SupplierReturnItem,
+    SupplierReturnStatus,
+    TaxRate,
+} from './model/types'
+
+export {
+    useSupplierReturns,
+    useSupplierReturn,
+    useSupplierReturnItems,
+    useSupplierReturnMutations,
+    useSupplierReturnItemMutations,
+} from './hooks/useSupplierReturns'
 
 export {
     usePurchaseOrders,

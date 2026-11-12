@@ -81,6 +81,23 @@ export const mockSuppliers = (
     // Pestañas del detalle
     api.get(`${ADMIN}/suppliers/:id/contacts`, () => ok([]))
     api.get(`${ADMIN}/suppliers/:id/products`, () => ok([]))
+    // Lo que se le debe (S5.7), en el detalle: nada
+    api.get(`${ADMIN}/supplier-accounts/:id`, ({ params }) => {
+        const supplier = find(params.id)
+        return supplier
+            ? ok({
+                  supplierId: supplier.id,
+                  supplierName: supplier.name,
+                  supplierTaxId: supplier.taxId,
+                  paymentTerms: supplier.paymentTerms ?? null,
+                  outstanding: 0,
+                  overdue: 0,
+                  payables: [],
+                  payments: [],
+                  returns: [],
+              })
+            : notFound()
+    })
 
     api.post(`${ADMIN}/suppliers`, ({ body }) => {
         const input = body as SupplierFormValues

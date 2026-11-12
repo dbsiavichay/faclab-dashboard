@@ -18,6 +18,11 @@ import PurchaseOrderItemForm from '../components/PurchaseOrderItemForm'
 import ReceiveForm from '../components/ReceiveForm'
 import { formatProductLabel } from '@shared/lib/format'
 import EmptyState from '@/components/shared/EmptyState'
+import { PERMISSION } from '@/constants/permissions.constant'
+import { useCan } from '@/stores'
+import { notifyError } from '@shared/ui/notify'
+import { useSupplierReturnMutations } from '../hooks/useSupplierReturns'
+import { SUPPLIER_RETURN_ERROR_MESSAGES } from '../model/types'
 
 const PurchaseOrderDetailPage = () => {
     const { id } = useParams<{ id: string }>()
@@ -30,6 +35,27 @@ const PurchaseOrderDetailPage = () => {
     const { data: receipts = [] } = usePurchaseOrderReceipts(orderId)
 
     const actions = usePurchaseOrderActions(orderId, order)
+    const canWrite = useCan(PERMISSION.PURCHASE_WRITE)
+    const { create: createReturn } = useSupplierReturnMutations()
+    // Received goods not returned yet can go back to the supplier (S5.7)
+    const canReturn =
+        canWrite &&
+        items.some(
+            (item) => item.quantityReceived - (item.quantityReturned ?? 0) > 0
+        )
+
+    const handleReturn = async () => {
+        try {
+            const draft = await createReturn.mutateAsync({
+                purchaseOrderId: orderId,
+            })
+            navigate(`/supplier-returns/${draft.id}`)
+        } catch (error: unknown) {
+            notifyError(error, 'Error al crear la devolución', {
+                messages: SUPPLIER_RETURN_ERROR_MESSAGES,
+            })
+        }
+    }
 
     const isDraft = order?.status === 'draft'
     const isSent = order?.status === 'sent'
@@ -75,6 +101,9 @@ const PurchaseOrderDetailPage = () => {
                 isDraft={isDraft}
                 canReceive={canReceive}
                 canCancel={canCancel}
+                canReturn={canReturn}
+                isCreatingReturn={createReturn.isPending}
+                onReturn={handleReturn}
                 onBack={() => navigate('/purchase-orders')}
                 onEdit={actions.handleEditOrder}
                 onSend={() => actions.setSendDialogOpen(true)}

@@ -10,6 +10,7 @@ import SupplierContactsTab from '../components/SupplierContactsTab'
 import SupplierProductsTab from '../components/SupplierProductsTab'
 import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
+import { SupplierAccountCard } from '@features/payables'
 
 const { TabList, TabNav, TabContent } = Tabs
 
@@ -60,6 +61,11 @@ const SupplierDetailPage = () => {
             />
 
             <SupplierInfoCard supplier={supplier} />
+
+            <SupplierAccountCard
+                supplierId={supplierId}
+                paymentTerms={supplier.paymentTerms}
+            />
 
             <Card>
                 <Tabs defaultValue="contacts" variant="underline">

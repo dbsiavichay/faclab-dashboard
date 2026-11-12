@@ -38,7 +38,14 @@ import {
     REFUND_STATUS_LABELS,
     SHIFT_STATUS_LABELS,
 } from '@features/pos/model/types'
-import { PURCHASE_ORDER_STATUS_LABELS } from '@features/purchases/model/types'
+import {
+    PAYABLE_APPLICATION_KINDS,
+    PAYABLE_STATUSES,
+} from '@features/payables/model/types'
+import {
+    PURCHASE_ORDER_STATUS_LABELS,
+    SUPPLIER_RETURN_STATUSES,
+} from '@features/purchases/model/types'
 import { QUOTE_STATUS_LABELS } from '@features/quotes/model/types'
 import {
     RECEIVABLE_APPLICATION_KINDS,
@@ -128,6 +135,17 @@ const FRONT_ENUMS: [string, string, readonly string[]][] = [
         'ReceivableApplicationKind',
         'RECEIVABLE_APPLICATION_KINDS',
         RECEIVABLE_APPLICATION_KINDS,
+    ],
+    [
+        'SupplierReturnStatus',
+        'SUPPLIER_RETURN_STATUSES',
+        SUPPLIER_RETURN_STATUSES,
+    ],
+    ['PayableStatus', 'PAYABLE_STATUSES', PAYABLE_STATUSES],
+    [
+        'PayableApplicationKind',
+        'PAYABLE_APPLICATION_KINDS',
+        PAYABLE_APPLICATION_KINDS,
     ],
 ]
 

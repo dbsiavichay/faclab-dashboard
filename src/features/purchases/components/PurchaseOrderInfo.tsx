@@ -1,4 +1,5 @@
 import Card from '@/components/ui/Card'
+import { TAX_CODE_LABELS } from '@/constants/tax.constant'
 import { formatCurrency, formatDate, formatDatetime } from '@shared/lib/format'
 import type { PurchaseOrder } from '../model/types'
 
@@ -44,7 +45,7 @@ export const PurchaseOrderInfo = ({ order, supplierName }: Props) => (
                 <p className="font-medium">{formatCurrency(order.subtotal)}</p>
             </div>
             <div>
-                <p className="text-sm text-gray-500">Impuestos</p>
+                <p className="text-sm text-gray-500">IVA</p>
                 <p className="font-medium">{formatCurrency(order.tax)}</p>
             </div>
             <div>
@@ -54,6 +55,27 @@ export const PurchaseOrderInfo = ({ order, supplierName }: Props) => (
                 </p>
             </div>
         </div>
+        {order.taxes && order.taxes.length > 0 && (
+            <div className="mt-4 pt-4 border-t dark:border-gray-600">
+                <p className="text-sm text-gray-500 mb-2">IVA por tarifa</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {order.taxes.map((rate) => (
+                        <div
+                            key={rate.taxCode}
+                            className="flex justify-between gap-4 text-sm"
+                        >
+                            <span>
+                                {TAX_CODE_LABELS[rate.taxCode] ?? rate.taxCode}
+                            </span>
+                            <span>
+                                Base {formatCurrency(rate.base)} · IVA{' '}
+                                {formatCurrency(rate.tax)}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )}
         {order.notes && (
             <div className="mt-4 pt-4 border-t dark:border-gray-600">
                 <p className="text-sm text-gray-500">Notas</p>

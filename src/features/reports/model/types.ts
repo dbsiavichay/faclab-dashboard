@@ -140,6 +140,7 @@ export const REFERENCE_TYPE_LABELS: Record<string, string> = {
     sale: 'Venta',
     refund: 'Devolución',
     purchase_order: 'Orden de compra',
+    supplier_return: 'Devolución a proveedor',
     adjustment: 'Ajuste',
     transfer: 'Transferencia',
 }

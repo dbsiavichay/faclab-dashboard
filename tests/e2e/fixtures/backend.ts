@@ -29,6 +29,8 @@ const EMPTY_ADMIN_LISTS = [
     'invoice-discrepancies',
     'suppliers',
     'purchase-orders',
+    'supplier-returns',
+    'payables',
     'users',
     'audit-log',
     'branches',

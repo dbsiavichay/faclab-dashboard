@@ -16,6 +16,7 @@ import {
 } from '../model/receivePurchaseOrder.schema'
 import type { PurchaseOrderItem } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
+import { FormItem } from '@/components/ui/Form'
 import EmptyState from '@/components/shared/EmptyState'
 import { formatQuantity, roundQuantity } from '@shared/lib/quantity'
 
@@ -56,7 +57,12 @@ const ReceiveForm = ({
         formState: { errors },
     } = useForm<ReceiveFormValues>({
         resolver: zodResolver(receiveFormSchema),
-        defaultValues: { items: [], notes: '', receivedAt: '' },
+        defaultValues: {
+            items: [],
+            notes: '',
+            receivedAt: '',
+            supplierInvoiceNumber: '',
+        },
     })
 
     const { fields } = useFieldArray({ control, name: 'items' })
@@ -91,6 +97,7 @@ const ReceiveForm = ({
                 items: pendingItems,
                 notes: '',
                 receivedAt: '',
+                supplierInvoiceNumber: '',
             })
         }
     }, [open, items, reset])
@@ -126,6 +133,8 @@ const ReceiveForm = ({
                     items: filteredItems,
                     notes: values.notes || undefined,
                     receivedAt: dateToIsoStartOfDay(values.receivedAt),
+                    supplierInvoiceNumber:
+                        values.supplierInvoiceNumber?.trim() || undefined,
                 },
             })
 
@@ -306,6 +315,20 @@ const ReceiveForm = ({
                                     {...register('receivedAt')}
                                 />
                             </LabeledField>
+                            <FormItem
+                                label="N.º de factura del proveedor"
+                                invalid={!!errors.supplierInvoiceNumber}
+                                errorMessage={
+                                    errors.supplierInvoiceNumber?.message
+                                }
+                            >
+                                <Input
+                                    placeholder="001-001-000000123"
+                                    maxLength={20}
+                                    invalid={!!errors.supplierInvoiceNumber}
+                                    {...register('supplierInvoiceNumber')}
+                                />
+                            </FormItem>
                             <LabeledField label="Notas">
                                 <Input
                                     textArea

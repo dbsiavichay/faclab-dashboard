@@ -29,6 +29,8 @@ const SCREENS = [
     { path: '/reports/pos', heading: 'Reportes POS' },
     { path: '/suppliers', heading: 'Proveedores' },
     { path: '/purchase-orders', heading: 'Órdenes de Compra' },
+    { path: '/supplier-returns', heading: 'Devoluciones a Proveedor' },
+    { path: '/payables', heading: 'Cuentas por pagar' },
     { path: '/settings/users', heading: 'Usuarios' },
     { path: '/settings/audit-log', heading: 'Bitácora de auditoría' },
     { path: '/settings/company-config', heading: 'Perfil fiscal' },

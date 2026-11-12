@@ -5,6 +5,7 @@ import { formatCurrency } from '@shared/lib/format'
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi'
 import type { PurchaseOrder, PurchaseOrderItem } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
+import { TAX_CODE_LABELS } from '@/constants/tax.constant'
 import { formatQuantity } from '@shared/lib/quantity'
 
 const { Tr, Th, Td, THead, TBody, TFoot } = Table
@@ -59,7 +60,9 @@ export const PurchaseOrderItems = ({
                         <Th>Cant. Pedida</Th>
                         <Th>Cant. Recibida</Th>
                         <Th>Cant. Pendiente</Th>
+                        {!isDraft && <Th>Cant. Devuelta</Th>}
                         <Th>Costo Unitario</Th>
+                        <Th>IVA</Th>
                         <Th>Subtotal</Th>
                         {isDraft && <Th>Acciones</Th>}
                     </Tr>
@@ -68,7 +71,9 @@ export const PurchaseOrderItems = ({
                     {items.map((item) => {
                         const pending =
                             item.quantityOrdered - item.quantityReceived
-                        const subtotal = item.unitCost * item.quantityOrdered
+                        const subtotal =
+                            item.subtotal ??
+                            item.unitCost * item.quantityOrdered
                         return (
                             <Tr key={item.id}>
                                 <Td>
@@ -90,7 +95,7 @@ export const PurchaseOrderItems = ({
                                 <Td>
                                     {pending > 0 ? (
                                         <span className="text-amber-600 dark:text-amber-400 font-medium">
-                                            {pending}
+                                            {formatQuantity(pending)}
                                         </span>
                                     ) : (
                                         <span className="text-emerald-600 dark:text-emerald-400">
@@ -98,7 +103,19 @@ export const PurchaseOrderItems = ({
                                         </span>
                                     )}
                                 </Td>
+                                {!isDraft && (
+                                    <Td>
+                                        {formatQuantity(
+                                            item.quantityReturned ?? 0
+                                        )}
+                                    </Td>
+                                )}
                                 <Td>{formatCurrency(item.unitCost)}</Td>
+                                <Td>
+                                    {item.taxCode
+                                        ? TAX_CODE_LABELS[item.taxCode]
+                                        : '-'}
+                                </Td>
                                 <Td className="font-medium">
                                     {formatCurrency(subtotal)}
                                 </Td>
@@ -129,18 +146,32 @@ export const PurchaseOrderItems = ({
                     })}
                 </TBody>
                 <TFoot>
-                    <Tr>
-                        <Td
-                            colSpan={isDraft ? 6 : 5}
-                            className="text-right font-medium"
-                        >
-                            Total
-                        </Td>
-                        <Td className="font-semibold">
-                            {formatCurrency(order.total)}
-                        </Td>
-                        {isDraft && <Td />}
-                    </Tr>
+                    {(
+                        [
+                            ['Subtotal', order.subtotal],
+                            ['IVA', order.tax],
+                            ['Total', order.total],
+                        ] as const
+                    ).map(([label, amount]) => (
+                        <Tr key={label}>
+                            <Td
+                                colSpan={isDraft ? 6 : 7}
+                                className="text-right font-medium"
+                            >
+                                {label}
+                            </Td>
+                            <Td
+                                className={
+                                    label === 'Total'
+                                        ? 'font-semibold'
+                                        : 'font-medium'
+                                }
+                            >
+                                {formatCurrency(amount)}
+                            </Td>
+                            {isDraft && <Td />}
+                        </Tr>
+                    ))}
                 </TFoot>
             </Table>
         )}

@@ -14,7 +14,6 @@ import { ProductSelect, useProduct } from '@features/products'
 import Select from '@/components/ui/Select'
 import { formatQuantity } from '@shared/lib/quantity'
 import { notifySuccess, notifyError } from '@shared/ui/notify'
-import { formatCurrency } from '@shared/lib/format'
 import {
     purchaseOrderItemCreateSchema,
     purchaseOrderItemUpdateSchema,
@@ -22,6 +21,7 @@ import {
     type PurchaseOrderItemUpdateFormValues,
 } from '../model/purchaseOrderItem.schema'
 import type { PurchaseOrderItem } from '../model/types'
+import { LineTotals } from './LineTotals'
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
@@ -234,12 +234,10 @@ const PurchaseOrderItemCreateForm = ({
                             />
                         </FormItem>
 
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p className="text-sm text-gray-500">Subtotal</p>
-                            <p className="text-lg font-semibold">
-                                {formatCurrency(subtotal)}
-                            </p>
-                        </div>
+                        <LineTotals
+                            subtotal={subtotal}
+                            taxCode={product?.taxCode}
+                        />
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">
@@ -379,12 +377,10 @@ const PurchaseOrderItemUpdateForm = ({
                             />
                         </FormItem>
 
-                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <p className="text-sm text-gray-500">Subtotal</p>
-                            <p className="text-lg font-semibold">
-                                {formatCurrency(subtotal)}
-                            </p>
-                        </div>
+                        <LineTotals
+                            subtotal={subtotal}
+                            taxCode={item.taxCode}
+                        />
                     </div>
 
                     <div className="flex justify-end gap-2 mt-6">

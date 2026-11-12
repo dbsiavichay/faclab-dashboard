@@ -75,7 +75,9 @@
         "purchases": {
             "title": "Compras",
             "suppliers": "Proveedores",
-            "purchaseOrders": "Órdenes de Compra"
+            "purchaseOrders": "Órdenes de Compra",
+            "supplierReturns": "Devoluciones a proveedor",
+            "payables": "Cuentas por pagar"
         },
         "settings": {
             "title": "Configuración",

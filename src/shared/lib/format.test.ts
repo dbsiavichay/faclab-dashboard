@@ -1,11 +1,23 @@
 import { describe, it, expect } from 'vitest'
 import {
+    formatCost,
     formatCurrency,
     formatDate,
     formatDatetime,
     formatPercent,
     formatProductLabel,
 } from './format'
+
+describe('formatCost', () => {
+    it('keeps the decimals of a unit cost, up to six', () => {
+        expect(formatCost(0.0125)).toContain('0,0125')
+        expect(formatCost(0.6666666)).toContain('0,666667')
+    })
+
+    it('shows at least cents', () => {
+        expect(formatCost(6.5)).toContain('6,50')
+    })
+})
 
 describe('formatCurrency', () => {
     it('formats a positive number as USD with es-EC locale', () => {

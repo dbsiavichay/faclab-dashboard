@@ -68,6 +68,9 @@ export interface AdjustmentItem {
     difference: number
     lotId: number | null
     notes: string | null
+    // Per base unit, for what the count adds over the system, e.g. an initial
+    // balance (S5.6); without it those units enter at the average cost
+    unitCost?: number | null
 }
 
 export interface AdjustmentItemInput {
@@ -76,11 +79,13 @@ export interface AdjustmentItemInput {
     actualQuantity: number
     lotId?: number | null
     notes?: string | null
+    unitCost?: number | null
 }
 
 export interface AdjustmentItemUpdateInput {
     actualQuantity?: number | null
     notes?: string | null
+    unitCost?: number | null
 }
 
 export interface AdjustmentListParams extends PaginationParams {

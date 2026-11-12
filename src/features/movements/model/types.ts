@@ -7,8 +7,11 @@ export interface Movement {
     productId: number
     quantity: number
     type: MovementType
+    locationId?: number | null
     reason?: string | null
     date?: string | null
+    // Per base unit it moved at: an OUT, its location's average cost (S5.6)
+    unitCost: number
 }
 
 export interface MovementInput {
@@ -17,6 +20,9 @@ export interface MovementInput {
     type: MovementType
     reason?: string
     date?: string
+    // Only for an IN (e.g. an initial balance); without it the IN enters at
+    // the location's average cost
+    unitCost?: number
 }
 
 export interface MovementListParams {

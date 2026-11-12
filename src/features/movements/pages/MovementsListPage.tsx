@@ -9,7 +9,7 @@ import Select from '@/components/ui/Select'
 import type { Movement } from '../model/types'
 import MovementForm from '../components/MovementForm'
 import { HiOutlinePlus } from 'react-icons/hi'
-import { formatDatetime } from '@shared/lib/format'
+import { formatCost, formatDatetime } from '@shared/lib/format'
 import LabeledField from '@/components/shared/LabeledField'
 import StatusBadge from '@/components/shared/StatusBadge'
 import { formatQuantity } from '@shared/lib/quantity'
@@ -86,6 +86,11 @@ const MovementsListPage = () => {
                     </span>
                 )
             },
+        },
+        {
+            header: 'Costo unitario',
+            accessorKey: 'unitCost',
+            cell: ({ row }) => formatCost(row.original.unitCost),
         },
         {
             header: 'Motivo',

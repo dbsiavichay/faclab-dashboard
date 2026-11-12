@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button'
 import type { Stock } from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
 import { formatQuantity } from '@shared/lib/quantity'
+import { formatCost, formatCurrency } from '@shared/lib/format'
 
 const StockPage = () => {
     const [productId, setProductId] = useState<string>('')
@@ -71,6 +72,19 @@ const StockPage = () => {
             cell: ({ row }) =>
                 row.original.locationName || (
                     <span className="text-gray-400 italic">Sin ubicación</span>
+                ),
+        },
+        {
+            header: 'Costo promedio',
+            accessorKey: 'averageCost',
+            cell: ({ row }) => formatCost(row.original.averageCost),
+        },
+        {
+            header: 'Valor',
+            id: 'value',
+            cell: ({ row }) =>
+                formatCurrency(
+                    row.original.quantity * row.original.averageCost
                 ),
         },
     ]

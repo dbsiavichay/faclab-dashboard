@@ -15,6 +15,7 @@ const mockStock = {
     locationId: 3,
     locationName: 'A1',
     reservedQuantity: 0,
+    averageCost: 6.5,
 }
 
 const mockPaginatedResponse = {

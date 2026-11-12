@@ -2,10 +2,14 @@ import { useState } from 'react'
 import StatusBadge from '@/components/shared/StatusBadge'
 import Select from '@/components/ui/Select'
 import DataTable, { ColumnDef } from '@/components/shared/DataTable'
-import { formatDatetime } from '@shared/lib/format'
+import { formatCost, formatCurrency, formatDatetime } from '@shared/lib/format'
 import { ProductSelect } from '@features/products'
 import { useMovementHistory } from '../hooks/useReports'
-import type { MovementHistoryItem, MovementHistoryParams } from '../model/types'
+import {
+    REFERENCE_TYPE_LABELS,
+    type MovementHistoryItem,
+    type MovementHistoryParams,
+} from '../model/types'
 import LabeledField from '@/components/shared/LabeledField'
 import Input from '@/components/ui/Input'
 import { formatQuantity } from '@shared/lib/quantity'
@@ -15,13 +19,6 @@ const movementTypeOptions = [
     { value: 'IN', label: 'Entrada' },
     { value: 'OUT', label: 'Salida' },
 ]
-
-const referenceTypeLabels: Record<string, string> = {
-    sale: 'Venta',
-    purchase_order: 'Orden de Compra',
-    adjustment: 'Ajuste',
-    transfer: 'Transferencia',
-}
 
 type Option = { value: string; label: string }
 
@@ -104,6 +101,19 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
             },
         },
         {
+            header: 'Costo unitario',
+            accessorKey: 'unitCost',
+            cell: (props) => formatCost(props.row.original.unitCost),
+        },
+        {
+            header: 'Valor',
+            id: 'value',
+            cell: (props) => {
+                const { quantity, unitCost } = props.row.original
+                return formatCurrency(Math.abs(quantity) * unitCost)
+            },
+        },
+        {
             header: 'Referencia',
             accessorKey: 'referenceType',
             cell: (props) => {
@@ -112,7 +122,7 @@ const MovementsTab = ({ warehouseOptions }: Props) => {
                     return <span className="text-gray-400">-</span>
                 return (
                     <span className="text-sm">
-                        {referenceTypeLabels[referenceType] ?? referenceType}
+                        {REFERENCE_TYPE_LABELS[referenceType] ?? referenceType}
                         {referenceId ? ` #${referenceId}` : ''}
                     </span>
                 )

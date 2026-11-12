@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Dialog from '@/components/ui/Dialog'
 import Button from '@/components/ui/Button'
@@ -39,6 +39,7 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
     })
 
     const numberRegister = makeNumberRegister(register)
+    const type = useWatch({ control, name: 'type' })
 
     useEffect(() => {
         if (open) reset({ type: 'IN', reason: '', date: '' })
@@ -53,6 +54,8 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                 quantity: signedQuantity,
                 reason: values.reason || undefined,
                 date: values.date || undefined,
+                // An OUT leaves at the average cost: core refuses one of its own
+                unitCost: values.type === 'IN' ? values.unitCost : undefined,
             })
             notifySuccess(
                 'Movimiento creado',
@@ -125,6 +128,29 @@ const MovementForm = ({ open, onClose }: MovementFormProps) => {
                                 {...numberRegister('quantity', {})}
                             />
                         </FormItem>
+
+                        {type === 'IN' && (
+                            <FormItem
+                                label="Costo unitario"
+                                invalid={!!errors.unitCost}
+                                errorMessage={errors.unitCost?.message}
+                                extra={
+                                    <span className="text-xs text-gray-500 ml-2">
+                                        Sin él, entra al costo promedio
+                                    </span>
+                                }
+                            >
+                                <Input
+                                    type="number"
+                                    step="any"
+                                    min={0}
+                                    placeholder="Costo por unidad base"
+                                    disabled={isSubmitting}
+                                    invalid={!!errors.unitCost}
+                                    {...numberRegister('unitCost', {})}
+                                />
+                            </FormItem>
+                        )}
 
                         <FormItem
                             label="Motivo"

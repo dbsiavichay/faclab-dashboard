@@ -6,6 +6,7 @@ import { getDifferenceColor, getDifferenceLabel } from './utils'
 import type { AdjustmentItem } from '../model/types'
 import EmptyState from '@/components/shared/EmptyState'
 import { formatQuantity } from '@shared/lib/quantity'
+import { formatCost } from '@shared/lib/format'
 
 const { Tr, Th, Td, THead, TBody } = Table
 
@@ -60,6 +61,7 @@ export const AdjustmentItems = ({
                         <Th>Esperado</Th>
                         <Th>Actual</Th>
                         <Th>Diferencia</Th>
+                        <Th>Costo unitario</Th>
                         <Th>Lote</Th>
                         <Th>Notas</Th>
                         {isDraft && <Th>Acciones</Th>}
@@ -80,6 +82,15 @@ export const AdjustmentItems = ({
                                 >
                                     {getDifferenceLabel(item.difference)}
                                 </span>
+                            </Td>
+                            <Td>
+                                {item.unitCost != null ? (
+                                    formatCost(item.unitCost)
+                                ) : (
+                                    <span className="text-gray-400">
+                                        Promedio
+                                    </span>
+                                )}
                             </Td>
                             <Td>{item.lotId ? `#${item.lotId}` : '-'}</Td>
                             <Td>
